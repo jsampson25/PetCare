@@ -17,6 +17,7 @@ This directory is the source of truth for the product and its implementation. Ea
 ## Domain specifications
 
 - [Business Configuration](domains/business-configuration/README.md)
+- [Customer and Household](domains/customer-household/README.md)
 
 ## Planned documentation areas
 

@@ -39,7 +39,7 @@ Proposed → Accepted → Designed → Implemented → Verified
 |---|---|---:|---|---|
 | Business Configuration | BCFG | P0 | [Specification](../domains/business-configuration/README.md) | In progress |
 | Identity and Access | IAM | P0 | Planned | Not started |
-| Customer and Household | CUST | P0 | Planned | Not started |
+| Customer and Household | CUST | P0 | [Specification](../domains/customer-household/README.md) | In progress |
 | Pet and Eligibility | PET | P0 | Planned | Not started |
 | Service Catalog | SERV | P0 | Planned | Not started |
 | Resource and Capacity | CAP | P0 | Planned | Not started |
@@ -76,4 +76,3 @@ A requirement must be:
 - Prioritized
 - Free of unnecessary implementation assumptions
 - Linked to relevant business rules and acceptance scenarios
-

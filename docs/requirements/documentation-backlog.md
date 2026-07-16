@@ -30,7 +30,7 @@ This backlog defines what documentation is needed and when. It prevents speculat
 | Sequence | Domain | MVP priority | Minimum required artifacts | Status |
 |---:|---|---:|---|---|
 | 1 | Business Configuration | P0 | Requirements, entities, workflows, permissions, rules, acceptance scenarios | In progress |
-| 2 | Customer and Household | P0 | Same, plus portal access and consent | Not started |
+| 2 | Customer and Household | P0 | Same, plus portal access and consent | In progress |
 | 3 | Pet and Eligibility | P0 | Same, plus vaccination and health data controls | Not started |
 | 4 | Service Catalog | P0 | Service definition, add-ons, duration, eligibility, resource needs | Not started |
 | 5 | Resource and Capacity | P0 | Capacity rules, resources, allocation, closures | Not started |
@@ -60,4 +60,3 @@ This backlog defines what documentation is needed and when. It prevents speculat
 - Mark documents accepted only after conflicts with related domains are resolved.
 - Revisit MVP priority after each validated customer interview or pilot observation.
 - Create implementation artifacts just before or during implementation, not months in advance.
-
