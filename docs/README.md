@@ -7,9 +7,16 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Product vision](product/product-vision.md)
 - [MVP scope](product/mvp-scope.md)
 - [Glossary](product/glossary.md)
+- [Master requirements index](requirements/README.md)
+- [Documentation backlog](requirements/documentation-backlog.md)
+- [Requirements traceability](requirements/traceability.md)
 - [Architecture overview](architecture/overview.md)
 - [Technology stack](architecture/technology-stack.md)
 - [Architecture decisions](decisions/README.md)
+
+## Domain specifications
+
+- [Business Configuration](domains/business-configuration/README.md)
 
 ## Planned documentation areas
 
@@ -23,4 +30,3 @@ This directory is the source of truth for the product and its implementation. Ea
 ## Documentation rule
 
 Avoid creating hundreds of speculative documents before they are needed. A document should support a current decision, design, implementation, or test. Cross-link related material and update existing documents instead of duplicating requirements.
-
