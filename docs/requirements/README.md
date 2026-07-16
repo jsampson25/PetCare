@@ -40,7 +40,7 @@ Proposed → Accepted → Designed → Implemented → Verified
 | Business Configuration | BCFG | P0 | [Specification](../domains/business-configuration/README.md) | In progress |
 | Identity and Access | IAM | P0 | Planned | Not started |
 | Customer and Household | CUST | P0 | [Specification](../domains/customer-household/README.md) | In progress |
-| Pet and Eligibility | PET | P0 | Planned | Not started |
+| Pet and Eligibility | PET | P0 | [Specification](../domains/pet-eligibility/README.md) | In progress |
 | Service Catalog | SERV | P0 | Planned | Not started |
 | Resource and Capacity | CAP | P0 | Planned | Not started |
 | Booking and Waitlist | BOOK | P0 | Planned | Not started |

@@ -18,6 +18,7 @@ This directory is the source of truth for the product and its implementation. Ea
 
 - [Business Configuration](domains/business-configuration/README.md)
 - [Customer and Household](domains/customer-household/README.md)
+- [Pet and Eligibility](domains/pet-eligibility/README.md)
 
 ## Planned documentation areas
 
