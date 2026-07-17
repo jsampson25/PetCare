@@ -1,0 +1,11 @@
+{
+  "name": "@petcare/test-support",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./factories": "./src/factories.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

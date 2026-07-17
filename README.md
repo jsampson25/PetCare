@@ -46,7 +46,7 @@ Technology choices are recorded in [docs/architecture/technology-stack.md](docs/
 ```text
 apps/                    Deployable applications
 packages/                Reusable UI, configuration, and shared code
-database/                Database schemas, migrations, policies, and seed data
+supabase/                Database configuration, migrations, policies, tests, and seed data
 docs/                    Product and engineering source of truth
 tests/                   Cross-application and end-to-end tests
 .github/                 GitHub templates and automation
@@ -56,5 +56,17 @@ Start with the [documentation index](docs/README.md), [product vision](docs/prod
 
 ## Current status
 
-Repository foundation. No production application has been scaffolded yet.
+Initial application scaffold. The workspace, web shell, shared packages, database tooling, automated checks, and CI foundation are in place; business capabilities are implemented through the MVP roadmap.
 
+## Local setup
+
+Prerequisites: Node.js 24, pnpm 11, Git, Docker Desktop, and the Supabase CLI.
+
+```powershell
+Copy-Item .env.example .env.local
+pnpm install
+supabase start
+pnpm dev
+```
+
+The web application runs at `http://localhost:3000` and its health endpoint is available at `http://localhost:3000/api/health`.

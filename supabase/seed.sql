@@ -1,0 +1,2 @@
+-- Deterministic local reference and demonstration data will be added with the first tenant schema.
+-- Never place production customer or pet data in this file.
