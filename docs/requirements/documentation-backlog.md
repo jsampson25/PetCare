@@ -20,7 +20,7 @@ This backlog defines what documentation is needed and when. It prevents speculat
 | Master requirements index | P0 | MVP scope | Accepted |
 | Requirements traceability model | P0 | Requirements index | Accepted |
 | Information architecture | P0 | Personas, MVP scope | Not started |
-| Role and permission model | P0 | IAM, portal scope | Not started |
+| Role and permission model | P0 | IAM, portal scope | In progress |
 | Multi-tenant security model | P0 | Architecture | Not started |
 | Design system foundation | P0 | UX principles | Not started |
 | Test strategy | P0 | Architecture, requirements | Not started |

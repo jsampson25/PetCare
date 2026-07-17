@@ -17,6 +17,7 @@ This directory is the source of truth for the product and its implementation. Ea
 ## Domain specifications
 
 - [Business Configuration](domains/business-configuration/README.md)
+- [Identity and Access](domains/identity-access/README.md)
 - [Customer and Household](domains/customer-household/README.md)
 - [Pet and Eligibility](domains/pet-eligibility/README.md)
 - [Service Catalog](domains/service-catalog/README.md)

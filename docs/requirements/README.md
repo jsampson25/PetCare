@@ -38,7 +38,7 @@ Proposed → Accepted → Designed → Implemented → Verified
 | Domain | Prefix | MVP importance | Specification | Status |
 |---|---|---:|---|---|
 | Business Configuration | BCFG | P0 | [Specification](../domains/business-configuration/README.md) | In progress |
-| Identity and Access | IAM | P0 | Planned | Not started |
+| Identity and Access | IAM | P0 | [Specification](../domains/identity-access/README.md) | In progress |
 | Customer and Household | CUST | P0 | [Specification](../domains/customer-household/README.md) | In progress |
 | Pet and Eligibility | PET | P0 | [Specification](../domains/pet-eligibility/README.md) | In progress |
 | Service Catalog | SERV | P0 | [Specification](../domains/service-catalog/README.md) | In progress |
