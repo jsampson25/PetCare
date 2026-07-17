@@ -46,7 +46,7 @@ Proposed → Accepted → Designed → Implemented → Verified
 | Booking and Waitlist | BOOK | P0 | [Specification](../domains/booking-waitlist/README.md) | In progress |
 | Pricing and Policies | PRICE | P0 | [Specification](../domains/pricing-policies/README.md) | In progress |
 | Payments and Invoicing | PAY | P0 | [Specification](../domains/payments-invoicing/README.md) | In progress |
-| Operations | OPS | P0 | Planned | Not started |
+| Operations | OPS | P0 | [Specification](../domains/operations/README.md) | In progress |
 | Communications | COMM | P0 | Planned | Not started |
 | Reporting | RPT | P0/P1 | Planned | Not started |
 | Website and Content | WEB | P0/P1 | Planned | Not started |

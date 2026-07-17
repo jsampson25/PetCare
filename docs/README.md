@@ -24,6 +24,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Booking and Waitlist](domains/booking-waitlist/README.md)
 - [Pricing and Policies](domains/pricing-policies/README.md)
 - [Payments and Invoicing](domains/payments-invoicing/README.md)
+- [Operations](domains/operations/README.md)
 
 ## Planned documentation areas
 
