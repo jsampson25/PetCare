@@ -44,7 +44,7 @@ Proposed → Accepted → Designed → Implemented → Verified
 | Service Catalog | SERV | P0 | [Specification](../domains/service-catalog/README.md) | In progress |
 | Resource and Capacity | CAP | P0 | [Specification](../domains/resource-capacity/README.md) | In progress |
 | Booking and Waitlist | BOOK | P0 | [Specification](../domains/booking-waitlist/README.md) | In progress |
-| Pricing and Policies | PRICE | P0 | Planned | Not started |
+| Pricing and Policies | PRICE | P0 | [Specification](../domains/pricing-policies/README.md) | In progress |
 | Payments and Invoicing | PAY | P0 | Planned | Not started |
 | Operations | OPS | P0 | Planned | Not started |
 | Communications | COMM | P0 | Planned | Not started |
