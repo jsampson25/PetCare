@@ -39,7 +39,7 @@ This backlog defines what documentation is needed and when. It prevents speculat
 | 8 | Payments and Invoicing | P0 | Payment lifecycle, refunds, reconciliation, webhooks | In progress |
 | 9 | Operations | P0 | Check-in, service work, care tasks, check-out, audit timeline | In progress |
 | 10 | Communications | P0 | Transactional messages, preferences, delivery events | In progress |
-| 11 | Reporting | P0/P1 | MVP reports, definitions, filters, exports | Not started |
+| 11 | Reporting | P0/P1 | MVP reports, definitions, filters, exports | In progress |
 | 12 | Website and Content | P0/P1 | Tenant website, theme, pages, booking integration | Not started |
 | 13 | Platform Administration | P0 | Tenant support, subscriptions, audit, feature controls | Not started |
 
