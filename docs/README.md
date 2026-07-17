@@ -20,6 +20,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Check-in and checkout journey](ux/check-in-checkout-journey.md)
 - [Daily care and service-execution journey](ux/daily-care-service-execution-journey.md)
 - [Business onboarding journey](ux/business-onboarding-journey.md)
+- [Responsive and accessibility interaction standards](ux/responsive-accessibility-standards.md)
 
 ## Domain specifications
 
