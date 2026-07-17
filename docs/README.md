@@ -25,6 +25,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Pricing and Policies](domains/pricing-policies/README.md)
 - [Payments and Invoicing](domains/payments-invoicing/README.md)
 - [Operations](domains/operations/README.md)
+- [Communications](domains/communications/README.md)
 
 ## Planned documentation areas
 
