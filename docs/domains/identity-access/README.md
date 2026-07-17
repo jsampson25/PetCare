@@ -262,6 +262,12 @@ Invited -> Active -> Suspended -> Active
 
 ## Staff invitations
 
+### Initial database contract
+
+The E02 implementation uses `staff_invitations` with normalized role and location-scope child records. Creation returns a cryptographically random token once; only its SHA-256 digest is stored. Acceptance locks the invitation, matches the authenticated verified email, rechecks expiry and MFA, creates the membership, applies the approved role/location scope, and consumes the token in one transaction.
+
+Pending invitations may be revoked or superseded. A scheduled database maintenance function marks elapsed invitations expired and records audit evidence. Raw tokens, authentication credentials, and MFA secrets never enter application tables or audit details.
+
 ### Invitation flow
 
 ```mermaid
@@ -757,4 +763,3 @@ Security metrics are interpreted as signals, not employee productivity scores. A
 - [Operations](../operations/README.md)
 - [Reporting](../reporting/README.md)
 - [Platform Administration](../platform-administration/README.md)
-
