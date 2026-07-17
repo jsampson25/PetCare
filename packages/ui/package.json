@@ -3,12 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "exports": {
-    "./button-link": "./src/button-link.tsx"
+    "./alert": "./src/alert.tsx",
+    "./app-shell": "./src/app-shell.tsx",
+    "./badge": "./src/badge.tsx",
+    "./button": "./src/button.tsx",
+    "./button-link": "./src/button-link.tsx",
+    "./card": "./src/card.tsx",
+    "./field": "./src/field.tsx",
+    "./navigation": "./src/navigation.ts",
+    "./state-panel": "./src/state-panel.tsx"
   },
   "peerDependencies": {
     "react": "^19.2.0"
   },
   "scripts": {
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

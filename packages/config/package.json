@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "exports": {
-    "./environment": "./src/environment.ts"
+    "./environment": "./src/environment.ts",
+    "./tenant-theme": "./src/tenant-theme.ts"
   },
   "scripts": {
     "test": "vitest run",
