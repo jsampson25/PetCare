@@ -18,6 +18,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Quality documentation](quality/README.md)
 - [Platform test strategy](quality/test-strategy.md)
 - [Architecture decisions](decisions/README.md)
+- [ADR-0003: Repository and delivery architecture](decisions/ADR-0003-repository-delivery-architecture.md)
 - [UX documentation](ux/README.md)
 - [Information architecture and navigation](ux/information-architecture.md)
 - [Design system foundation](ux/design-system.md)

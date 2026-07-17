@@ -835,10 +835,10 @@ This is the transition from repository planning to working software.
 
 ## 38. Open decisions before E00/E02
 
-- Exact monorepo/workspace tool or whether the initial repository remains a simple package workspace.
+- Repository/workspace structure is resolved by [ADR-0003](../decisions/ADR-0003-repository-delivery-architecture.md).
 - Supabase project and local-development workflow.
 - Authentication email provider/configuration for development and production.
-- Database migration tool and ownership roles.
+- Database migration workflow is resolved by ADR-0003; final runtime/migration database roles are completed with the first tenant schema.
 - Preview/staging hosting accounts and environment naming.
 - Initial component documentation approach.
 - Feature-flag implementation for prelaunch work.
@@ -860,4 +860,3 @@ This is the transition from repository planning to working software.
 - [Customer booking journey](../ux/customer-booking-journey.md)
 - [Check-in and checkout journey](../ux/check-in-checkout-journey.md)
 - [Daily care and service-execution journey](../ux/daily-care-service-execution-journey.md)
-

@@ -17,4 +17,4 @@ Each record should contain:
 
 - [ADR-0001: Start with a modular monolith](ADR-0001-modular-monolith.md)
 - [ADR-0002: Use business-scoped multi-tenancy](ADR-0002-business-multi-tenancy.md)
-
+- [ADR-0003: Repository and delivery architecture](ADR-0003-repository-delivery-architecture.md)
