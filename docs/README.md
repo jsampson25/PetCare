@@ -28,6 +28,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Communications](domains/communications/README.md)
 - [Reporting](domains/reporting/README.md)
 - [Website and Content](domains/website-content/README.md)
+- [Platform Administration](domains/platform-administration/README.md)
 
 ## Planned documentation areas
 

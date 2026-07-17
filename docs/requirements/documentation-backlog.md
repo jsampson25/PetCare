@@ -41,7 +41,7 @@ This backlog defines what documentation is needed and when. It prevents speculat
 | 10 | Communications | P0 | Transactional messages, preferences, delivery events | In progress |
 | 11 | Reporting | P0/P1 | MVP reports, definitions, filters, exports | In progress |
 | 12 | Website and Content | P0/P1 | Tenant website, theme, pages, booking integration | In progress |
-| 13 | Platform Administration | P0 | Tenant support, subscriptions, audit, feature controls | Not started |
+| 13 | Platform Administration | P0 | Tenant support, subscriptions, audit, feature controls | In progress |
 
 ## Implementation artifacts created only when a domain enters development
 

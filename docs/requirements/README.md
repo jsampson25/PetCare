@@ -50,7 +50,7 @@ Proposed → Accepted → Designed → Implemented → Verified
 | Communications | COMM | P0 | [Specification](../domains/communications/README.md) | In progress |
 | Reporting | RPT | P0/P1 | [Specification](../domains/reporting/README.md) | In progress |
 | Website and Content | WEB | P0/P1 | [Specification](../domains/website-content/README.md) | In progress |
-| Platform Administration | ADMIN | P0 | Planned | Not started |
+| Platform Administration | ADMIN | P0 | [Specification](../domains/platform-administration/README.md) | In progress |
 | AI Assistance | AI | Future | Planned | Deferred |
 
 ## Cross-cutting requirement areas
