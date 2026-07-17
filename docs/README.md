@@ -6,6 +6,7 @@ This directory is the source of truth for the product and its implementation. Ea
 
 - [Product vision](product/product-vision.md)
 - [MVP scope](product/mvp-scope.md)
+- [MVP implementation roadmap](product/mvp-implementation-roadmap.md)
 - [Glossary](product/glossary.md)
 - [Terminology consistency audit](product/terminology-audit.md)
 - [Master requirements index](requirements/README.md)

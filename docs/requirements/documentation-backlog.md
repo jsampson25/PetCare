@@ -25,6 +25,7 @@ This backlog defines what documentation is needed and when. It prevents speculat
 | Design system foundation | P0 | UX principles | In progress |
 | Responsive and accessibility interaction standards | P0 | Information architecture, design system | In progress |
 | Test strategy | P0 | Architecture, requirements | In progress |
+| MVP implementation roadmap | P0 | MVP scope, domains, architecture, test strategy | Review needed |
 
 ## Domain specification backlog
 
