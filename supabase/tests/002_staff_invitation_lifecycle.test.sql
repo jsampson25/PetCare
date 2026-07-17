@@ -32,7 +32,7 @@ insert into auth.users (
 set local role authenticated;
 select set_config(
   'request.jwt.claims',
-  '{"sub":"31000000-0000-4000-8000-000000000001","role":"authenticated","email":"owner@example.test","aal":"aal1"}',
+  '{"sub":"31000000-0000-4000-8000-000000000001","role":"authenticated","email":"owner@example.test","aal":"aal2"}',
   true
 );
 select lives_ok(
@@ -63,7 +63,7 @@ where business.public_slug = 'invitation-test';
 set local role authenticated;
 select set_config(
   'request.jwt.claims',
-  '{"sub":"31000000-0000-4000-8000-000000000001","role":"authenticated","email":"owner@example.test","aal":"aal1"}',
+  '{"sub":"31000000-0000-4000-8000-000000000001","role":"authenticated","email":"owner@example.test","aal":"aal2"}',
   true
 );
 with created as (
@@ -115,6 +115,11 @@ select is(
   1,
   'invitation creation is audited'
 );
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"31000000-0000-4000-8000-000000000001","role":"authenticated","email":"owner@example.test","aal":"aal1"}',
+  true
+);
 select throws_ok(
   $$ select * from app.create_staff_invitation(
     (select business_id from invitation_test_context),
@@ -142,7 +147,7 @@ select is(
 
 select set_config(
   'request.jwt.claims',
-  '{"sub":"32000000-0000-4000-8000-000000000002","role":"authenticated","email":"manager@example.test","aal":"aal1"}',
+  '{"sub":"32000000-0000-4000-8000-000000000002","role":"authenticated","email":"manager@example.test","aal":"aal2"}',
   true
 );
 select lives_ok(
@@ -186,7 +191,7 @@ select is(
 set local role authenticated;
 select set_config(
   'request.jwt.claims',
-  '{"sub":"32000000-0000-4000-8000-000000000002","role":"authenticated","email":"manager@example.test","aal":"aal1"}',
+  '{"sub":"32000000-0000-4000-8000-000000000002","role":"authenticated","email":"manager@example.test","aal":"aal2"}',
   true
 );
 select throws_ok(
@@ -197,7 +202,7 @@ select throws_ok(
 
 select set_config(
   'request.jwt.claims',
-  '{"sub":"31000000-0000-4000-8000-000000000001","role":"authenticated","email":"owner@example.test","aal":"aal1"}',
+  '{"sub":"31000000-0000-4000-8000-000000000001","role":"authenticated","email":"owner@example.test","aal":"aal2"}',
   true
 );
 with created as (

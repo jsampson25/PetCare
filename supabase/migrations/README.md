@@ -7,3 +7,5 @@ The E02 migrations introduce identity profiles, businesses, locations, membershi
 Staff invitations store only token digests, use bounded expiry, bind acceptance to the authenticated email, require MFA for privileged roles, and become unusable after acceptance, revocation, expiry, or supersession.
 
 Invitation preview is a narrow token-bound RPC. It returns only the intended business, email, role, location labels, and expiry for a valid pending token; invalid and terminal tokens return no row.
+
+Privileged MFA enforcement is part of the database authorization helpers. Memberships holding any role marked `requires_mfa` receive no permission or location grant until the current JWT has AAL2 assurance.

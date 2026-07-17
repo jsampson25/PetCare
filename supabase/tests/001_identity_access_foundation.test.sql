@@ -70,8 +70,7 @@ select is(
 );
 
 set local role authenticated;
-select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
-select set_config('request.jwt.claim.role', 'authenticated', true);
+select set_config('request.jwt.claims', '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated","email":"owner-a@example.test","aal":"aal2"}', true);
 
 select lives_ok(
   $$ select * from app.create_business_with_owner(
@@ -82,8 +81,7 @@ select lives_ok(
 
 reset role;
 set local role authenticated;
-select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000002', true);
-select set_config('request.jwt.claim.role', 'authenticated', true);
+select set_config('request.jwt.claims', '{"sub":"20000000-0000-4000-8000-000000000002","role":"authenticated","email":"owner-b@example.test","aal":"aal2"}', true);
 
 select lives_ok(
   $$ select * from app.create_business_with_owner(
@@ -101,8 +99,7 @@ select is((select count(*)::integer from public.membership_roles where role_key 
 select is((select count(*)::integer from public.audit_events where event_type = 'business.created'), 2, 'business creation is audited');
 
 set local role authenticated;
-select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
-select set_config('request.jwt.claim.role', 'authenticated', true);
+select set_config('request.jwt.claims', '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated","email":"owner-a@example.test","aal":"aal2"}', true);
 
 select is((select count(*)::integer from public.businesses), 1, 'RLS exposes only identity A business');
 select is((select public_slug from public.businesses), 'business-a', 'identity A cannot substitute business B identifier');

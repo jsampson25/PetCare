@@ -7,3 +7,5 @@ Tests run inside transactions and roll back their fixtures. Identity tests use s
 The staff-invitation suite verifies token secrecy, recipient binding, single use, role and location validation, MFA step-up, tenant isolation, revocation, and audit evidence.
 
 Invitation-preview tests verify default-deny behavior and the deliberately narrow anonymous execution grant.
+
+Privileged-MFA tests prove the same owner receives no permission/location access at AAL1 and regains the expected grants only at AAL2.

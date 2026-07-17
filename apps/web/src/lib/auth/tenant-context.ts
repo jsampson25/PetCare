@@ -10,7 +10,9 @@ export type BusinessContext = {
   identityId: string;
   membershipId: string;
   permissions: Set<string>;
+  requiresMfa: boolean;
   roles: string[];
+  sessionAssuranceLevel: string;
 };
 
 export async function listBusinessContexts() {
@@ -70,9 +72,16 @@ export async function resolveBusinessContext(): Promise<BusinessContext | null> 
   if (!business) return null;
 
   const roles = (roleAssignments ?? []).map((assignment) => assignment.role_key);
-  const { data: permissionAssignments } = roles.length
-    ? await supabase.from('role_permissions').select('permission_key').in('role_key', roles)
-    : { data: [] as { permission_key: string }[] };
+  let permissionAssignments: { permission_key: string }[] = [];
+  let roleDefinitions: { requires_mfa: boolean; role_key: string }[] = [];
+  if (roles.length) {
+    const [permissionResult, roleResult] = await Promise.all([
+      supabase.from('role_permissions').select('permission_key').in('role_key', roles),
+      supabase.from('role_definitions').select('role_key,requires_mfa').in('role_key', roles),
+    ]);
+    permissionAssignments = permissionResult.data ?? [];
+    roleDefinitions = roleResult.data ?? [];
+  }
 
   return {
     businessId,
@@ -80,6 +89,8 @@ export async function resolveBusinessContext(): Promise<BusinessContext | null> 
     identityId,
     membershipId: membership.id,
     permissions: new Set((permissionAssignments ?? []).map((entry) => entry.permission_key)),
+    requiresMfa: (roleDefinitions ?? []).some((role) => role.requires_mfa),
     roles,
+    sessionAssuranceLevel: typeof claimsData.claims.aal === 'string' ? claimsData.claims.aal : 'aal1',
   };
 }

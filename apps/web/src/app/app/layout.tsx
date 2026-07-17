@@ -9,6 +9,7 @@ const businessNavigation = [
   { href: '/app/calendar', label: 'Calendar', requiredPermissions: ['bookings.view'] },
   { href: '/app/customers', label: 'Customers', requiredPermissions: ['customers.view'] },
   { href: '/app/settings/staff', label: 'Staff', requiredPermissions: ['staff.invite'] },
+  { href: '/app/settings/security', label: 'Security' },
   { href: '/app/design-system', label: 'Design system' },
   { href: '/app/settings', label: 'Settings', requiredPermissions: ['business.manage_profile'] },
   { href: '/auth/select-business', label: 'Switch business' },
@@ -18,6 +19,9 @@ const businessNavigation = [
 export default async function BusinessLayout({ children }: { children: ReactNode }) {
   const context = await resolveBusinessContext();
   if (!context) redirect('/auth/select-business');
+  if (context.requiresMfa && context.sessionAssuranceLevel !== 'aal2') {
+    redirect('/auth/mfa?next=/app');
+  }
   return (
     <AppShell
       contextLabel={context.businessName}
