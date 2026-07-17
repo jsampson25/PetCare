@@ -1,23 +1,29 @@
 import { AppShell } from '@petcare/ui/app-shell';
+import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
+
+import { resolveBusinessContext } from '../../lib/auth/tenant-context';
 
 const businessNavigation = [
   { href: '/app', label: 'Today' },
-  { href: '/app/calendar', label: 'Calendar', requiredPermissions: ['bookings.read'] },
-  { href: '/app/customers', label: 'Customers', requiredPermissions: ['customers.read'] },
+  { href: '/app/calendar', label: 'Calendar', requiredPermissions: ['bookings.view'] },
+  { href: '/app/customers', label: 'Customers', requiredPermissions: ['customers.view'] },
+  { href: '/app/settings/staff', label: 'Staff', requiredPermissions: ['staff.invite'] },
   { href: '/app/design-system', label: 'Design system' },
-  { href: '/app/settings', label: 'Settings', requiredPermissions: ['business.manage'] },
+  { href: '/app/settings', label: 'Settings', requiredPermissions: ['business.manage_profile'] },
+  { href: '/auth/select-business', label: 'Switch business' },
+  { href: '/auth/sign-out', label: 'Sign out' },
 ] as const;
 
-const demonstrationPermissions = new Set(['bookings.read', 'customers.read', 'business.manage']);
-
-export default function BusinessLayout({ children }: { children: ReactNode }) {
+export default async function BusinessLayout({ children }: { children: ReactNode }) {
+  const context = await resolveBusinessContext();
+  if (!context) redirect('/auth/select-business');
   return (
     <AppShell
-      contextLabel="Happy Paws Resort"
+      contextLabel={context.businessName}
       items={businessNavigation}
       kind="business"
-      permissions={demonstrationPermissions}
+      permissions={context.permissions}
     >
       {children}
     </AppShell>

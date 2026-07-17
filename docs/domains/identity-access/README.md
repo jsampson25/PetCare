@@ -274,6 +274,8 @@ The E02 implementation uses `staff_invitations` with normalized role and locatio
 
 Pending invitations may be revoked or superseded. A scheduled database maintenance function marks elapsed invitations expired and records audit evidence. Raw tokens, authentication credentials, and MFA secrets never enter application tables or audit details.
 
+The initial web interface adds a server-verified business selector, permission-derived business navigation, staff invitation management, and a token-bound acceptance page. The selected business cookie is only a context hint: every resolution revalidates the signed-in identity's active membership through RLS before the application renders tenant data. Until transactional email is implemented, the inviter receives the acceptance link once for secure manual delivery.
+
 ### Invitation flow
 
 ```mermaid

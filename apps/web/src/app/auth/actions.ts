@@ -4,7 +4,9 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
 import { getSafeRedirect } from '../../lib/auth/safe-redirect';
+import { businessContextCookie } from '../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../lib/supabase/server';
+import { cookies } from 'next/headers';
 
 const emailSchema = z.email().max(320);
 const passwordSchema = z.string().min(12).max(128);
@@ -41,6 +43,7 @@ export async function register(formData: FormData) {
   const password = passwordSchema.safeParse(field(formData, 'password'));
   const confirmation = field(formData, 'passwordConfirmation');
   const displayName = z.string().min(1).max(120).safeParse(field(formData, 'displayName'));
+  const next = getSafeRedirect(field(formData, 'next'), '/auth/verified');
   if (!email.success || !password.success || !displayName.success || password.data !== confirmation) {
     redirect(messageUrl('/auth/register', 'error', 'Check your details. Passwords must match and contain at least 12 characters.'));
   }
@@ -53,7 +56,7 @@ export async function register(formData: FormData) {
     password: password.data,
     options: {
       data: { display_name: displayName.data },
-      emailRedirectTo: `${appUrl}/auth/callback?next=/auth/verified`,
+      emailRedirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
   if (error) redirect(messageUrl('/auth/register', 'error', 'Registration could not be completed. Please try again.'));
@@ -89,5 +92,7 @@ export async function updatePassword(formData: FormData) {
 export async function signOut() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
+  const cookieStore = await cookies();
+  cookieStore.delete(businessContextCookie);
   redirect(messageUrl('/auth/sign-in', 'notice', 'You have been signed out.'));
 }
