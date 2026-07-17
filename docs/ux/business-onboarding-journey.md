@@ -176,7 +176,7 @@ If provisioning fails, do not create duplicate tenants on retry. Show a safe ret
 Explain:
 
 - The SaaS plan is what the business pays PetCare.
-- Customer payment setup is configured later so pet owners can pay the business.
+- Customer payment setup is configured later so customers can pay the business.
 - Trial dates, included features, renewal timing, and cancellation access.
 
 Do not mix PetCare subscription invoices with future customer invoices.
@@ -1179,4 +1179,3 @@ Completion speed is paired with configuration quality, test success, support bur
 - [Communications](../domains/communications/README.md)
 - [Website and Content](../domains/website-content/README.md)
 - [Platform Administration](../domains/platform-administration/README.md)
-

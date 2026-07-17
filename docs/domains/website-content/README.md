@@ -493,7 +493,7 @@ Consumed events may include public projection changes for business configuration
 
 **Given** a visitor submits a message asking to reserve dates  
 **When** the inquiry is accepted  
-**Then** it is recorded as an inquiry and the confirmation clearly states that no reservation was created.
+**Then** it is recorded as an inquiry and the confirmation clearly states that no booking was created.
 
 ### WEB-AC-009: Slug redirect
 
@@ -575,4 +575,3 @@ Marketing attribution is limited to consented, documented parameters. Website an
 - [Pricing and Policies](../pricing-policies/README.md)
 - [Communications](../communications/README.md)
 - [Reporting](../reporting/README.md)
-

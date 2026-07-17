@@ -4,7 +4,7 @@
 
 The Reporting domain turns trusted operational and financial records into consistent, explainable business information. It gives business owners, managers, and authorized staff timely answers about bookings, occupancy, revenue, customers, compliance, and daily execution without changing the underlying source records.
 
-This domain owns metric definitions, report composition, filtering, exports, saved views, freshness indicators, and reconciliation evidence. It does not own reservations, payments, invoices, pet records, or care activity.
+This domain owns metric definitions, report composition, filtering, exports, saved views, freshness indicators, and reconciliation evidence. It does not own bookings, payments, invoices, pet records, or care activity.
 
 ## Product outcomes
 
@@ -55,7 +55,7 @@ This domain owns metric definitions, report composition, filtering, exports, sav
 
 | Subject | System of record | Reporting responsibility |
 |---|---|---|
-| Reservations and waitlist | Booking and Waitlist | Aggregate lifecycle and conversion measures |
+| Bookings and waitlist | Booking and Waitlist | Aggregate lifecycle and conversion measures |
 | Sellable capacity and assignments | Resource and Capacity | Calculate occupancy and utilization at a defined grain |
 | Prices, discounts, fees, and taxes | Pricing and Policies | Explain booked-value composition from immutable snapshots |
 | Invoices, payments, refunds, and settlement | Payments and Invoicing | Present distinct financial measures and reconciliation views |
@@ -133,7 +133,7 @@ Dashboards should emphasize one to three outcomes, their most useful drivers, an
 | RPT-MET-001 | Sellable resource-hours | Sum of resource time available for sale after closures, maintenance, and administrative blocks, at the resource/location time grain. |
 | RPT-MET-002 | Occupied resource-hours | Sum of sellable resource time assigned to eligible active stays. Cancelled, declined, no-show, and tentative holds are excluded unless a separate hold metric is requested. |
 | RPT-MET-003 | Occupancy rate | `occupied resource-hours / sellable resource-hours`. Numerator and denominator must use the same resources, intervals, location time zone, and service eligibility. |
-| RPT-MET-004 | Check-in completion rate | Completed check-ins divided by reservations that reached an eligible arrival state during the period. Cancelled-before-arrival reservations are excluded. |
+| RPT-MET-004 | Check-in completion rate | Completed check-ins divided by bookings that reached an eligible arrival state during the period. Cancelled-before-arrival bookings are excluded. |
 | RPT-MET-005 | On-time care-task rate | Eligible care tasks completed within their configured window divided by completed, missed, or overdue eligible tasks. Cancelled tasks and tasks invalidated by an approved care-plan change are excluded. |
 | RPT-MET-006 | Medication on-time rate | Medication administrations recorded within the configured window divided by administrations due and eligible for compliance measurement. Approved holds remain separately visible. |
 | RPT-MET-007 | Incident rate per 100 pet-care days | `qualifying incidents / pet-care days * 100`. Severity and incident type remain available as dimensions. |
@@ -147,21 +147,21 @@ Occupancy is calculated from summed time, not by averaging percentages across da
 | RPT-MET-010 | Booking requests | Distinct booking requests created in the period, excluding test and administratively voided records. |
 | RPT-MET-011 | Confirmed bookings | Distinct requests that first entered a confirmed state in the period. |
 | RPT-MET-012 | Booking conversion rate | Confirmed eligible booking requests divided by eligible completed booking requests for the selected cohort. The cohort basis must be shown as request-created date or decision date. |
-| RPT-MET-013 | Cancellation rate | Reservations cancelled after confirmation divided by confirmed reservations with a scheduled arrival in the selected period. Customer, business, and policy cancellation reasons are separable dimensions. |
-| RPT-MET-014 | No-show rate | Reservations marked no-show divided by reservations expected to arrive, excluding cancellations recorded before the arrival cutoff. |
-| RPT-MET-015 | Waitlist conversion rate | Waitlist entries converted to a confirmed reservation divided by eligible closed waitlist entries. Expired, declined, and withdrawn outcomes remain separately visible. |
+| RPT-MET-013 | Cancellation rate | Bookings cancelled after confirmation divided by confirmed bookings with a scheduled arrival in the selected period. Customer, business, and policy cancellation reasons are separable dimensions. |
+| RPT-MET-014 | No-show rate | Bookings marked no-show divided by bookings expected to arrive, excluding cancellations recorded before the arrival cutoff. |
+| RPT-MET-015 | Waitlist conversion rate | Waitlist entries converted to a confirmed booking divided by eligible closed waitlist entries. Expired, declined, and withdrawn outcomes remain separately visible. |
 | RPT-MET-016 | Average lead time | Average elapsed calendar time between booking creation and scheduled service start for confirmed bookings. Median must also be available to expose skew. |
 
 ### Financial
 
 | ID | Metric | Canonical definition |
 |---|---|---|
-| RPT-MET-020 | Gross booked value | Sum of immutable reservation price snapshots before discounts, credits, refunds, and payment activity, excluding voided reservations. This is demand value, not cash or recognized revenue. |
+| RPT-MET-020 | Gross booked value | Sum of immutable booking price snapshots before discounts, credits, refunds, and payment activity, excluding voided bookings. This is demand value, not cash or recognized revenue. |
 | RPT-MET-021 | Net invoiced charges | Finalized invoice charges plus fees and taxes, less invoice discounts and credit notes, using invoice issue or service-period basis as visibly selected. |
 | RPT-MET-022 | Collected cash | Sum of successful captured payments in the period, excluding failed, pending, and authorized-only attempts. |
 | RPT-MET-023 | Net collected cash | Successful captured payments less successful refunds in the period. Processor fees and disputes are not deducted unless the report is explicitly a settlement report. |
 | RPT-MET-024 | Outstanding balance | Finalized invoice amount minus applied successful payments, applied credits, and other settled allocations as of the report watermark. Negative balances appear as customer credit, not negative receivables. |
-| RPT-MET-025 | Average booking value | Net invoiced charges allocated to completed eligible reservations divided by those reservations. Scope and allocation basis must be shown. |
+| RPT-MET-025 | Average booking value | Net invoiced charges allocated to completed eligible bookings divided by those bookings. Scope and allocation basis must be shown. |
 | RPT-MET-026 | Refund rate | Successful refunded amount divided by successfully captured amount for the selected payment cohort. Both transaction-period and original-payment-cohort views may be offered but cannot be mixed. |
 | RPT-MET-027 | Deposit liability | Unapplied, unrefunded successful deposits held as of the report watermark. Applied deposits move out of this measure when the allocation succeeds. |
 
@@ -172,8 +172,8 @@ Occupancy is calculated from summed time, not by averaging percentages across da
 | ID | Metric | Canonical definition |
 |---|---|---|
 | RPT-MET-030 | Active customers | Distinct non-merged customer households with qualifying completed or future confirmed activity inside the configured activity window. The window must be displayed. |
-| RPT-MET-031 | Repeat-customer rate | Customers with at least two completed qualifying reservations divided by customers with at least one, for the selected cohort and observation window. |
-| RPT-MET-032 | Returning booking share | Confirmed bookings from customers with a prior completed reservation divided by confirmed bookings in the period. |
+| RPT-MET-031 | Repeat-customer rate | Customers with at least two completed qualifying bookings divided by customers with at least one, for the selected cohort and observation window. |
+| RPT-MET-032 | Returning booking share | Confirmed bookings from customers with a prior completed booking divided by confirmed bookings in the period. |
 | RPT-MET-033 | Vaccine compliance rate | Pets associated with an upcoming eligible service whose required vaccines are verified and valid through the configured service boundary divided by pets evaluated. |
 | RPT-MET-034 | Report-card completion rate | Eligible completed stays with a published required report card divided by eligible completed stays. |
 
@@ -200,7 +200,7 @@ Occupancy is calculated from summed time, not by averaging percentages across da
 |---|---:|---|
 | RPT-FR-001 | P0 | The system shall provide only reports authorized for the user's tenant, role, and location scope. |
 | RPT-FR-002 | P0 | The system shall display applied filters, effective time zone, metric definition version, and freshness watermark with every report run. |
-| RPT-FR-003 | P0 | Users shall filter supported reports by date range, location, service, reservation status, and other definition-approved dimensions. |
+| RPT-FR-003 | P0 | Users shall filter supported reports by date range, location, service, booking status, and other definition-approved dimensions. |
 | RPT-FR-004 | P0 | The system shall calculate canonical metrics from documented inclusion, exclusion, grain, and time-basis rules. |
 | RPT-FR-005 | P0 | Authorized users shall drill from aggregate values to authorized supporting records without expanding their data access. |
 | RPT-FR-006 | P0 | Authorized users shall export the complete filtered result set to CSV using the same definitions and authorization as the visible report. |
@@ -344,7 +344,7 @@ Performance targets are initial engineering targets and must be validated using 
 
 The Reporting domain may consume events such as:
 
-- `reservation.created`, `reservation.confirmed`, `reservation.cancelled`, `reservation.no_show_recorded`
+- `booking.created`, `booking.confirmed`, `booking.cancelled`, `booking.no_show_recorded`
 - `waitlist.entry_created`, `waitlist.entry_converted`, `waitlist.entry_closed`
 - `capacity.availability_changed`, `resource.assignment_changed`
 - `invoice.finalized`, `invoice.credited`, `payment.captured`, `payment.refunded`, `payment.disputed`
@@ -370,7 +370,7 @@ Event consumption improves read performance but does not make the event stream t
 
 ### RPT-AC-003: Financial labels remain distinct
 
-**Given** a reservation is invoiced, partially paid, and later partially refunded  
+**Given** a booking is invoiced, partially paid, and later partially refunded
 **When** an owner opens the financial overview  
 **Then** booked value, net invoiced charges, collected cash, net collected cash, outstanding balance, and deposit liability are shown as distinct measures.
 
@@ -436,4 +436,3 @@ This sequence preserves one metric contract while allowing the physical implemen
 - [Communications](../communications/README.md)
 - [Customer and Household](../customer-household/README.md)
 - [Pet and Eligibility](../pet-eligibility/README.md)
-

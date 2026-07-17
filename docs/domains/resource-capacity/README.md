@@ -29,7 +29,7 @@ Service Catalog declares what a service needs. This domain determines whether th
 | Resource | A named assignable item at a location. |
 | Capacity pool | A count-based limit not requiring a specific named resource at booking time. |
 | Capacity rule | Effective limit by service, resource type, time, pet attributes, or operating condition. |
-| Hold | Temporary capacity reservation while a user completes a booking or staff decision. |
+| Hold | Temporary protection of capacity while a user completes a booking or staff decision. |
 | Commitment | Confirmed capacity consumption linked to a booking item. |
 | Assignment | A specific resource allocation, usually during planning or operations. |
 | Block | A period when a resource or quantity is unavailable. |
@@ -204,7 +204,7 @@ Not every resource type requires cleaning or inspection; lifecycle configuration
 | CapacityOverride | Dated authorized limit change |
 | ResourceBlock | Closure, maintenance, cleaning, or manual unavailability |
 | AvailabilityEvaluation | Point-in-time demand, inputs, result, and reasons |
-| CapacityHold | Expiring reservation of demand |
+| CapacityHold | Expiring hold on demand |
 | CapacityCommitment | Confirmed booking demand and snapshot |
 | ResourceAssignment | Specific resource, subject, interval, and state |
 | AssignmentHistory | Immutable move/swap/release record |
@@ -290,4 +290,3 @@ Events include tenant, location, resource/pool, interval, actor, source, version
 - Operations for assignments, cleaning, maintenance, and live states
 - Workforce scheduling for employee availability when introduced
 - Reporting for utilization and lost-demand analysis
-

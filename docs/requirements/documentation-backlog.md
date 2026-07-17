@@ -16,7 +16,7 @@ This backlog defines what documentation is needed and when. It prevents speculat
 |---|---:|---|---|
 | Product vision | P0 | None | Accepted |
 | MVP scope | P0 | Product vision | Accepted |
-| Glossary | P0 | Product vision | In progress |
+| Glossary | P0 | Product vision | Review needed |
 | Master requirements index | P0 | MVP scope | Accepted |
 | Requirements traceability model | P0 | Requirements index | Accepted |
 | Information architecture | P0 | Personas, MVP scope | In progress |

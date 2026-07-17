@@ -57,7 +57,7 @@ This domain is separate from a pet-care business's own settings. Business Config
 ### Out of scope
 
 - Tenant staff management and day-to-day business configuration
-- Pet owner payments, deposits, refunds, and business invoices
+- Customer payments, deposits, refunds, and business invoices
 - Editing customer, pet, booking, care, or financial records as a normal support shortcut
 - General employee HR administration for the PetCare company
 - Production database consoles exposed in the application
@@ -185,7 +185,7 @@ Each step is idempotent. A retry must discover and reuse successfully created re
 Two distinct financial relationships exist:
 
 1. **Platform subscription:** the pet-care business pays PetCare for software access.
-2. **Customer commerce:** a pet owner pays the pet-care business for boarding, daycare, grooming, and add-ons.
+2. **Customer commerce:** a customer pays the pet-care business for boarding, daycare, grooming, and add-ons.
 
 They use separate accounts, ledgers, invoices, webhooks, permissions, reporting labels, and reconciliation. A tenant subscription failure must not appear as a pet-owner invoice or alter customer balances.
 
@@ -724,4 +724,3 @@ Metrics for operator performance must not incentivize unsafe access, premature c
 - [Reporting](../reporting/README.md)
 - [Website and Content](../website-content/README.md)
 - [ADR-0002: Business Multi-Tenancy](../../decisions/ADR-0002-business-multi-tenancy.md)
-
