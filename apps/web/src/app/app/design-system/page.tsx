@@ -2,8 +2,31 @@ import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
 import { Card } from '@petcare/ui/card';
+import { DataTable, type DataColumn } from '@petcare/ui/data-table';
 import { Field } from '@petcare/ui/field';
+import { FormErrorSummary } from '@petcare/ui/form-error-summary';
 import { StatePanel } from '@petcare/ui/state-panel';
+
+import { ComponentInteractions } from '../../../components/component-interactions';
+
+type ExampleReservation = {
+  date: string;
+  pet: string;
+  service: string;
+  status: string;
+};
+
+const reservationColumns: DataColumn<ExampleReservation>[] = [
+  { key: 'pet', header: 'Pet', render: (row) => <strong>{row.pet}</strong> },
+  { key: 'service', header: 'Service', render: (row) => row.service },
+  { key: 'date', header: 'Arrival', render: (row) => row.date },
+  { key: 'status', header: 'Status', render: (row) => <Badge tone="success">{row.status}</Badge> },
+];
+
+const reservations: ExampleReservation[] = [
+  { date: 'Aug 14, 8:00 AM', pet: 'Bella', service: 'Boarding', status: 'Confirmed' },
+  { date: 'Aug 15, 7:30 AM', pet: 'Max', service: 'Daycare', status: 'Confirmed' },
+];
 
 export default function DesignSystemPage() {
   return (
@@ -28,9 +51,12 @@ export default function DesignSystemPage() {
         </Card>
 
         <Card title="Form fields" description="Labels remain visible; guidance and errors are programmatically associated.">
-          <div className="grid gap-5 md:grid-cols-2">
-            <Field hint="Used for reservation confirmations." id="example-email" label="Email address" type="email" />
-            <Field error="Enter a valid phone number." id="example-phone" label="Mobile phone" value="555" readOnly />
+          <div className="grid gap-5">
+            <FormErrorSummary errors={[{ fieldId: 'example-phone', message: 'Enter a valid phone number.' }]} />
+            <div className="grid gap-5 md:grid-cols-2">
+              <Field hint="Used for reservation confirmations." id="example-email" label="Email address" type="email" />
+              <Field error="Enter a valid phone number." id="example-phone" label="Mobile phone" value="555" readOnly />
+            </div>
           </div>
         </Card>
 
@@ -59,6 +85,19 @@ export default function DesignSystemPage() {
             description="Pet profiles keep vaccinations, feeding, medication, behavior, and care instructions together."
             title="No pets yet"
           />
+        </Card>
+
+        <Card title="Data table" description="Headers, caption, status text, and a contained horizontal overflow fallback.">
+          <DataTable
+            caption="Example upcoming reservations"
+            columns={reservationColumns}
+            getRowKey={(row) => `${row.pet}-${row.date}`}
+            rows={reservations}
+          />
+        </Card>
+
+        <Card title="Interactive patterns" description="Review with mouse, keyboard, touch, zoom, and assistive technology.">
+          <ComponentInteractions />
         </Card>
       </div>
     </div>

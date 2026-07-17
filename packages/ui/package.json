@@ -9,9 +9,14 @@
     "./button": "./src/button.tsx",
     "./button-link": "./src/button-link.tsx",
     "./card": "./src/card.tsx",
+    "./data-table": "./src/data-table.tsx",
+    "./dialog": "./src/dialog.tsx",
     "./field": "./src/field.tsx",
+    "./form-error-summary": "./src/form-error-summary.tsx",
     "./navigation": "./src/navigation.ts",
-    "./state-panel": "./src/state-panel.tsx"
+    "./state-panel": "./src/state-panel.tsx",
+    "./tabs": "./src/tabs.tsx",
+    "./upload-field": "./src/upload-field.tsx"
   },
   "peerDependencies": {
     "react": "^19.2.0"
