@@ -13,6 +13,8 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Architecture overview](architecture/overview.md)
 - [Technology stack](architecture/technology-stack.md)
 - [Architecture decisions](decisions/README.md)
+- [UX documentation](ux/README.md)
+- [Information architecture and navigation](ux/information-architecture.md)
 
 ## Domain specifications
 
