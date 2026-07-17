@@ -49,7 +49,7 @@ Proposed → Accepted → Designed → Implemented → Verified
 | Operations | OPS | P0 | [Specification](../domains/operations/README.md) | In progress |
 | Communications | COMM | P0 | [Specification](../domains/communications/README.md) | In progress |
 | Reporting | RPT | P0/P1 | [Specification](../domains/reporting/README.md) | In progress |
-| Website and Content | WEB | P0/P1 | Planned | Not started |
+| Website and Content | WEB | P0/P1 | [Specification](../domains/website-content/README.md) | In progress |
 | Platform Administration | ADMIN | P0 | Planned | Not started |
 | AI Assistance | AI | Future | Planned | Deferred |
 
