@@ -15,6 +15,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Architecture decisions](decisions/README.md)
 - [UX documentation](ux/README.md)
 - [Information architecture and navigation](ux/information-architecture.md)
+- [Design system foundation](ux/design-system.md)
 
 ## Domain specifications
 

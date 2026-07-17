@@ -5,11 +5,11 @@ This area defines how the product is organized and experienced across public, cu
 ## Current artifacts
 
 - [Information architecture and navigation](information-architecture.md)
+- [Design system foundation](design-system.md)
 
 ## Planned artifacts
 
 - Role and permission presentation model
-- Design system foundation
 - Customer booking journey
 - Check-in and checkout journeys
 - Daily care and service-execution journeys
@@ -27,4 +27,3 @@ This area defines how the product is organized and experienced across public, cu
 - Preserve context when a user moves between related screens.
 - Prefer updating a shared journey or pattern over documenting inconsistent screen-specific behavior.
 - Do not create detailed screens for deferred capabilities before their product scope is accepted.
-
