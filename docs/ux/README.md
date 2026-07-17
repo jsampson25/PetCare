@@ -9,11 +9,11 @@ This area defines how the product is organized and experienced across public, cu
 - [Customer booking journey](customer-booking-journey.md)
 - [Check-in and checkout journey](check-in-checkout-journey.md)
 - [Daily care and service-execution journey](daily-care-service-execution-journey.md)
+- [Business onboarding journey](business-onboarding-journey.md)
 
 ## Planned artifacts
 
 - Role and permission presentation model
-- Business onboarding journey
 - Responsive interaction standards
 - Accessibility interaction standards
 - Screen-level specifications created as implementation begins

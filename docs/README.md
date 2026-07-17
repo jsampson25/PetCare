@@ -19,6 +19,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Customer booking journey](ux/customer-booking-journey.md)
 - [Check-in and checkout journey](ux/check-in-checkout-journey.md)
 - [Daily care and service-execution journey](ux/daily-care-service-execution-journey.md)
+- [Business onboarding journey](ux/business-onboarding-journey.md)
 
 ## Domain specifications
 
