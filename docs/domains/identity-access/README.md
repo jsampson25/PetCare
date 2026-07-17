@@ -159,6 +159,12 @@ Disabling an identity does not erase historical authorship. Audit, booking, care
 
 ## Authentication
 
+### Initial web contract
+
+The web application uses Supabase SSR clients with HTTP-only cookie sessions refreshed by the Next.js proxy. Registration requires email verification, password reset responses do not reveal whether an account exists, recovery updates revoke all existing sessions, and callback redirects accept only application-relative paths. Business, portal, and platform route namespaces require an authenticated claim before rendering; database RLS remains the authoritative authorization layer.
+
+The initial forms cover registration, sign-in, verification callback, password-reset request, password update, and sign-out. MFA enrollment and tenant-context selection remain subsequent E02 slices.
+
 ### Customer registration
 
 1. Resolve the business from trusted website or booking context.
