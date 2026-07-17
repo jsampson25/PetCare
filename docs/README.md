@@ -21,6 +21,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Pet and Eligibility](domains/pet-eligibility/README.md)
 - [Service Catalog](domains/service-catalog/README.md)
 - [Resource and Capacity](domains/resource-capacity/README.md)
+- [Booking and Waitlist](domains/booking-waitlist/README.md)
 
 ## Planned documentation areas
 
