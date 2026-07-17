@@ -16,6 +16,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [UX documentation](ux/README.md)
 - [Information architecture and navigation](ux/information-architecture.md)
 - [Design system foundation](ux/design-system.md)
+- [Customer booking journey](ux/customer-booking-journey.md)
 
 ## Domain specifications
 

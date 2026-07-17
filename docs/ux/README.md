@@ -6,11 +6,11 @@ This area defines how the product is organized and experienced across public, cu
 
 - [Information architecture and navigation](information-architecture.md)
 - [Design system foundation](design-system.md)
+- [Customer booking journey](customer-booking-journey.md)
 
 ## Planned artifacts
 
 - Role and permission presentation model
-- Customer booking journey
 - Check-in and checkout journeys
 - Daily care and service-execution journeys
 - Business onboarding journey
