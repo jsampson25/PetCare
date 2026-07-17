@@ -24,7 +24,7 @@ This backlog defines what documentation is needed and when. It prevents speculat
 | Multi-tenant security model | P0 | Architecture | In progress |
 | Design system foundation | P0 | UX principles | In progress |
 | Responsive and accessibility interaction standards | P0 | Information architecture, design system | In progress |
-| Test strategy | P0 | Architecture, requirements | Not started |
+| Test strategy | P0 | Architecture, requirements | In progress |
 
 ## Domain specification backlog
 
