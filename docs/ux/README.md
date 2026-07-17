@@ -11,10 +11,10 @@ This area defines how the product is organized and experienced across public, cu
 - [Daily care and service-execution journey](daily-care-service-execution-journey.md)
 - [Business onboarding journey](business-onboarding-journey.md)
 - [Responsive and accessibility interaction standards](responsive-accessibility-standards.md)
+- [Role and permission presentation model](role-permission-presentation-model.md)
 
 ## Planned artifacts
 
-- Role and permission presentation model
 - Screen-level specifications created as implementation begins
 
 ## UX documentation rules

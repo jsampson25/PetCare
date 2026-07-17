@@ -21,6 +21,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Daily care and service-execution journey](ux/daily-care-service-execution-journey.md)
 - [Business onboarding journey](ux/business-onboarding-journey.md)
 - [Responsive and accessibility interaction standards](ux/responsive-accessibility-standards.md)
+- [Role and permission presentation model](ux/role-permission-presentation-model.md)
 
 ## Domain specifications
 
