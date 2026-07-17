@@ -29,6 +29,10 @@ npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
 
+# temporary local GitHub Actions inspection exports
+ci-status.json
+ci-failure.log
+
 # generated local data
 .turbo/
 .vercel/
