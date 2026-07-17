@@ -8,11 +8,11 @@ This area defines how the product is organized and experienced across public, cu
 - [Design system foundation](design-system.md)
 - [Customer booking journey](customer-booking-journey.md)
 - [Check-in and checkout journey](check-in-checkout-journey.md)
+- [Daily care and service-execution journey](daily-care-service-execution-journey.md)
 
 ## Planned artifacts
 
 - Role and permission presentation model
-- Daily care and service-execution journeys
 - Business onboarding journey
 - Responsive interaction standards
 - Accessibility interaction standards

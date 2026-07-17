@@ -18,6 +18,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Design system foundation](ux/design-system.md)
 - [Customer booking journey](ux/customer-booking-journey.md)
 - [Check-in and checkout journey](ux/check-in-checkout-journey.md)
+- [Daily care and service-execution journey](ux/daily-care-service-execution-journey.md)
 
 ## Domain specifications
 
