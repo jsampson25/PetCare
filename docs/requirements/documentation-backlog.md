@@ -36,7 +36,7 @@ This backlog defines what documentation is needed and when. It prevents speculat
 | 5 | Resource and Capacity | P0 | Capacity rules, resources, allocation, closures | In progress |
 | 6 | Booking and Waitlist | P0 | Lifecycle, availability, waitlist, modifications, cancellation | In progress |
 | 7 | Pricing and Policies | P0 | Calculation order, snapshots, deposits, fees, taxes | In progress |
-| 8 | Payments and Invoicing | P0 | Payment lifecycle, refunds, reconciliation, webhooks | Not started |
+| 8 | Payments and Invoicing | P0 | Payment lifecycle, refunds, reconciliation, webhooks | In progress |
 | 9 | Operations | P0 | Check-in, service work, care tasks, check-out, audit timeline | Not started |
 | 10 | Communications | P0 | Transactional messages, preferences, delivery events | Not started |
 | 11 | Reporting | P0/P1 | MVP reports, definitions, filters, exports | Not started |
