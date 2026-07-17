@@ -33,7 +33,7 @@ This backlog defines what documentation is needed and when. It prevents speculat
 | 2 | Customer and Household | P0 | Same, plus portal access and consent | In progress |
 | 3 | Pet and Eligibility | P0 | Same, plus vaccination and health data controls | In progress |
 | 4 | Service Catalog | P0 | Service definition, add-ons, duration, eligibility, resource needs | In progress |
-| 5 | Resource and Capacity | P0 | Capacity rules, resources, allocation, closures | Not started |
+| 5 | Resource and Capacity | P0 | Capacity rules, resources, allocation, closures | In progress |
 | 6 | Booking and Waitlist | P0 | Lifecycle, availability, waitlist, modifications, cancellation | Not started |
 | 7 | Pricing and Policies | P0 | Calculation order, snapshots, deposits, fees, taxes | Not started |
 | 8 | Payments and Invoicing | P0 | Payment lifecycle, refunds, reconciliation, webhooks | Not started |

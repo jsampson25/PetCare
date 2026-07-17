@@ -42,7 +42,7 @@ Proposed → Accepted → Designed → Implemented → Verified
 | Customer and Household | CUST | P0 | [Specification](../domains/customer-household/README.md) | In progress |
 | Pet and Eligibility | PET | P0 | [Specification](../domains/pet-eligibility/README.md) | In progress |
 | Service Catalog | SERV | P0 | [Specification](../domains/service-catalog/README.md) | In progress |
-| Resource and Capacity | CAP | P0 | Planned | Not started |
+| Resource and Capacity | CAP | P0 | [Specification](../domains/resource-capacity/README.md) | In progress |
 | Booking and Waitlist | BOOK | P0 | Planned | Not started |
 | Pricing and Policies | PRICE | P0 | Planned | Not started |
 | Payments and Invoicing | PAY | P0 | Planned | Not started |

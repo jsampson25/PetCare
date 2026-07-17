@@ -20,6 +20,7 @@ This directory is the source of truth for the product and its implementation. Ea
 - [Customer and Household](domains/customer-household/README.md)
 - [Pet and Eligibility](domains/pet-eligibility/README.md)
 - [Service Catalog](domains/service-catalog/README.md)
+- [Resource and Capacity](domains/resource-capacity/README.md)
 
 ## Planned documentation areas
 
