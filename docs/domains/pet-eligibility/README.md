@@ -303,6 +303,8 @@ The medication-plan slice adds medication name, explicit dose and route, schedul
 
 The feeding-plan slice adds food source and product, amount per meal, meal count, schedule, preparation, supplements, separate-feeding controls, and information provenance. A pet has only one active plan; replacement requires discontinuing the prior plan with an auditable reason. These profile plans feed later check-in snapshots and operational meal tasks; they are not meal-completion records. Other health conditions, behavior, identifiers, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
 
+The behavior-and-handling slice adds structured aggression, bite, escape, anxiety, guarding, interaction, restraint, and barrier risks. Each record preserves context, severity, observation date, source, triggers, preferred handling, prohibited approaches, calming strategies, and group-play guidance. High and critical risks are visually prominent, while resolution preserves the original report and a required reason. Formal service evaluations, other health conditions, identifiers, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
+
 ## Domain events
 
 - `pet.created`

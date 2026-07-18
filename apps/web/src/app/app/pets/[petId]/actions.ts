@@ -279,3 +279,80 @@ export async function discontinuePetFeedingPlan(formData: FormData) {
     `/app/pets/${parsed.data.petId}?notice=Feeding+plan+discontinued+with+history+preserved.`,
   );
 }
+
+const behaviorSchema = z.object({
+  behaviorType: z.enum([
+    'aggression',
+    'bite_history',
+    'escape_risk',
+    'severe_anxiety',
+    'resource_guarding',
+    'dog_interaction',
+    'human_interaction',
+    'handling_sensitivity',
+    'barrier_reactivity',
+    'other',
+  ]),
+  calmingStrategies: z.string().trim().max(1000),
+  contextDescription: z.string().trim().min(1).max(1000),
+  groupPlayGuidance: z.enum(['not_evaluated', 'approved', 'conditional', 'not_approved']),
+  informationSource: z.enum(['customer_reported', 'staff_observed', 'veterinary_documented']),
+  observedOn: z.union([z.literal(''), z.string().date()]),
+  petId: z.uuid(),
+  preferredHandling: z.string().trim().min(1).max(1000),
+  prohibitedApproaches: z.string().trim().max(1000),
+  severity: z.enum(['information', 'caution', 'high', 'critical']),
+  triggers: z.string().trim().max(1000),
+});
+
+export async function addPetBehaviorRecord(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = behaviorSchema.safeParse(Object.fromEntries(formData));
+  const today = new Date().toISOString().slice(0, 10);
+  if (!parsed.success || (parsed.data.observedOn && parsed.data.observedOn > today)) {
+    redirect('/app/customers?error=Check+the+behavior+and+handling+details.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_pet_behavior_record', {
+    calming_text: parsed.data.calmingStrategies,
+    context_text: parsed.data.contextDescription,
+    handling_text: parsed.data.preferredHandling,
+    observation_date: parsed.data.observedOn || null,
+    play_guidance: parsed.data.groupPlayGuidance,
+    prohibited_text: parsed.data.prohibitedApproaches,
+    record_type: parsed.data.behaviorType,
+    risk_severity: parsed.data.severity,
+    source_type: parsed.data.informationSource,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+    trigger_text: parsed.data.triggers,
+  });
+  if (error)
+    redirect(`/app/pets/${parsed.data.petId}?error=The+behavior+record+could+not+be+saved.`);
+  redirect(`/app/pets/${parsed.data.petId}?notice=Behavior+and+handling+record+added.`);
+}
+
+const resolveBehaviorSchema = z.object({
+  behaviorRecordId: z.uuid(),
+  petId: z.uuid(),
+  reason: z.string().trim().min(1).max(1000),
+});
+
+export async function resolvePetBehaviorRecord(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = resolveBehaviorSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/customers?error=A+resolution+reason+is+required.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('resolve_pet_behavior_record', {
+    behavior_record_id: parsed.data.behaviorRecordId,
+    reason: parsed.data.reason,
+    target_business_id: context.businessId,
+  });
+  if (error)
+    redirect(`/app/pets/${parsed.data.petId}?error=The+behavior+record+could+not+be+resolved.`);
+  redirect(
+    `/app/pets/${parsed.data.petId}?notice=Behavior+record+resolved+with+history+preserved.`,
+  );
+}

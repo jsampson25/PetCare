@@ -10,10 +10,12 @@ import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
 import {
   addPetAllergy,
+  addPetBehaviorRecord,
   addPetFeedingPlan,
   addPetMedicationPlan,
   discontinuePetFeedingPlan,
   discontinuePetMedicationPlan,
+  resolvePetBehaviorRecord,
   resolvePetAllergy,
   reviewPetVaccination,
   submitPetVaccination,
@@ -73,6 +75,14 @@ export default async function PetVaccinationsPage({
     .eq('business_id', context.businessId)
     .eq('pet_id', petId)
     .order('created_at', { ascending: false });
+  const { data: behaviorRecords } = await supabase
+    .from('pet_behavior_records')
+    .select(
+      'id,behavior_type,severity,context_description,observed_on,triggers,preferred_handling,prohibited_approaches,calming_strategies,group_play_guidance,information_source,status,resolved_reason,created_at',
+    )
+    .eq('business_id', context.businessId)
+    .eq('pet_id', petId)
+    .order('created_at', { ascending: false });
   const evidenceLinks = new Map<string, string>();
   await Promise.all(
     (vaccinations ?? []).map(async (record) => {
@@ -110,6 +120,140 @@ export default async function PetVaccinationsPage({
         <Alert title="Vaccination updated" tone="success">
           {notice}
         </Alert>
+      ) : null}
+      <Card
+        title={`Behavior and handling (${behaviorRecords?.filter((record) => record.status === 'active').length ?? 0} active)`}
+        description="Critical behavior risks remain structured and prominent instead of being buried in general notes."
+      >
+        {behaviorRecords?.length ? (
+          <ul className="space-y-4">
+            {behaviorRecords.map((record) => (
+              <li
+                className="rounded-[var(--radius-md)] border border-[var(--border-default)] p-4"
+                key={record.id}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-bold capitalize">
+                      {record.behavior_type.replaceAll('_', ' ')}
+                    </p>
+                    <p className="text-sm capitalize text-[var(--text-secondary)]">
+                      {record.information_source.replaceAll('_', ' ')}
+                      {record.observed_on ? ` · ${formatDate(record.observed_on)}` : ''}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge tone={behaviorTone(record.severity)}>{record.severity}</Badge>
+                    <Badge tone={record.status === 'active' ? 'warning' : 'neutral'}>
+                      {record.status}
+                    </Badge>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm">
+                  <strong>Context:</strong> {record.context_description}
+                </p>
+                {record.triggers ? (
+                  <p className="mt-2 text-sm">
+                    <strong>Triggers:</strong> {record.triggers}
+                  </p>
+                ) : null}
+                <p className="mt-2 text-sm">
+                  <strong>Preferred handling:</strong> {record.preferred_handling}
+                </p>
+                {record.prohibited_approaches ? (
+                  <p className="mt-2 text-sm">
+                    <strong>Do not:</strong> {record.prohibited_approaches}
+                  </p>
+                ) : null}
+                {record.calming_strategies ? (
+                  <p className="mt-2 text-sm">
+                    <strong>Calming strategies:</strong> {record.calming_strategies}
+                  </p>
+                ) : null}
+                <p className="mt-2 text-sm capitalize">
+                  <strong>Group play:</strong> {record.group_play_guidance.replaceAll('_', ' ')}
+                </p>
+                {record.resolved_reason ? (
+                  <p className="mt-2 text-sm">
+                    <strong>Resolution:</strong> {record.resolved_reason}
+                  </p>
+                ) : null}
+                {canManage && record.status === 'active' ? (
+                  <form
+                    action={resolvePetBehaviorRecord}
+                    className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end"
+                  >
+                    <input name="behaviorRecordId" type="hidden" value={record.id} />
+                    <input name="petId" type="hidden" value={pet.id} />
+                    <Field label="Resolution reason" name="reason" required />
+                    <Button type="submit" variant="secondary">
+                      Resolve record
+                    </Button>
+                  </form>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">
+            No behavior or handling records have been added.
+          </p>
+        )}
+      </Card>
+      {canManage ? (
+        <Card
+          title="Add behavior and handling record"
+          description="Describe the context and safe handling response. Customer statements and staff observations remain distinguishable."
+        >
+          <form action={addPetBehaviorRecord} className="grid gap-5 sm:grid-cols-2">
+            <input name="petId" type="hidden" value={pet.id} />
+            <BehaviorSelect
+              label="Behavior or risk type"
+              name="behaviorType"
+              options={[
+                'aggression',
+                'bite_history',
+                'escape_risk',
+                'severe_anxiety',
+                'resource_guarding',
+                'dog_interaction',
+                'human_interaction',
+                'handling_sensitivity',
+                'barrier_reactivity',
+                'other',
+              ]}
+            />
+            <BehaviorSelect
+              label="Severity"
+              name="severity"
+              options={['information', 'caution', 'high', 'critical']}
+            />
+            <Field
+              label="Observation date (optional)"
+              max={new Date().toISOString().slice(0, 10)}
+              name="observedOn"
+              type="date"
+            />
+            <BehaviorSelect
+              label="Information source"
+              name="informationSource"
+              options={['customer_reported', 'staff_observed', 'veterinary_documented']}
+            />
+            <TextArea label="Context and what occurred" name="contextDescription" required />
+            <TextArea label="Known triggers (optional)" name="triggers" />
+            <TextArea label="Preferred safe handling" name="preferredHandling" required />
+            <TextArea label="Prohibited approaches (optional)" name="prohibitedApproaches" />
+            <TextArea label="Calming strategies (optional)" name="calmingStrategies" />
+            <BehaviorSelect
+              label="Group-play guidance"
+              name="groupPlayGuidance"
+              options={['not_evaluated', 'approved', 'conditional', 'not_approved']}
+            />
+            <div className="sm:col-span-2">
+              <Button type="submit">Add behavior record</Button>
+            </div>
+          </form>
+        </Card>
       ) : null}
       <Card
         title="Feeding plan"
@@ -693,4 +837,39 @@ function FeedingSelect({
       </select>
     </div>
   );
+}
+
+function BehaviorSelect({
+  label,
+  name,
+  options,
+}: {
+  label: string;
+  name: string;
+  options: string[];
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-bold" htmlFor={name}>
+        {label}
+      </label>
+      <select
+        className="mt-2 min-h-12 w-full rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-[var(--surface-default)] px-3 capitalize"
+        id={name}
+        name={name}
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option.replaceAll('_', ' ')}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function behaviorTone(severity: string): 'danger' | 'info' | 'neutral' | 'warning' {
+  if (severity === 'critical' || severity === 'high') return 'danger';
+  if (severity === 'caution') return 'warning';
+  return 'info';
 }

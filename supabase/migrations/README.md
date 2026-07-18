@@ -27,3 +27,5 @@ Structured pet allergy records capture category, severity, reaction, care instru
 Pet medication plans capture name, explicit dose, administration route, schedule, instructions, optional effective dates, as-needed indication, and information source. Plans are discontinued through an audited function with a required reason rather than overwritten or deleted.
 
 Pet feeding plans capture food source and product, explicit meal amount and count, schedule, preparation, supplements, information source, and separate-feeding safety. Only one plan may be active per pet; replacement plans require history-preserving discontinuation of the prior plan.
+
+Pet behavior records capture structured risk type and severity, incident or observation context, triggers, preferred and prohibited handling, calming strategies, group-play guidance, observation date, and source. Records are resolved with required context rather than deleted.
