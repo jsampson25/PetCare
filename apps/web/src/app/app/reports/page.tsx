@@ -104,6 +104,12 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
         >
           View booking activity
         </ButtonLink>
+        <ButtonLink
+          href={`/app/reports/occupancy?start=${inputDate(start)}&end=${inputDate(endDay)}`}
+          variant="secondary"
+        >
+          View occupancy
+        </ButtonLink>
       </div>
       {error || !summary ? (
         <Alert title="Report unavailable" tone="danger">

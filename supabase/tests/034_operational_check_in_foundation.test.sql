@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(187);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(193);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -191,4 +191,10 @@ select is((app.get_booking_activity_report((select id from businesses where publ
 select lives_ok($$select app.get_booking_activity_report((select id from businesses where public_slug='checkin-test'),now()-interval '30 days',now()+interval '30 days',true)$$,'authorized CSV export projection runs');
 select is((select count(*) from report_exports),1::bigint,'export is audited once');
 select is((select row_count from report_exports),1,'export audit records row count');
+select lives_ok($$select app.get_capacity_utilization_report((select id from businesses where public_slug='checkin-test'),current_date,current_date+3)$$,'authorized utilization report runs');
+select is((app.get_capacity_utilization_report((select id from businesses where public_slug='checkin-test'),current_date,current_date+3)->>'definition_version'),'1','utilization exposes definition version');
+select is((app.get_capacity_utilization_report((select id from businesses where public_slug='checkin-test'),current_date,current_date+3)->'period'->>'day_basis'),'location_local_time','utilization exposes local-day basis');
+select is(jsonb_array_length(app.get_capacity_utilization_report((select id from businesses where public_slug='checkin-test'),current_date,current_date+3)->'rows'),4,'one active pool produces one row per day');
+select is((select max((value->>'occupancy_rate_percent')::numeric)<=100 from jsonb_array_elements(app.get_capacity_utilization_report((select id from businesses where public_slug='checkin-test'),current_date,current_date+3)->'rows')),true,'occupancy rate never exceeds one hundred percent');
+select is((select max((value->>'occupied_resource_hours')::numeric)>0 from jsonb_array_elements(app.get_capacity_utilization_report((select id from businesses where public_slug='checkin-test'),current_date,current_date+3)->'rows')),true,'committed stay contributes occupied hours');
 select * from finish();rollback;

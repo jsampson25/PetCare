@@ -206,6 +206,8 @@ Report aggregation is performed only after tenant membership, permission, and lo
 
 The booking-activity drill-down applies that rule directly. It presents authorized booking-item records behind the summary, caps synchronous results at 5,000 rows, and offers CSV only to users with `reports.export`. Every screen run and export records its period, authorized-location scope, definition version, freshness watermark, requester, and row count. CSV responses are private, non-cacheable downloads and use deterministic columns and escaping.
 
+The capacity-utilization report uses location-local calendar days and actual elapsed day duration, including daylight-saving transitions. Sellable resource-hours equal the configured or date-overridden capacity multiplied by that duration. Occupied resource-hours clip eligible commitments to the same daily interval and multiply by committed quantity. The overall rate is calculated from summed hours rather than averaging child percentages.
+
 | ID         | Priority | Requirement                                                                                                                               |
 | ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | RPT-FR-001 |       P0 | The system shall provide only reports authorized for the user's tenant, role, and location scope.                                         |
