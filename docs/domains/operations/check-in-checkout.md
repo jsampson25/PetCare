@@ -61,6 +61,10 @@ flowchart TD
 - Completion captures immutable arrival condition, care-plan snapshot, custody inventory, receiving staff identity, and operational timeline evidence.
 - Care snapshots copy active allergy, medication, feeding, behavior, health, and pet identity data. They do not rewrite the master pet profile.
 - Booking-, visit-, pet-, and request-key uniqueness makes arrival and check-in retries safe.
+- `visit_resource_assignments` links a pet visit to a compatible named resource without confusing capacity reservations with physical location.
+- A resource must be ready or validly occupied below `max_pets`; maintenance and out-of-service resources can never be assigned through check-in.
+- `operational_handoffs` records the receiving staff member separately from the staff member who completed intake.
+- Handoff queues one idempotent customer confirmation only after a receiving staff member accepts responsibility.
 
 ## Acceptance scenarios
 

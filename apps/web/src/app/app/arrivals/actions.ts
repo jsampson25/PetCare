@@ -85,3 +85,33 @@ export async function completePetCheckIn(formData: FormData) {
     `/app/arrivals/${parsed.data.bookingId}?notice=Pet+checked+in+and+care+snapshot+secured.`,
   );
 }
+
+const handoffSchema = z.object({
+  bookingId: z.uuid(),
+  petVisitId: z.uuid(),
+  resourceId: z.preprocess((value) => value || undefined, z.uuid().optional()),
+  handoffNotes: z.string().trim().max(1000).optional(),
+  handoffConfirmed: z.literal('yes'),
+});
+
+export async function acceptOperationalHandoff(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('operations.check_in')) redirect('/denied');
+  const parsed = handoffSchema.safeParse(Object.fromEntries(formData));
+  const bookingId = String(formData.get('bookingId') ?? '');
+  if (!parsed.success)
+    redirect(`/app/arrivals/${bookingId}?error=Confirm+the+operational+handoff.`);
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('accept_operational_handoff', {
+    handoff_note: parsed.data.handoffNotes || '',
+    request_key: `handoff-${parsed.data.petVisitId}`,
+    target_business_id: context.businessId,
+    target_pet_visit_id: parsed.data.petVisitId,
+    target_resource_id: parsed.data.resourceId ?? null,
+  });
+  if (error)
+    redirect(
+      `/app/arrivals/${parsed.data.bookingId}?error=The+resource+or+handoff+is+no+longer+available.`,
+    );
+  redirect(`/app/arrivals/${parsed.data.bookingId}?notice=Operational+handoff+accepted.`);
+}

@@ -51,4 +51,18 @@ describe('transactional email', () => {
       }),
     );
   });
+
+  it('renders a pet-specific operational handoff confirmation', () => {
+    const result = renderTransactionalEmail(
+      {
+        business_name: 'Good Dogs',
+        message_type: 'pet_checked_in',
+        recipient_name: 'Pat',
+        template_data: { booking_number: 'PC-000123', pet_name: 'Milo' },
+      },
+      'https://petcare.test',
+    );
+    expect(result.subject).toBe('Milo is checked in');
+    expect(result.text).toContain('safely checked in');
+  });
 });

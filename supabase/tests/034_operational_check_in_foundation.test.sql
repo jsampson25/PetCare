@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(30);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(40);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -6,6 +6,7 @@ select lives_ok($$select app.create_customer_household_with_pet((select id from 
 select lives_ok($$select app.create_service_draft((select id from businesses where public_slug='checkin-test'),'boarding','Boarding','Boarding','overnight_date_range',null,'staff_approval','Stay')$$,'service created');
 select lives_ok($$select app.publish_service_version((select business_id from services),(select id from services),(select id from service_versions),(select id from locations),false,true,true,false)$$,'service published');
 select lives_ok($$select app.configure_capacity_pool((select business_id from services),(select id from locations),(select id from services),'Capacity','count',2,2)$$,'capacity configured');
+insert into capacity_resources(business_id,capacity_pool_id,resource_code,label,resource_type,max_pets) values((select business_id from capacity_pools),(select id from capacity_pools),'K-01','Kennel 01','kennel',1);
 select lives_ok($$select * from app.create_pricing_bundle((select id from businesses where public_slug='checkin-test'),(select id from locations),'USD','USD','Deposit','percentage',5000,0,24,5000,10000,'Agreement','Accepted payment terms.','Half deposit.')$$,'pricing configured');
 select lives_ok($$select app.add_price_rate((select business_id from price_books),(select id from price_book_versions),(select id from locations),(select id from service_versions),'night',10000,'Night',100,null,null)$$,'rate created');
 select lives_ok($$select app.publish_pricing_bundle((select business_id from price_books),(select id from price_book_versions),(select id from commercial_policy_versions),current_date)$$,'pricing published');
@@ -31,4 +32,14 @@ select is((select jsonb_array_length(verified_identifiers) from check_in_records
 select is((select jsonb_typeof(snapshot->'medications') from care_plan_snapshots),'array','care snapshot has structured medication data');
 select throws_ok($$update care_plan_snapshots set snapshot='{}'$$,'P0001','commercial snapshots are immutable','care snapshot cannot be rewritten');
 select throws_ok($$select app.complete_pet_check_in((select business_id from bookings),(select id from bookings),(select id from pets),'Pat Owner','owner','photo_id','["name:Milo","name:Milo"]','{}','[]','different-key')$$,'22023','two pet identifiers are required','duplicate identity signals are rejected');
+select lives_ok($$select app.accept_operational_handoff((select business_id from pet_visits),(select id from pet_visits),(select id from capacity_resources),'Blue leash is in Cubby A.','handoff-once')$$,'receiving staff accepts handoff');
+select is(app.accept_operational_handoff((select business_id from pet_visits),(select id from pet_visits),(select id from capacity_resources),'Blue leash is in Cubby A.','handoff-once'),(select id from operational_handoffs),'handoff retry is idempotent');
+select is((select handoff_status from pet_visits),'accepted','pet handoff state is explicit');
+select is((select count(*) from visit_resource_assignments),1::bigint,'one named-resource assignment created');
+select is((select status from capacity_resources),'occupied','full resource becomes occupied');
+select is((select count(*) from transactional_message_outbox where message_type='pet_checked_in'),1::bigint,'customer check-in communication queued once');
+select is((select count(*) from operational_timeline_events),3::bigint,'handoff appends operational timeline evidence');
+select throws_ok($$select app.accept_operational_handoff((select business_id from pet_visits),(select id from pet_visits),null,'Duplicate handoff','handoff-different')$$,'P0002','pet handoff unavailable','second handoff is rejected');
+select throws_ok($$update operational_handoffs set handoff_notes='rewritten'$$,'P0001','commercial snapshots are immutable','accepted handoff cannot be rewritten');
+select is((select ends_at-starts_at from visit_resource_assignments),(select scheduled_end-scheduled_start from operational_visits),'resource assignment covers the visit schedule');
 select * from finish();rollback;

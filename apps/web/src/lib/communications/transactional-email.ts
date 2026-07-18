@@ -52,6 +52,11 @@ export function renderTransactionalEmail(message: Message, appUrl: string) {
       heading: 'Booking confirmed',
       body: 'Your pet-care booking is confirmed.',
     },
+    pet_checked_in: {
+      subject: `${String(message.template_data.pet_name ?? 'Your pet')} is checked in`,
+      heading: 'Check-in complete',
+      body: `${String(message.template_data.pet_name ?? 'Your pet')} is safely checked in and has been handed off to the care team.`,
+    },
   };
   const copy = content[message.message_type] ?? {
     subject: 'Update from PetCare',
