@@ -1,6 +1,7 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
+import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -97,6 +98,13 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
           <Button type="submit">Apply dates</Button>
         </form>
       </Card>
+      <div className="flex flex-wrap gap-3">
+        <ButtonLink
+          href={`/app/reports/bookings?start=${inputDate(start)}&end=${inputDate(endDay)}`}
+        >
+          View booking activity
+        </ButtonLink>
+      </div>
       {error || !summary ? (
         <Alert title="Report unavailable" tone="danger">
           The report could not be generated for this scope. Check your dates and permissions.

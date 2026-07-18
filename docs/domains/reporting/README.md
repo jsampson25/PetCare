@@ -204,6 +204,8 @@ The summary distinguishes booking requests, scheduled confirmations, cancellatio
 
 Report aggregation is performed only after tenant membership, permission, and location-scope checks. A staff member cannot use an aggregate to infer records outside their authorized locations. Future exports and drill-downs must reuse the same scope and definition version rather than reconstructing access in the browser.
 
+The booking-activity drill-down applies that rule directly. It presents authorized booking-item records behind the summary, caps synchronous results at 5,000 rows, and offers CSV only to users with `reports.export`. Every screen run and export records its period, authorized-location scope, definition version, freshness watermark, requester, and row count. CSV responses are private, non-cacheable downloads and use deterministic columns and escaping.
+
 | ID         | Priority | Requirement                                                                                                                               |
 | ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | RPT-FR-001 |       P0 | The system shall provide only reports authorized for the user's tenant, role, and location scope.                                         |

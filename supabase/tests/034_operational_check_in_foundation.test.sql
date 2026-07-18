@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(179);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(187);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -183,4 +183,12 @@ select is((app.get_business_summary_report((select id from businesses where publ
 select is((app.get_business_summary_report((select id from businesses where public_slug='checkin-test'),now()-interval '30 days',now()+interval '30 days')->'operational'->>'booking_requests'),'1','booking request count reconciles to source');
 select is((app.get_business_summary_report((select id from businesses where public_slug='checkin-test'),now()-interval '30 days',now()+interval '30 days')->'financial'->>'outstanding_balance_minor')::bigint >= 0,true,'outstanding balance is a nonnegative as-of measure');
 select is((select count(*) from reporting_runs),7::bigint,'each successful report run is auditable');
+select lives_ok($$select app.get_booking_activity_report((select id from businesses where public_slug='checkin-test'),now()-interval '30 days',now()+interval '30 days',false)$$,'authorized booking activity report runs');
+select is((app.get_booking_activity_report((select id from businesses where public_slug='checkin-test'),now()-interval '30 days',now()+interval '30 days',false)->>'definition_version'),'1','booking activity exposes definition version');
+select is((app.get_booking_activity_report((select id from businesses where public_slug='checkin-test'),now()-interval '30 days',now()+interval '30 days',false)->>'row_count'),'1','booking activity reconciles one item');
+select is((app.get_booking_activity_report((select id from businesses where public_slug='checkin-test'),now()-interval '30 days',now()+interval '30 days',false)->'rows'->0->>'booking_number'),(select booking_number from bookings),'drill-down preserves source booking number');
+select is((app.get_booking_activity_report((select id from businesses where public_slug='checkin-test'),now()-interval '30 days',now()+interval '30 days',false)->'rows'->0->>'pet_name'),'Milo','drill-down preserves pet identity');
+select lives_ok($$select app.get_booking_activity_report((select id from businesses where public_slug='checkin-test'),now()-interval '30 days',now()+interval '30 days',true)$$,'authorized CSV export projection runs');
+select is((select count(*) from report_exports),1::bigint,'export is audited once');
+select is((select row_count from report_exports),1,'export audit records row count');
 select * from finish();rollback;
