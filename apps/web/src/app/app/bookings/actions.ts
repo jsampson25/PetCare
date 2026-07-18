@@ -197,3 +197,51 @@ export async function declineWaitlistOffer(formData: FormData) {
   if (error) redirect('/app/bookings?error=The+offer+could+not+be+declined.');
   redirect('/app/bookings?notice=Offer+declined+and+capacity+released.');
 }
+
+const bookingLifecycleSchema = z.object({
+  bookingId: z.uuid(),
+  reason: z.string().trim().min(8).max(500),
+});
+
+export async function markBookingNoShow(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('bookings.cancel')) redirect('/denied');
+  const parsed = bookingLifecycleSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/bookings?error=A+detailed+no-show+reason+is+required.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('mark_booking_no_show', {
+    reason_value: parsed.data.reason,
+    request_key: `no-show-${crypto.randomUUID()}`,
+    target_booking_id: parsed.data.bookingId,
+    target_business_id: context.businessId,
+  });
+  if (error)
+    redirect(`/app/bookings/${parsed.data.bookingId}?error=No-show+could+not+be+recorded.`);
+  redirect(`/app/bookings/${parsed.data.bookingId}?notice=Booking+marked+as+a+no-show.`);
+}
+
+export async function syncBookingActions(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('bookings.modify')) redirect('/denied');
+  const bookingId = z.uuid().safeParse(formData.get('bookingId'));
+  if (!bookingId.success) redirect('/app/bookings?error=Booking+action+sync+failed.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('sync_booking_action_items', {
+    target_booking_id: bookingId.data,
+    target_business_id: context.businessId,
+  });
+  if (error)
+    redirect(`/app/bookings/${bookingId.data}?error=Booking+actions+could+not+be+updated.`);
+  redirect(`/app/bookings/${bookingId.data}?notice=Booking+actions+updated.`);
+}
+
+export async function expireBookingRequests() {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('bookings.modify')) redirect('/denied');
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc('expire_booking_requests', {
+    target_business_id: context.businessId,
+  });
+  if (error) redirect('/app/bookings?error=Expired+requests+could+not+be+processed.');
+  redirect(`/app/bookings?notice=${data ?? 0}+expired+request(s)+processed.`);
+}

@@ -7,7 +7,12 @@ import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
-import { acceptWaitlistOffer, declineWaitlistOffer, offerWaitlistEntry } from './actions';
+import {
+  acceptWaitlistOffer,
+  declineWaitlistOffer,
+  expireBookingRequests,
+  offerWaitlistEntry,
+} from './actions';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 const tone = (status: string) =>
@@ -23,15 +28,28 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('bookings.view')) redirect('/denied');
   const parameters = await searchParams;
+  const query = typeof parameters.q === 'string' ? parameters.q.trim() : '';
+  const status = typeof parameters.status === 'string' ? parameters.status : 'active';
   const supabase = await createSupabaseServerClient();
+  let bookingQuery = supabase
+    .from('bookings')
+    .select(
+      'id,booking_number,status,source_channel,created_at,customers(first_name,last_name),locations(name)',
+    )
+    .eq('business_id', context.businessId)
+    .order('created_at', { ascending: false })
+    .limit(100);
+  if (status === 'active')
+    bookingQuery = bookingQuery.in('status', [
+      'action_required',
+      'pending_approval',
+      'pending_deposit',
+      'confirmed',
+    ]);
+  else if (status !== 'all') bookingQuery = bookingQuery.eq('status', status);
+  if (query) bookingQuery = bookingQuery.ilike('booking_number', `%${query}%`);
   const [{ data: bookings }, { data: waitlist }, { data: offers }] = await Promise.all([
-    supabase
-      .from('bookings')
-      .select(
-        'id,booking_number,status,source_channel,created_at,customers(first_name,last_name),locations(name)',
-      )
-      .eq('business_id', context.businessId)
-      .order('created_at', { ascending: false }),
+    bookingQuery,
     supabase
       .from('waitlist_entries')
       .select(
@@ -63,6 +81,50 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
           <ButtonLink href="/app/bookings/new">New booking</ButtonLink>
         ) : null}
       </header>
+      <Card
+        title="Find bookings"
+        description="Search the authoritative booking number and narrow the lifecycle state."
+      >
+        <form className="flex flex-wrap items-end gap-3" method="get">
+          <label className="text-sm font-bold">
+            Booking number
+            <input
+              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
+              defaultValue={query}
+              name="q"
+              placeholder="PC-000123"
+            />
+          </label>
+          <label className="text-sm font-bold">
+            Status
+            <select
+              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
+              defaultValue={status}
+              name="status"
+            >
+              <option value="active">Active</option>
+              <option value="all">All</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="action_required">Action required</option>
+              <option value="pending_approval">Pending approval</option>
+              <option value="pending_deposit">Pending deposit</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="no_show">No-show</option>
+              <option value="expired">Expired</option>
+            </select>
+          </label>
+          <Button type="submit" variant="secondary">
+            Apply filters
+          </Button>
+        </form>
+        {context.permissions.has('bookings.modify') ? (
+          <form action={expireBookingRequests} className="mt-4 border-t pt-4">
+            <Button type="submit" variant="quiet">
+              Process expired requests
+            </Button>
+          </form>
+        ) : null}
+      </Card>
       {typeof parameters.notice === 'string' ? (
         <Alert title="Booking updated" tone="success">
           {parameters.notice}

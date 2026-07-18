@@ -15,11 +15,19 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
     typeof parameters.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(parameters.date)
       ? parameters.date
       : new Date().toISOString().slice(0, 10);
+  const requestedLocation = typeof parameters.location === 'string' ? parameters.location : 'all';
+  const requestedStatus = typeof parameters.status === 'string' ? parameters.status : 'active';
   const start = new Date(`${requestedDate}T00:00:00`);
   const end = new Date(start);
   end.setDate(end.getDate() + 7);
   const supabase = await createSupabaseServerClient();
-  const { data: items } = await supabase
+  const { data: locations } = await supabase
+    .from('locations')
+    .select('id,name')
+    .eq('business_id', context.businessId)
+    .eq('status', 'active')
+    .order('name');
+  let calendarQuery = supabase
     .from('booking_items')
     .select(
       'id,booking_id,starts_at,ends_at,status,pets(name),service_versions(customer_name),bookings!inner(booking_number,status,location_id,customers(first_name,last_name),locations(name))',
@@ -28,6 +36,12 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
     .lt('starts_at', end.toISOString())
     .gt('ends_at', start.toISOString())
     .order('starts_at');
+  if (requestedStatus === 'active')
+    calendarQuery = calendarQuery.in('status', ['held', 'confirmed']);
+  else if (requestedStatus !== 'all') calendarQuery = calendarQuery.eq('status', requestedStatus);
+  if (requestedLocation !== 'all')
+    calendarQuery = calendarQuery.eq('bookings.location_id', requestedLocation);
+  const { data: items } = await calendarQuery;
   const grouped = new Map<string, typeof items>();
   for (const item of items ?? []) {
     const key = item.starts_at.slice(0, 10);
@@ -55,6 +69,36 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
               name="date"
               type="date"
             />
+          </label>
+          <label className="text-sm font-bold">
+            Location
+            <select
+              className="ml-2 min-h-11 rounded-lg border bg-white px-3"
+              defaultValue={requestedLocation}
+              name="location"
+            >
+              <option value="all">All locations</option>
+              {locations?.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-sm font-bold">
+            Item status
+            <select
+              className="ml-2 min-h-11 rounded-lg border bg-white px-3"
+              defaultValue={requestedStatus}
+              name="status"
+            >
+              <option value="active">Active</option>
+              <option value="all">All</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="held">Held</option>
+              <option value="completed">Completed</option>
+              <option value="no_show">No-show</option>
+            </select>
           </label>
           <button
             className="min-h-11 rounded-lg bg-[var(--action-primary)] px-5 text-sm font-bold text-[var(--action-primary-text)]"

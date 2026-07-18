@@ -7,7 +7,13 @@ import { notFound, redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { cancelBooking, rescheduleBooking, resolveBookingReview } from '../actions';
+import {
+  cancelBooking,
+  markBookingNoShow,
+  rescheduleBooking,
+  resolveBookingReview,
+  syncBookingActions,
+} from '../actions';
 
 type PageParameters = Promise<{ bookingId: string }>;
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
@@ -32,47 +38,58 @@ export default async function BookingDetailPage({
     .eq('id', bookingId)
     .single();
   if (!booking) notFound();
-  const [{ data: revision }, { data: items }, { data: validations }, { data: timeline }] =
-    await Promise.all([
-      supabase
-        .from('booking_revisions')
-        .select(
-          'id,quote_id,status,validation_snapshot,created_at,quotes(currency_code,subtotal_minor,discount_minor,fee_minor,tax_minor,total_minor,deposit_due_minor,balance_due_minor)',
-        )
-        .eq('business_id', context.businessId)
-        .eq('booking_id', bookingId)
-        .eq('revision_number', booking.current_revision_number)
-        .single(),
-      supabase
-        .from('booking_items')
-        .select(
-          'id,starts_at,ends_at,quantity,status,pets(name,breed),service_versions(customer_name)',
-        )
-        .eq('business_id', context.businessId)
-        .eq('booking_id', bookingId),
-      supabase
-        .from('booking_validation_results')
-        .select('id,check_type,outcome,blocking,customer_message')
-        .eq('business_id', context.businessId)
-        .eq(
-          'booking_revision_id',
-          (
-            await supabase
-              .from('booking_revisions')
-              .select('id')
-              .eq('business_id', context.businessId)
-              .eq('booking_id', bookingId)
-              .eq('revision_number', booking.current_revision_number)
-              .single()
-          ).data?.id ?? '',
-        ),
-      supabase
-        .from('booking_timeline_events')
-        .select('id,event_type,summary,occurred_at,customer_visible')
-        .eq('business_id', context.businessId)
-        .eq('booking_id', bookingId)
-        .order('occurred_at', { ascending: false }),
-    ]);
+  const [
+    { data: revision },
+    { data: items },
+    { data: validations },
+    { data: timeline },
+    { data: actions },
+  ] = await Promise.all([
+    supabase
+      .from('booking_revisions')
+      .select(
+        'id,quote_id,status,validation_snapshot,created_at,quotes(currency_code,subtotal_minor,discount_minor,fee_minor,tax_minor,total_minor,deposit_due_minor,balance_due_minor)',
+      )
+      .eq('business_id', context.businessId)
+      .eq('booking_id', bookingId)
+      .eq('revision_number', booking.current_revision_number)
+      .single(),
+    supabase
+      .from('booking_items')
+      .select(
+        'id,starts_at,ends_at,quantity,status,pets(name,breed),service_versions(customer_name)',
+      )
+      .eq('business_id', context.businessId)
+      .eq('booking_id', bookingId),
+    supabase
+      .from('booking_validation_results')
+      .select('id,check_type,outcome,blocking,customer_message')
+      .eq('business_id', context.businessId)
+      .eq(
+        'booking_revision_id',
+        (
+          await supabase
+            .from('booking_revisions')
+            .select('id')
+            .eq('business_id', context.businessId)
+            .eq('booking_id', bookingId)
+            .eq('revision_number', booking.current_revision_number)
+            .single()
+        ).data?.id ?? '',
+      ),
+    supabase
+      .from('booking_timeline_events')
+      .select('id,event_type,summary,occurred_at,customer_visible')
+      .eq('business_id', context.businessId)
+      .eq('booking_id', bookingId)
+      .order('occurred_at', { ascending: false }),
+    supabase
+      .from('booking_action_items')
+      .select('id,action_type,audience,status,title,due_at,blocking')
+      .eq('business_id', context.businessId)
+      .eq('booking_id', bookingId)
+      .order('created_at', { ascending: false }),
+  ]);
   const customer = booking.customers as unknown as {
     first_name: string;
     last_name: string;
@@ -226,6 +243,41 @@ export default async function BookingDetailPage({
           ))}
         </div>
       </Card>
+      <Card
+        title="Required actions"
+        description="Customer and staff obligations remain explicit until resolved or expired."
+      >
+        {actions?.length ? (
+          <div className="divide-y">
+            {actions.map((action) => (
+              <div
+                className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                key={action.id}
+              >
+                <div>
+                  <p className="font-bold">{action.title}</p>
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    {action.audience} · {action.action_type.replaceAll('_', ' ')}
+                    {action.due_at
+                      ? ` · due ${new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(action.due_at))}`
+                      : ''}
+                  </p>
+                </div>
+                <Badge tone={action.status === 'open' ? 'warning' : 'info'}>{action.status}</Badge>
+              </div>
+            ))}
+          </div>
+        ) : context.permissions.has('bookings.modify') ? (
+          <form action={syncBookingActions}>
+            <input name="bookingId" type="hidden" value={booking.id} />
+            <Button type="submit" variant="secondary">
+              Create current action item
+            </Button>
+          </form>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">No required actions.</p>
+        )}
+      </Card>
       <Card title="Timeline">
         {timeline?.length ? (
           <ol className="space-y-4">
@@ -297,6 +349,20 @@ export default async function BookingDetailPage({
                 Validate and reschedule
               </Button>
             </div>
+          </form>
+        </Card>
+      ) : null}
+      {booking.status === 'confirmed' && context.permissions.has('bookings.cancel') ? (
+        <Card
+          title="Record no-show"
+          description="Available only after the scheduled start; the original financial and policy snapshot is preserved."
+        >
+          <form action={markBookingNoShow} className="flex flex-wrap items-end gap-4">
+            <input name="bookingId" type="hidden" value={booking.id} />
+            <Field label="No-show reason" name="reason" minLength={8} required />
+            <Button type="submit" variant="danger">
+              Mark no-show
+            </Button>
           </form>
         </Card>
       ) : null}
