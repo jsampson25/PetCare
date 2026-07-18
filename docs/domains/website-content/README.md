@@ -222,6 +222,14 @@ Requested -> Verification pending -> Verified -> Certificate provisioning
 
 ## Content authoring and publication
 
+### Implemented E12 foundation
+
+- Staff edit structured, governed content and validated brand colors rather than arbitrary HTML or scripts.
+- Publishing creates an immutable numbered snapshot; draft edits do not alter the live site.
+- Rollback republishes a prior snapshot as a new publication and preserves complete history.
+- The public tenant route resolves only active businesses with a published site and projects active public-enabled services and locations from their source domains.
+- Home, services, about, FAQ, policies, contact, booking, and portal handoffs share one light customer-facing experience.
+
 ### Editing flow
 
 ```mermaid
