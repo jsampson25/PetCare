@@ -68,6 +68,18 @@ flowchart TD
 - Manager resolutions are immutable records. Eligibility, deposit, and approval blockers cannot be bypassed from check-in; exceptions require an action explicitly marked overrideable by policy.
 - `care_plan_amendments` append visit-only instructions to the immutable intake snapshot. A requested master-profile change remains a separate `proposed` workflow.
 
+## Implemented E11 checkout foundation
+
+- The Departures workspace shows every pet still in care with service, care, incident, report-card, balance, and custody readiness in one controlled workflow.
+- `complete_pet_checkout` verifies the pickup person against the household or an effective pet-specific pickup authorization without exposing the authorization list.
+- Two distinct identity evidence values, the verification method, relationship, handoff notes, staff identity, timestamp, and final acknowledgement are stored in an immutable checkout record.
+- Active care work, unresolved alerts or incidents, an unfinished service, a missing published report card, and an outstanding invoice balance block release by default.
+- Only an owner or manager may create an immutable, reasoned override for an allowed checkout blocker. The original blocker remains visible in the reconciliation snapshot.
+- Every return-required custody item must be reconciled. Missing or damaged property additionally requires a documented manager exception.
+- Retry keys make checkout completion idempotent and prevent duplicate custody returns or turnover work.
+- Completing checkout releases only that pet's active resource assignment. A shared resource enters cleaning only after its final active assignment is released.
+- Final sibling-pet checkout closes the operational visit; each pet can still depart independently.
+
 ## Acceptance scenarios
 
 | ID         | Scenario                                                                                                    |

@@ -9,6 +9,7 @@ const businessNavigation = [
   { href: '/app/bookings', label: 'Bookings', requiredPermissions: ['bookings.view'] },
   { href: '/app/calendar', label: 'Calendar', requiredPermissions: ['bookings.view'] },
   { href: '/app/arrivals', label: 'Arrivals', requiredPermissions: ['operations.check_in'] },
+  { href: '/app/departures', label: 'Departures', requiredPermissions: ['operations.check_out'] },
   { href: '/app/tasks', label: 'Care work', requiredPermissions: ['operations.record_feeding'] },
   {
     href: '/app/observations',

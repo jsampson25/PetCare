@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(108);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(120);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -111,4 +111,16 @@ select lives_ok($$select app.transition_report_card((select business_id from rep
 select lives_ok($$select app.transition_report_card((select business_id from report_cards),(select id from report_cards),'approved','Manager verified customer-safe content.','report-card-approved')$$,'manager approves report card');
 select lives_ok($$select app.transition_report_card((select business_id from report_cards),(select id from report_cards),'published','Approved for customer delivery.','report-card-published')$$,'manager publishes report card');
 select is((select count(*) from transactional_message_outbox where message_type='report_card_published'),1::bigint,'published report card queues delivery once');
+select throws_ok($$select app.complete_pet_checkout((select business_id from pet_visits),(select id from pet_visits),'Pat Owner','owner','photo_id','["name:Pat Owner","account verified"]',jsonb_build_array(jsonb_build_object('item_id',(select id from visit_custody_items),'status','returned','notes','Blue leash returned')),'Final care and property reviewed.',true,'checkout-once')$$,'P0001','checkout blockers remain unresolved','open care alert and balance prevent release');
+select lives_ok($$select app.record_checkout_override((select business_id from pet_visits),(select id from pet_visits),'open_care','Manager reviewed the corrected meal record and remaining alert.','checkout-open-care')$$,'manager documents care exception');
+select lives_ok($$select app.record_checkout_override((select business_id from pet_visits),(select id from pet_visits),'balance_due','Manager approved departure with documented balance follow-up.','checkout-balance')$$,'manager documents balance exception');
+select lives_ok($$select app.complete_pet_checkout((select business_id from pet_visits),(select id from pet_visits),'Pat Owner','owner','photo_id','["name:Pat Owner","account verified"]',jsonb_build_array(jsonb_build_object('item_id',(select id from visit_custody_items),'status','returned','notes','Blue leash returned')),'Final care and property reviewed.',true,'checkout-once')$$,'authorized checkout completes');
+select is(app.complete_pet_checkout((select business_id from pet_visits),(select id from pet_visits),'Pat Owner','owner','photo_id','["name:Pat Owner","account verified"]','[]','',true,'checkout-once'),(select id from check_out_records),'checkout retry returns the same record');
+select is((select status from pet_visits),'checked_out','pet custody is released');
+select is((select status from operational_visits),'checked_out','final pet checkout closes operational visit');
+select is((select status from visit_resource_assignments),'released','active resource assignment is released');
+select is((select status from capacity_resources),'cleaning','released resource requires cleaning');
+select is((select count(*) from resource_turnover_tasks),1::bigint,'one turnover task is created');
+select is((select return_status from custody_item_returns),'returned','custody return is preserved');
+select is((select status from booking_items),'completed','booked service item completes at checkout');
 select * from finish();rollback;
