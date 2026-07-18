@@ -1,11 +1,13 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
+import { Button } from '@petcare/ui/button';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
+import { acceptWaitlistOffer, declineWaitlistOffer, offerWaitlistEntry } from './actions';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 const tone = (status: string) =>
@@ -22,7 +24,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
   if (!context?.permissions.has('bookings.view')) redirect('/denied');
   const parameters = await searchParams;
   const supabase = await createSupabaseServerClient();
-  const [{ data: bookings }, { data: waitlist }] = await Promise.all([
+  const [{ data: bookings }, { data: waitlist }, { data: offers }] = await Promise.all([
     supabase
       .from('bookings')
       .select(
@@ -38,6 +40,14 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
       .eq('business_id', context.businessId)
       .in('status', ['active', 'offered'])
       .order('priority_created_at'),
+    supabase
+      .from('waitlist_offers')
+      .select(
+        'id,deadline_at,status,waitlist_entries(preferred_start,preferred_end,pets(name),services(internal_name),customers(first_name,last_name))',
+      )
+      .eq('business_id', context.businessId)
+      .eq('status', 'offered')
+      .order('deadline_at'),
   ]);
   return (
     <div className="space-y-6">
@@ -130,13 +140,84 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
                       )}
                     </p>
                   </div>
-                  <Badge tone="info">{entry.status}</Badge>
+                  <div className="flex items-center gap-3">
+                    <Badge tone="info">{entry.status}</Badge>
+                    {entry.status === 'active' && context.permissions.has('bookings.modify') ? (
+                      <form action={offerWaitlistEntry}>
+                        <input name="entryId" type="hidden" value={entry.id} />
+                        <Button type="submit" variant="secondary">
+                          Offer slot
+                        </Button>
+                      </form>
+                    ) : null}
+                  </div>
                 </div>
               );
             })}
           </div>
         ) : (
           <p className="text-sm text-[var(--text-secondary)]">No active waitlist demand.</p>
+        )}
+      </Card>
+      <Card
+        title="Timed offers"
+        description="Offers retain a dedicated capacity hold and expire without creating a reservation."
+      >
+        {offers?.length ? (
+          <div className="divide-y">
+            {offers.map((offer) => {
+              const entry = offer.waitlist_entries as unknown as {
+                preferred_start: string;
+                preferred_end: string;
+                pets: { name: string };
+                services: { internal_name: string };
+                customers: { first_name: string; last_name: string };
+              };
+              const units = Math.max(
+                1,
+                Math.ceil(
+                  (new Date(entry.preferred_end).getTime() -
+                    new Date(entry.preferred_start).getTime()) /
+                    86_400_000,
+                ),
+              );
+              return (
+                <div
+                  className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
+                  key={offer.id}
+                >
+                  <div>
+                    <p className="font-bold">
+                      {entry?.pets?.name} · {entry?.services?.internal_name}
+                    </p>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      {entry?.customers?.first_name} {entry?.customers?.last_name} · expires{' '}
+                      {new Intl.DateTimeFormat('en-US', { timeStyle: 'short' }).format(
+                        new Date(offer.deadline_at),
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <form action={acceptWaitlistOffer}>
+                      <input name="offerId" type="hidden" value={offer.id} />
+                      <input name="units" type="hidden" value={units} />
+                      <Button type="submit">Convert</Button>
+                    </form>
+                    {context.permissions.has('bookings.modify') ? (
+                      <form action={declineWaitlistOffer}>
+                        <input name="offerId" type="hidden" value={offer.id} />
+                        <Button type="submit" variant="quiet">
+                          Decline
+                        </Button>
+                      </form>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">No active offers.</p>
         )}
       </Card>
     </div>

@@ -89,3 +89,111 @@ export async function cancelBooking(formData: FormData) {
   if (error) redirect(`/app/bookings/${parsed.data.bookingId}?error=Cancellation+failed.`);
   redirect(`/app/bookings/${parsed.data.bookingId}?notice=Booking+cancelled.`);
 }
+
+const reviewSchema = z.object({
+  bookingId: z.uuid(),
+  decision: z.enum(['approved', 'rejected', 'changes_requested']),
+  reason: z.string().trim().min(8).max(500),
+});
+export async function resolveBookingReview(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('bookings.modify')) redirect('/denied');
+  const parsed = reviewSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/bookings?error=Check+the+review+decision+and+reason.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('resolve_booking_review', {
+    decision_value: parsed.data.decision,
+    reason_value: parsed.data.reason,
+    request_key: `review-${crypto.randomUUID()}`,
+    target_booking_id: parsed.data.bookingId,
+    target_business_id: context.businessId,
+  });
+  if (error)
+    redirect(`/app/bookings/${parsed.data.bookingId}?error=Review+could+not+be+completed.`);
+  redirect(`/app/bookings/${parsed.data.bookingId}?notice=Review+decision+recorded.`);
+}
+
+const rescheduleSchema = z.object({
+  bookingId: z.uuid(),
+  coupon: z.string().trim().max(32).optional(),
+  endsAt: z.string().refine((value) => !Number.isNaN(new Date(value).getTime())),
+  reason: z.string().trim().min(8).max(500),
+  startsAt: z.string().refine((value) => !Number.isNaN(new Date(value).getTime())),
+  units: z.coerce.number().int().positive().max(365),
+});
+export async function rescheduleBooking(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('bookings.modify')) redirect('/denied');
+  const parsed = rescheduleSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/bookings?error=Check+the+replacement+schedule.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('reschedule_booking', {
+    coupon_value: parsed.data.coupon || null,
+    new_end: new Date(parsed.data.endsAt).toISOString(),
+    new_start: new Date(parsed.data.startsAt).toISOString(),
+    reason_value: parsed.data.reason,
+    request_key: `reschedule-${crypto.randomUUID()}`,
+    requested_units: parsed.data.units,
+    target_booking_id: parsed.data.bookingId,
+    target_business_id: context.businessId,
+  });
+  if (error)
+    redirect(
+      `/app/bookings/${parsed.data.bookingId}?error=Replacement+capacity,+eligibility,+or+payment+requirements+prevented+the+change.`,
+    );
+  redirect(`/app/bookings/${parsed.data.bookingId}?notice=Booking+rescheduled.`);
+}
+
+const offerSchema = z.object({ entryId: z.uuid() });
+export async function offerWaitlistEntry(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('bookings.modify')) redirect('/denied');
+  const parsed = offerSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/bookings?error=Select+an+active+waitlist+entry.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('offer_waitlist_entry', {
+    deadline_minutes: 30,
+    request_key: `offer-${crypto.randomUUID()}`,
+    target_business_id: context.businessId,
+    target_entry_id: parsed.data.entryId,
+  });
+  if (error) redirect('/app/bookings?error=Capacity+is+not+currently+available+for+that+entry.');
+  redirect('/app/bookings?notice=Timed+waitlist+offer+created.');
+}
+
+const offerResponseSchema = z.object({
+  offerId: z.uuid(),
+  units: z.coerce.number().int().positive().max(365).default(1),
+});
+export async function acceptWaitlistOffer(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('bookings.create')) redirect('/denied');
+  const parsed = offerResponseSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/bookings?error=Select+an+active+offer.');
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc('accept_waitlist_offer', {
+    coupon_value: null,
+    request_key: `accept-${crypto.randomUUID()}`,
+    requested_units: parsed.data.units,
+    target_business_id: context.businessId,
+    target_offer_id: parsed.data.offerId,
+  });
+  if (error || typeof data !== 'string')
+    redirect('/app/bookings?error=The+offer+could+not+be+converted.');
+  redirect(`/app/bookings/${data}?notice=Waitlist+offer+converted.`);
+}
+
+export async function declineWaitlistOffer(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('bookings.modify')) redirect('/denied');
+  const parsed = offerResponseSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/bookings?error=Select+an+active+offer.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('decline_waitlist_offer', {
+    reason_value: 'Customer declined the offered dates',
+    target_business_id: context.businessId,
+    target_offer_id: parsed.data.offerId,
+  });
+  if (error) redirect('/app/bookings?error=The+offer+could+not+be+declined.');
+  redirect('/app/bookings?notice=Offer+declined+and+capacity+released.');
+}

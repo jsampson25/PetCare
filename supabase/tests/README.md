@@ -4,6 +4,8 @@
 
 `027_booking_waitlist_calendar_foundation.test.sql` verifies booking orchestration across authority, eligibility, capacity, pricing, confirmation, immutable revisions, timeline evidence, idempotency, oversell prevention, waitlist creation, cancellation outcomes, and capacity release.
 
+`028_booking_workflow_waitlist_offers.test.sql` verifies approval decisions, revision-linked changes, atomic rescheduling, quote lineage, replacement-before-release capacity safety, chronological waitlist offers, offer-held capacity, conversion revalidation, confirmation-mode preservation, decline recovery, and idempotent retries.
+
 SQL tests for constraints, row-level security, functions, and tenant isolation live here. Every tenant-scoped migration must add positive and negative isolation coverage.
 
 Tests run inside transactions and roll back their fixtures. Identity tests use synthetic `example.test` addresses and fixed UUIDs; never copy production identities or customer data into fixtures.

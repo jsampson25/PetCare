@@ -7,7 +7,7 @@ import { notFound, redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { cancelBooking } from '../actions';
+import { cancelBooking, rescheduleBooking, resolveBookingReview } from '../actions';
 
 type PageParameters = Promise<{ bookingId: string }>;
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
@@ -246,6 +246,60 @@ export default async function BookingDetailPage({
           <p>No timeline events.</p>
         )}
       </Card>
+      {['action_required', 'pending_approval'].includes(booking.status) &&
+      context.permissions.has('bookings.modify') ? (
+        <Card
+          title="Resolve staff review"
+          description="Approval still requires a valid capacity hold and never bypasses a required deposit."
+        >
+          <form action={resolveBookingReview} className="grid gap-4 md:grid-cols-3">
+            <input name="bookingId" type="hidden" value={booking.id} />
+            <label className="text-sm font-bold">
+              Decision
+              <select
+                className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                name="decision"
+              >
+                <option value="approved">Approve</option>
+                <option value="changes_requested">Request changes</option>
+                <option value="rejected">Reject</option>
+              </select>
+            </label>
+            <Field label="Decision reason" name="reason" minLength={8} required />
+            <div className="self-end">
+              <Button type="submit">Record decision</Button>
+            </div>
+          </form>
+        </Card>
+      ) : null}
+      {booking.status === 'confirmed' && context.permissions.has('bookings.modify') ? (
+        <Card
+          title="Reschedule booking"
+          description="Replacement capacity is secured before the existing commitment is released. Changes requiring additional payment stop safely."
+        >
+          <form action={rescheduleBooking} className="grid gap-4 md:grid-cols-3">
+            <input name="bookingId" type="hidden" value={booking.id} />
+            <Field label="New start" name="startsAt" type="datetime-local" required />
+            <Field label="New end" name="endsAt" type="datetime-local" required />
+            <Field
+              label="Charge units"
+              name="units"
+              type="number"
+              min="1"
+              max="365"
+              defaultValue="1"
+              required
+            />
+            <Field label="Discount code (optional)" name="coupon" />
+            <Field label="Change reason" name="reason" minLength={8} required />
+            <div className="self-end">
+              <Button type="submit" variant="secondary">
+                Validate and reschedule
+              </Button>
+            </div>
+          </form>
+        </Card>
+      ) : null}
       {cancellable && context.permissions.has('bookings.cancel') ? (
         <Card
           title="Cancel booking"
