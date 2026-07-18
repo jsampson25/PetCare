@@ -14,11 +14,12 @@ export default async function BusinessHomePage() {
   const canWork =
     context.permissions.has('operations.record_feeding') ||
     context.permissions.has('operations.record_medication');
+  const canExecuteServices = context.permissions.has('operations.execute_service');
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   const end = new Date(start);
   end.setDate(end.getDate() + 1);
-  const [arrivalResult, visitResult, taskResult, alertResult] = await Promise.all([
+  const [arrivalResult, visitResult, taskResult, executionResult, alertResult] = await Promise.all([
     canCheckIn
       ? supabase
           .from('booking_items')
@@ -43,6 +44,13 @@ export default async function BusinessHomePage() {
           .eq('business_id', context.businessId)
           .in('status', ['scheduled', 'in_progress'])
           .lte('due_starts_at', new Date().toISOString())
+      : Promise.resolve({ count: 0 }),
+    canExecuteServices
+      ? supabase
+          .from('service_executions')
+          .select('id', { count: 'exact', head: true })
+          .eq('business_id', context.businessId)
+          .neq('stage', 'completed')
       : Promise.resolve({ count: 0 }),
     canWork
       ? supabase
@@ -78,6 +86,7 @@ export default async function BusinessHomePage() {
           ['Arrivals today', arrivalResult.count ?? 0, 'info'],
           ['Pets in care', visitResult.count ?? 0, 'success'],
           ['Tasks due', taskResult.count ?? 0, taskResult.count ? 'warning' : 'neutral'],
+          ['Active services', executionResult.count ?? 0, 'info'],
         ].map(([label, value, tone]) => (
           <Card key={label}>
             <div className="flex items-start justify-between gap-3">
@@ -92,6 +101,11 @@ export default async function BusinessHomePage() {
       </div>
       <div className="flex flex-wrap gap-3">
         {canWork ? <ButtonLink href="/app/tasks">Open care work</ButtonLink> : null}
+        {canExecuteServices ? (
+          <ButtonLink href="/app/service-board" variant="secondary">
+            Open service boards
+          </ButtonLink>
+        ) : null}
         {canCheckIn ? (
           <ButtonLink href="/app/arrivals" variant="secondary">
             Open arrivals

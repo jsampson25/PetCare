@@ -39,6 +39,14 @@
 - Combined services remain separate booking/service executions connected by one visit and dependency order.
 - Ready-for-pickup means care/service requirements are complete, not that payment or authorization is resolved.
 
+## Implemented E10 execution foundation
+
+- `service_executions` gives each confirmed booking item a category-specific operational stage after custody handoff.
+- Boarding begins in settling, daycare begins in attendance, and grooming begins in intake; their allowed progressions remain deliberately distinct.
+- Every transition is permission- and location-scoped, idempotent, and appended to `service_execution_events` plus the shared operational timeline.
+- Hold, ready, and completed transitions require written notes. Grooming cannot become ready without passing through quality review.
+- The staff service-board screen groups active work by category and exposes only valid next stages.
+
 ## Acceptance scenarios
 
 | ID         | Scenario                                                                                                  |

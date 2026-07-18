@@ -15,6 +15,11 @@ const businessNavigation = [
     label: 'Care log',
     requiredPermissions: ['operations.record_observation'],
   },
+  {
+    href: '/app/service-board',
+    label: 'Service boards',
+    requiredPermissions: ['operations.execute_service'],
+  },
   { href: '/app/invoices', label: 'Invoices', requiredPermissions: ['payments.view'] },
   {
     href: '/app/availability',
