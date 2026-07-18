@@ -110,6 +110,14 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
         >
           View occupancy
         </ButtonLink>
+        {context.permissions.has('reports.view_financial') ? (
+          <ButtonLink
+            href={`/app/reports/financial?start=${inputDate(start)}&end=${inputDate(endDay)}`}
+            variant="secondary"
+          >
+            View financial reconciliation
+          </ButtonLink>
+        ) : null}
       </div>
       {error || !summary ? (
         <Alert title="Report unavailable" tone="danger">

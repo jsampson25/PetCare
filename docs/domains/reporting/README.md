@@ -208,6 +208,8 @@ The booking-activity drill-down applies that rule directly. It presents authoriz
 
 The capacity-utilization report uses location-local calendar days and actual elapsed day duration, including daylight-saving transitions. Sellable resource-hours equal the configured or date-overridden capacity multiplied by that duration. Occupied resource-hours clip eligible commitments to the same daily interval and multiply by committed quantity. The overall rate is calculated from summed hours rather than averaging child percentages.
 
+The financial-reconciliation report is scoped by invoice issue time and shows the current immutable invoice total alongside successful payment allocations, credits, successful refunds, and current balance due. It assigns an explicit `reconciled`, `open_balance`, or `review_required` status without describing any amount as accounting revenue or bank settlement. Mixed-currency detection prevents a combined total from being presented as meaningful.
+
 | ID         | Priority | Requirement                                                                                                                               |
 | ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | RPT-FR-001 |       P0 | The system shall provide only reports authorized for the user's tenant, role, and location scope.                                         |

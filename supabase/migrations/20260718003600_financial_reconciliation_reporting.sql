@@ -1,0 +1,23 @@
+-- PetCare E13 invoice-level financial reconciliation without accounting-revenue claims.
+alter table public.reporting_runs drop constraint reporting_runs_report_key_check;
+alter table public.reporting_runs add constraint reporting_runs_report_key_check check(report_key in('business_summary','booking_activity','capacity_utilization','financial_reconciliation'));
+
+create or replace function app.get_financial_reconciliation_report(target_business_id uuid,period_start_value timestamptz,period_end_value timestamptz) returns jsonb language plpgsql security definer set search_path='' as $$
+declare generated_at_value timestamptz:=clock_timestamp();run_id_value uuid;rows_value jsonb;summary_value jsonb;currency_value text;currency_count integer;
+begin
+ if not app.member_has_permission(target_business_id,'reports.view_financial') then raise exception 'financial reconciliation report unavailable' using errcode='42501';end if;
+ if period_start_value is null or period_end_value is null or period_end_value<=period_start_value or period_end_value-period_start_value>interval '366 days' then raise exception 'valid report period required' using errcode='22023';end if;
+ select count(distinct i.currency_code),min(i.currency_code) into currency_count,currency_value from public.invoices i where i.business_id=target_business_id and i.status<>'void' and i.issued_at>=period_start_value and i.issued_at<period_end_value and app.member_can_access_location(i.business_id,i.location_id);
+ with scoped as(
+  select i.id,i.invoice_number,i.status,i.currency_code,i.issued_at,i.due_at,trim(c.first_name||' '||c.last_name) customer_name,iv.total_minor,ib.credit_minor,ib.paid_minor,ib.refunded_minor,ib.balance_due_minor,
+   case when ib.balance_due_minor=0 then 'reconciled' when ib.paid_minor+ib.credit_minor+ib.balance_due_minor=iv.total_minor then 'open_balance' else 'review_required' end reconciliation_status
+  from public.invoices i join public.customers c on c.business_id=i.business_id and c.id=i.customer_id join public.invoice_versions iv on iv.business_id=i.business_id and iv.invoice_id=i.id and iv.version_number=i.current_version_number join public.invoice_balances ib on ib.business_id=i.business_id and ib.invoice_id=i.id
+  where i.business_id=target_business_id and i.status<>'void' and i.issued_at>=period_start_value and i.issued_at<period_end_value and app.member_can_access_location(i.business_id,i.location_id)
+ )
+ select coalesce(jsonb_agg(jsonb_build_object('invoice_number',invoice_number,'invoice_status',status,'customer_name',customer_name,'currency_code',currency_code,'issued_at',issued_at,'due_at',due_at,'invoiced_minor',total_minor,'credits_minor',credit_minor,'collected_minor',paid_minor,'refunded_minor',refunded_minor,'outstanding_minor',balance_due_minor,'reconciliation_status',reconciliation_status) order by issued_at desc,invoice_number),'[]'::jsonb),
+  jsonb_build_object('invoice_count',count(*),'invoiced_minor',coalesce(sum(total_minor),0),'credits_minor',coalesce(sum(credit_minor),0),'collected_minor',coalesce(sum(paid_minor),0),'refunded_minor',coalesce(sum(refunded_minor),0),'outstanding_minor',coalesce(sum(balance_due_minor),0),'review_required_count',count(*) filter(where reconciliation_status='review_required'))
+ into rows_value,summary_value from scoped;
+ insert into public.reporting_runs(business_id,report_key,definition_version,period_start,period_end,time_basis,freshness_at,filters) values(target_business_id,'financial_reconciliation',1,period_start_value,period_end_value,'UTC',generated_at_value,jsonb_build_object('location_scope','authorized','invoice_basis','issued_at')) returning id into run_id_value;
+ return jsonb_build_object('run_id',run_id_value,'definition_version',1,'period',jsonb_build_object('start',period_start_value,'end',period_end_value,'time_basis','UTC','invoice_basis','issued_at'),'freshness',jsonb_build_object('status','current','as_of',generated_at_value),'currency_code',coalesce(currency_value,'USD'),'mixed_currency',currency_count>1,'summary',summary_value,'rows',rows_value,'definitions',jsonb_build_object('invoiced','Current immutable invoice-version total for invoices issued in the period.','collected','Successful payment allocations currently applied to scoped invoices.','refunded','Successful refund amount associated with scoped invoices.','outstanding','Current invoice balance after successful allocations and credits.'));
+end;$$;
+revoke all on function app.get_financial_reconciliation_report(uuid,timestamptz,timestamptz) from public;grant execute on function app.get_financial_reconciliation_report(uuid,timestamptz,timestamptz) to authenticated;
