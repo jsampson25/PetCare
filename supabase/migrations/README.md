@@ -19,3 +19,5 @@ Dated closures block location availability for a complete local calendar date. A
 The first E04 migration introduces business-scoped customers, households, household membership, and pets. An authorized staff workflow creates the first customer, administrator relationship, household, and dog atomically while enforcing normalized tenant-unique email addresses.
 
 The next E04 slice adds a permission-aware function for adding another dog to an existing active customer household. It derives the household from the tenant-scoped customer relationship rather than trusting a client-supplied household identifier.
+
+Vaccination evidence uses structured pet vaccination records and a private `pet-vaccine-evidence` bucket. PDFs and JPG/PNG images are limited to 10 MB, stored under tenant and pet path prefixes, and begin in pending scan and review states. Authorized staff may accept or reject pending evidence; rejected evidence requires a reason.

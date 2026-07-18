@@ -108,6 +108,11 @@ export default async function CustomerHouseholdPage({
                     : 'Birth date not provided'}
                 </p>
                 <p className="mt-1 text-sm font-semibold capitalize">{pet.status}</p>
+                <div className="mt-4">
+                  <ButtonLink href={`/app/pets/${pet.id}`} variant="secondary">
+                    Vaccinations
+                  </ButtonLink>
+                </div>
               </li>
             ))}
           </ul>

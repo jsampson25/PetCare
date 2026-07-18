@@ -19,3 +19,5 @@ Location-closure tests verify future-date validation, secure tenant-scoped remov
 Customer-household-pet foundation tests verify atomic creation, administrator membership, first-pet linkage, and default-deny reads for an unrelated identity.
 
 Additional-household-pet tests verify that authorized staff can add another dog to the resolved household while unrelated identities are denied.
+
+Vaccination-evidence tests cover structured submission, pending review, mandatory rejection reasons, acceptance, and tenant denial. Storage-provider and malware-scanner integration require environment-level tests in addition to pgTAP.

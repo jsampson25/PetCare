@@ -293,7 +293,9 @@ Detailed tables, constraints, indexes, and row-level policies will be produced i
 
 ### Initial E04 implementation
 
-The first pet slice creates an explicit dog record linked to a business-scoped household. It captures name, breed or mix, optional birth date with an estimated-date flag, sex, and lifecycle status in the same transaction as the first customer and household. Medical, feeding, medication, behavior, vaccination, documents, identifiers, and eligibility decisions remain subsequent E04 slices.
+The first pet slice creates an explicit dog record linked to a business-scoped household. It captures name, breed or mix, optional birth date with an estimated-date flag, sex, and lifecycle status in the same transaction as the first customer and household.
+
+The vaccination slice adds structured vaccine type, administration and expiration dates, provider, private evidence metadata, scan state, and staff review. Authorized staff can submit PDF/JPG/PNG evidence from the pet page, open it through a five-minute signed URL, and accept or reject it with rejection reasons preserved. Uploads begin in `pending` scan state; a production malware-scanning integration must promote clean files or block unsafe files before customer launch. Medical, feeding, medication, behavior, identifiers, automated vaccine compliance, and broader eligibility decisions remain subsequent E04 slices.
 
 ## Domain events
 
