@@ -308,6 +308,10 @@ Events include tenant/location, currency, price-book/rule versions, quote/bookin
 7. Quote validity by channel and service type.
 8. Whether manager overrides may reduce required holiday deposits.
 
+## Implemented foundation
+
+The first E06 implementation is provided by `20260718000300_pricing_policy_quote_foundation.sql`, `/app/settings/pricing`, and `/app/quotes`. Managers can draft a currency-specific price book with a location policy and agreement, add rates for exact published service versions, and publish the commercial bundle. Staff can calculate immutable itemized quote snapshots with integer-minor-unit subtotal, deterministic tax rounding, deposit due, remaining balance, expiration, and rule trace. Agreement acceptance records actor, policy version, quote scope, time, and structured evidence. Seasonal precedence, discounts/coupons, modifications, cancellation outcome calculation, and policy revision workflows remain subsequent E06 expansion work.
+
 ## Dependencies
 
 - Business Configuration for locations, currency, and policy setup
