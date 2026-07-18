@@ -328,3 +328,7 @@ Events include `business_id`, affected locations, service and version identifier
 - Operations for task generation and execution
 - Website and Content for customer presentation
 - Reporting for service/version performance
+
+## Implemented foundation
+
+The initial E05 slice is implemented by `20260717002200_service_catalog_foundation.sql` and the staff route at `/app/settings/services`. It provides stable tenant-owned services, immutable published versions, explicit scheduling and confirmation semantics, location/channel enablement, dedicated view/manage permissions, audited lifecycle actions, and tenant-isolation coverage in `022_service_catalog_foundation.test.sql`. Pricing, requirements, booking questions, resource declarations, and availability remain deliberately outside this slice and will attach to the published version identity in later E05 milestones.
