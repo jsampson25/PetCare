@@ -29,3 +29,5 @@ Medication-plan tests cover required as-needed indications, explicit dose retent
 Feeding-plan tests cover separate-feeding reasons, structured meal count, one-active-plan enforcement, history-preserving discontinuation, and tenant denial.
 
 Behavior-handling tests verify critical risk structure, required resolution context, retained history, and denial for an unrelated identity.
+
+Health-condition tests verify critical-condition emergency instructions, structured severity, required resolution context, retained history, and denial for an unrelated identity.

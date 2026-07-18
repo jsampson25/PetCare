@@ -29,3 +29,5 @@ Pet medication plans capture name, explicit dose, administration route, schedule
 Pet feeding plans capture food source and product, explicit meal amount and count, schedule, preparation, supplements, information source, and separate-feeding safety. Only one plan may be active per pet; replacement plans require history-preserving discontinuation of the prior plan.
 
 Pet behavior records capture structured risk type and severity, incident or observation context, triggers, preferred and prohibited handling, calming strategies, group-play guidance, observation date, and source. Records are resolved with required context rather than deleted.
+
+Pet health conditions capture structured category, severity, diagnosis date, care impact, emergency instructions, and information source. Severe and critical conditions require emergency instructions, remain visually prominent, and are resolved with preserved history and a required reason rather than deleted.

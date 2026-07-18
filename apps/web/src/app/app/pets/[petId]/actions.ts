@@ -356,3 +356,80 @@ export async function resolvePetBehaviorRecord(formData: FormData) {
     `/app/pets/${parsed.data.petId}?notice=Behavior+record+resolved+with+history+preserved.`,
   );
 }
+
+const healthConditionSchema = z.object({
+  careImpact: z.string().trim().min(1).max(1000),
+  category: z.enum([
+    'cardiac',
+    'respiratory',
+    'neurological',
+    'seizure',
+    'mobility',
+    'sensory',
+    'digestive',
+    'endocrine',
+    'skin_coat',
+    'immune',
+    'post_surgical',
+    'other',
+  ]),
+  conditionName: z.string().trim().min(1).max(200),
+  diagnosedOn: z.union([z.literal(''), z.string().date()]),
+  emergencyInstructions: z.string().trim().max(1000),
+  informationSource: z.enum(['customer_reported', 'staff_observed', 'veterinary_documented']),
+  petId: z.uuid(),
+  severity: z.enum(['mild', 'moderate', 'severe', 'critical']),
+});
+
+export async function addPetHealthCondition(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = healthConditionSchema.safeParse(Object.fromEntries(formData));
+  const today = new Date().toISOString().slice(0, 10);
+  if (
+    !parsed.success ||
+    (parsed.data.diagnosedOn && parsed.data.diagnosedOn > today) ||
+    (['severe', 'critical'].includes(parsed.data.severity) && !parsed.data.emergencyInstructions)
+  ) {
+    redirect('/app/customers?error=Check+the+health+condition+details.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_pet_health_condition', {
+    care_impact_text: parsed.data.careImpact,
+    condition_category: parsed.data.category,
+    condition_severity: parsed.data.severity,
+    diagnosis_date: parsed.data.diagnosedOn || null,
+    emergency_instruction_text: parsed.data.emergencyInstructions,
+    health_condition_name: parsed.data.conditionName,
+    source_type: parsed.data.informationSource,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+  });
+  if (error)
+    redirect(`/app/pets/${parsed.data.petId}?error=The+health+condition+could+not+be+saved.`);
+  redirect(`/app/pets/${parsed.data.petId}?notice=Health+condition+added.`);
+}
+
+const resolveHealthSchema = z.object({
+  healthConditionId: z.uuid(),
+  petId: z.uuid(),
+  reason: z.string().trim().min(1).max(1000),
+});
+
+export async function resolvePetHealthCondition(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = resolveHealthSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/customers?error=A+resolution+reason+is+required.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('resolve_pet_health_condition', {
+    health_condition_id: parsed.data.healthConditionId,
+    reason: parsed.data.reason,
+    target_business_id: context.businessId,
+  });
+  if (error)
+    redirect(`/app/pets/${parsed.data.petId}?error=The+health+condition+could+not+be+resolved.`);
+  redirect(
+    `/app/pets/${parsed.data.petId}?notice=Health+condition+resolved+with+history+preserved.`,
+  );
+}

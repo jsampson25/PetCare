@@ -305,6 +305,8 @@ The feeding-plan slice adds food source and product, amount per meal, meal count
 
 The behavior-and-handling slice adds structured aggression, bite, escape, anxiety, guarding, interaction, restraint, and barrier risks. Each record preserves context, severity, observation date, source, triggers, preferred handling, prohibited approaches, calming strategies, and group-play guidance. High and critical risks are visually prominent, while resolution preserves the original report and a required reason. Formal service evaluations, other health conditions, identifiers, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
 
+The health-condition slice adds structured medical category, severity, diagnosis date, care impact, emergency instructions, and information provenance. Severe and critical conditions cannot be recorded without emergency instructions and remain prominent for staff until resolved. Resolution preserves the original condition and requires historical context. Formal service evaluations, identifiers, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
+
 ## Domain events
 
 - `pet.created`

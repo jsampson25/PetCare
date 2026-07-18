@@ -12,10 +12,12 @@ import {
   addPetAllergy,
   addPetBehaviorRecord,
   addPetFeedingPlan,
+  addPetHealthCondition,
   addPetMedicationPlan,
   discontinuePetFeedingPlan,
   discontinuePetMedicationPlan,
   resolvePetBehaviorRecord,
+  resolvePetHealthCondition,
   resolvePetAllergy,
   reviewPetVaccination,
   submitPetVaccination,
@@ -83,6 +85,14 @@ export default async function PetVaccinationsPage({
     .eq('business_id', context.businessId)
     .eq('pet_id', petId)
     .order('created_at', { ascending: false });
+  const { data: healthConditions } = await supabase
+    .from('pet_health_conditions')
+    .select(
+      'id,condition_name,category,severity,diagnosed_on,care_impact,emergency_instructions,information_source,status,resolved_reason,created_at',
+    )
+    .eq('business_id', context.businessId)
+    .eq('pet_id', petId)
+    .order('created_at', { ascending: false });
   const evidenceLinks = new Map<string, string>();
   await Promise.all(
     (vaccinations ?? []).map(async (record) => {
@@ -120,6 +130,121 @@ export default async function PetVaccinationsPage({
         <Alert title="Vaccination updated" tone="success">
           {notice}
         </Alert>
+      ) : null}
+      <Card
+        title={`Health conditions (${healthConditions?.filter((condition) => condition.status === 'active').length ?? 0} active)`}
+        description="Severe and critical medical conditions require emergency instructions and remain prominent for care staff."
+      >
+        {healthConditions?.length ? (
+          <ul className="space-y-4">
+            {healthConditions.map((condition) => (
+              <li
+                className="rounded-[var(--radius-md)] border border-[var(--border-default)] p-4"
+                key={condition.id}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-bold">{condition.condition_name}</p>
+                    <p className="text-sm capitalize text-[var(--text-secondary)]">
+                      {condition.category.replaceAll('_', ' ')} ·{' '}
+                      {condition.information_source.replaceAll('_', ' ')}
+                      {condition.diagnosed_on ? ` · ${formatDate(condition.diagnosed_on)}` : ''}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge tone={healthTone(condition.severity)}>{condition.severity}</Badge>
+                    <Badge tone={condition.status === 'active' ? 'warning' : 'neutral'}>
+                      {condition.status}
+                    </Badge>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm">
+                  <strong>Care impact:</strong> {condition.care_impact}
+                </p>
+                {condition.emergency_instructions ? (
+                  <div className="mt-3">
+                    <Alert title="Emergency instructions" tone="danger">
+                      {condition.emergency_instructions}
+                    </Alert>
+                  </div>
+                ) : null}
+                {condition.resolved_reason ? (
+                  <p className="mt-2 text-sm">
+                    <strong>Resolution:</strong> {condition.resolved_reason}
+                  </p>
+                ) : null}
+                {canManage && condition.status === 'active' ? (
+                  <form
+                    action={resolvePetHealthCondition}
+                    className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end"
+                  >
+                    <input name="healthConditionId" type="hidden" value={condition.id} />
+                    <input name="petId" type="hidden" value={pet.id} />
+                    <Field label="Resolution reason" name="reason" required />
+                    <Button type="submit" variant="secondary">
+                      Resolve condition
+                    </Button>
+                  </form>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">
+            No health conditions have been added.
+          </p>
+        )}
+      </Card>
+      {canManage ? (
+        <Card
+          title="Add health condition"
+          description="Describe how the condition changes daily care. Severe or critical conditions require emergency instructions."
+        >
+          <form action={addPetHealthCondition} className="grid gap-5 sm:grid-cols-2">
+            <input name="petId" type="hidden" value={pet.id} />
+            <Field label="Condition or diagnosis" name="conditionName" required />
+            <HealthSelect
+              label="Category"
+              name="category"
+              options={[
+                'cardiac',
+                'respiratory',
+                'neurological',
+                'seizure',
+                'mobility',
+                'sensory',
+                'digestive',
+                'endocrine',
+                'skin_coat',
+                'immune',
+                'post_surgical',
+                'other',
+              ]}
+            />
+            <HealthSelect
+              label="Severity"
+              name="severity"
+              options={['mild', 'moderate', 'severe', 'critical']}
+            />
+            <Field
+              label="Diagnosis date (optional)"
+              max={new Date().toISOString().slice(0, 10)}
+              name="diagnosedOn"
+              type="date"
+            />
+            <HealthSelect
+              label="Information source"
+              name="informationSource"
+              options={['customer_reported', 'staff_observed', 'veterinary_documented']}
+            />
+            <div />
+            <TextArea label="Daily care impact" name="careImpact" required />
+            <TextArea label="Emergency instructions" name="emergencyInstructions" />
+            <div className="sm:col-span-2">
+              <Button type="submit">Add health condition</Button>
+            </div>
+          </form>
+        </Card>
       ) : null}
       <Card
         title={`Behavior and handling (${behaviorRecords?.filter((record) => record.status === 'active').length ?? 0} active)`}
@@ -872,4 +997,39 @@ function behaviorTone(severity: string): 'danger' | 'info' | 'neutral' | 'warnin
   if (severity === 'critical' || severity === 'high') return 'danger';
   if (severity === 'caution') return 'warning';
   return 'info';
+}
+
+function HealthSelect({
+  label,
+  name,
+  options,
+}: {
+  label: string;
+  name: string;
+  options: string[];
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-bold" htmlFor={name}>
+        {label}
+      </label>
+      <select
+        className="mt-2 min-h-12 w-full rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-[var(--surface-default)] px-3 capitalize"
+        id={name}
+        name={name}
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option.replaceAll('_', ' ')}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function healthTone(severity: string): 'danger' | 'neutral' | 'warning' {
+  if (severity === 'critical' || severity === 'severe') return 'danger';
+  if (severity === 'moderate') return 'warning';
+  return 'neutral';
 }
