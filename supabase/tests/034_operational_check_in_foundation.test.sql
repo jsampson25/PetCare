@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(86);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(90);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -89,4 +89,8 @@ select lives_ok($$select app.transition_service_execution((select business_id fr
 select lives_ok($$select app.transition_service_execution((select business_id from service_executions),(select id from service_executions),'departure_preparation','','execution-departure')$$,'boarding enters departure preparation');
 select lives_ok($$select app.transition_service_execution((select business_id from service_executions),(select id from service_executions),'ready','Final care and belongings review complete.','execution-ready')$$,'documented boarding service becomes ready');
 select is((select stage from service_executions),'ready','service readiness remains distinct from checkout');
+select lives_ok($$select app.create_playgroup_session((select id from businesses where public_slug='checkin-test'),(select id from locations),'Morning Group','mixed',8,4,2,'playgroup-session')$$,'staffed playgroup session opens');
+select is(app.create_playgroup_session((select id from businesses where public_slug='checkin-test'),(select id from locations),'Morning Group','mixed',8,4,2,'playgroup-session'),(select id from playgroup_sessions),'playgroup creation retry is idempotent');
+select is((select least(max_pets,pets_per_staff*staff_count) from playgroup_sessions),8,'effective group capacity respects physical and staff limits');
+select throws_ok($$select app.record_daycare_evaluation((select business_id from service_executions),(select id from service_executions),'approved','{}','Calm handling response.','wrong-service-evaluation')$$,'22023','structured daycare evaluation required','boarding execution cannot receive daycare evaluation');
 select * from finish();rollback;

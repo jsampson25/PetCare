@@ -46,6 +46,9 @@
 - Every transition is permission- and location-scoped, idempotent, and appended to `service_execution_events` plus the shared operational timeline.
 - Hold, ready, and completed transitions require written notes. Grooming cannot become ready without passing through quality review.
 - The staff service-board screen groups active work by category and exposes only valid next stages.
+- Daycare evaluations are immutable decisions with structured restrictions; only approved or restricted pets may enter a playgroup.
+- Active playgroup capacity is the lower of the physical maximum and the configured pets-per-staff ratio multiplied by staff present.
+- Participant rest, return, completion, and safety removal are distinct events. A removed pet cannot return until an owner or manager records clearance.
 
 ## Acceptance scenarios
 

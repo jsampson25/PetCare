@@ -20,6 +20,11 @@ const businessNavigation = [
     label: 'Service boards',
     requiredPermissions: ['operations.execute_service'],
   },
+  {
+    href: '/app/playgroups',
+    label: 'Playgroups',
+    requiredPermissions: ['operations.manage_playgroup'],
+  },
   { href: '/app/invoices', label: 'Invoices', requiredPermissions: ['payments.view'] },
   {
     href: '/app/availability',
