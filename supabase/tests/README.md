@@ -15,3 +15,5 @@ Business-onboarding tests exercise tenant provisioning, profile persistence, a s
 Customer-window tests verify the seven-day arrival/pickup schedule, tenant-authorized saves, and rejection of windows outside regular operating hours.
 
 Location-closure tests verify future-date validation, secure tenant-scoped removal, and persistence of customer communication context.
+
+Customer-household-pet foundation tests verify atomic creation, administrator membership, first-pet linkage, and default-deny reads for an unrelated identity.

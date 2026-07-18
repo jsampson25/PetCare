@@ -275,6 +275,10 @@ stateDiagram-v2
 
 Physical schemas, indexes, and row-level security policies will be defined immediately before implementation.
 
+### Initial E04 implementation
+
+The first vertical slice adds business-scoped customer and household records plus explicit household membership. Authorized staff can create a customer, administrator membership, household, and first dog atomically from `/app/customers`. Customer email is normalized and unique only within a business tenant; RLS and permission-aware functions prevent cross-tenant access. Additional adults, customer self-registration, emergency contacts, consent, and duplicate-review workflows remain later E04 slices.
+
 ## Domain events
 
 - `customer.created`

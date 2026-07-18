@@ -15,3 +15,5 @@ The E03 onboarding foundation adds business/location contact and address data, v
 Customer arrival and pickup windows are stored separately from operating hours. The initial slice configures weekday windows, closes weekends, validates every window against location operating hours, and preserves tenant-scoped audit history.
 
 Dated closures block location availability for a complete local calendar date. Authorized location managers may add, revise, or remove current and future closures with separate internal reasons and optional customer-facing messages.
+
+The first E04 migration introduces business-scoped customers, households, household membership, and pets. An authorized staff workflow creates the first customer, administrator relationship, household, and dog atomically while enforcing normalized tenant-unique email addresses.

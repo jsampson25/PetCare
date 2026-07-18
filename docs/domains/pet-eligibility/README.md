@@ -291,6 +291,10 @@ stateDiagram-v2
 
 Detailed tables, constraints, indexes, and row-level policies will be produced immediately before implementation.
 
+### Initial E04 implementation
+
+The first pet slice creates an explicit dog record linked to a business-scoped household. It captures name, breed or mix, optional birth date with an estimated-date flag, sex, and lifecycle status in the same transaction as the first customer and household. Medical, feeding, medication, behavior, vaccination, documents, identifiers, and eligibility decisions remain subsequent E04 slices.
+
 ## Domain events
 
 - `pet.created`
