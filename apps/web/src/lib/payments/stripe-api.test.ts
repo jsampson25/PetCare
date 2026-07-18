@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createOnboardingLink, stripeRequest, StripeApiError } from './stripe-api';
+import {
+  createOnboardingLink,
+  createPaymentRefund,
+  stripeRequest,
+  StripeApiError,
+} from './stripe-api';
 describe('Stripe API boundary', () => {
   afterEach(() => {
     delete process.env.STRIPE_SECRET_KEY;
@@ -62,5 +67,33 @@ describe('Stripe API boundary', () => {
         type: 'invalid_request_error',
       }),
     );
+  });
+  it('creates a connected-account refund without exposing card data', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
+    const original = global.fetch;
+    global.fetch = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ id: 're_123', status: 'succeeded' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+    );
+    await createPaymentRefund({
+      accountId: 'acct_123',
+      amountMinor: 2500,
+      paymentIntentId: 'pi_123',
+      refundRequestId: '00000000-0000-4000-8000-000000000123',
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://api.stripe.com/v1/refunds',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'Stripe-Account': 'acct_123',
+          'Idempotency-Key': 'refund-00000000-0000-4000-8000-000000000123',
+        }),
+        body: expect.stringContaining('payment_intent=pi_123'),
+      }),
+    );
+    global.fetch = original;
   });
 });

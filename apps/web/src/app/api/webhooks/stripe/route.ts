@@ -50,5 +50,8 @@ export async function POST(request: Request) {
     // The inbox is durable first; posting failure remains retryable and does not reject delivery.
     await supabase.rpc('process_stripe_checkout_event', { target_event_id: eventId });
   }
+  if (parsed.data.type.startsWith('refund.') && typeof eventId === 'string') {
+    await supabase.rpc('process_stripe_refund_event', { target_event_id: eventId });
+  }
   return Response.json({ received: true }, { headers: { 'Cache-Control': 'no-store' } });
 }

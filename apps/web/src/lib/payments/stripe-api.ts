@@ -109,3 +109,22 @@ export async function createInvoiceCheckoutSession(input: {
     },
   );
 }
+
+export async function createPaymentRefund(input: {
+  accountId: string;
+  amountMinor: number;
+  paymentIntentId: string;
+  refundRequestId: string;
+}) {
+  const body = new URLSearchParams({
+    payment_intent: input.paymentIntentId,
+    amount: String(input.amountMinor),
+    'metadata[petcare_refund_request_id]': input.refundRequestId,
+  });
+  return stripeRequest<{ id: string; status: string; failure_reason?: string | null }>('/refunds', {
+    method: 'POST',
+    body,
+    idempotencyKey: `refund-${input.refundRequestId}`,
+    connectedAccount: input.accountId,
+  });
+}

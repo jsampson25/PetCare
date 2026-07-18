@@ -4,7 +4,10 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
-import { createInvoiceCheckoutSession } from '../../../lib/payments/stripe-api';
+import {
+  createInvoiceCheckoutSession,
+  createPaymentRefund,
+} from '../../../lib/payments/stripe-api';
 import { createSupabaseAdminClient } from '../../../lib/supabase/admin';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
 
@@ -95,5 +98,82 @@ export async function startOnlinePayment(formData: FormData) {
   } catch (error) {
     if ((error as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw error;
     redirect(`/app/invoices/${invoice.id}?error=Stripe+checkout+could+not+be+started.`);
+  }
+}
+
+const refundSchema = z.object({
+  amount: z.coerce.number().positive().multipleOf(0.01).max(1_000_000),
+  confirmed: z.literal('true'),
+  invoiceId: z.uuid(),
+  paymentId: z.uuid(),
+  requestKey: z.uuid(),
+  reason: z.string().trim().min(5).max(500),
+});
+
+export async function issueRefund(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('payments.refund')) redirect('/denied');
+  const parsed = refundSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/invoices?error=Check+the+refund+details.');
+  const amountMinor = Math.round(parsed.data.amount * 100);
+  const supabase = await createSupabaseServerClient();
+  const { data: requestId, error } = await supabase.rpc('create_refund_request', {
+    amount_value: amountMinor,
+    reason_value: parsed.data.reason,
+    request_key: `refund-${parsed.data.requestKey}`,
+    target_business_id: context.businessId,
+    target_payment_id: parsed.data.paymentId,
+  });
+  if (error || typeof requestId !== 'string')
+    redirect(`/app/invoices/${parsed.data.invoiceId}?error=Refund+could+not+be+created.`);
+  const { data: payment } = await supabase
+    .from('payments')
+    .select('provider,provider_reference')
+    .eq('business_id', context.businessId)
+    .eq('id', parsed.data.paymentId)
+    .single();
+  const admin = createSupabaseAdminClient();
+  try {
+    if (payment?.provider === 'stripe') {
+      if (!payment.provider_reference) throw new Error('Processor reference unavailable');
+      const { data: merchant } = await supabase
+        .from('merchant_accounts')
+        .select('provider_account_id,status')
+        .eq('business_id', context.businessId)
+        .single();
+      if (!merchant || merchant.status !== 'active') throw new Error('Merchant unavailable');
+      const refund = await createPaymentRefund({
+        accountId: merchant.provider_account_id,
+        amountMinor,
+        paymentIntentId: payment.provider_reference,
+        refundRequestId: requestId,
+      });
+      const result =
+        refund.status === 'succeeded'
+          ? 'succeeded'
+          : refund.status === 'failed'
+            ? 'failed'
+            : 'processing';
+      const { error: finalizeError } = await admin.rpc('finalize_refund_request', {
+        failure_value: refund.failure_reason ?? '',
+        provider_ref: refund.id,
+        result_status: result,
+        target_request_id: requestId,
+      });
+      if (finalizeError || result === 'failed') throw finalizeError ?? new Error('Refund failed');
+      redirect(`/app/invoices/${parsed.data.invoiceId}?notice=Refund+submitted+successfully.`);
+    }
+    if (!payment) throw new Error('Payment unavailable');
+    const { error: finalizeError } = await admin.rpc('finalize_refund_request', {
+      failure_value: '',
+      provider_ref: `manual-${requestId}`,
+      result_status: 'succeeded',
+      target_request_id: requestId,
+    });
+    if (finalizeError) throw finalizeError;
+    redirect(`/app/invoices/${parsed.data.invoiceId}?notice=Manual+refund+recorded.`);
+  } catch (error) {
+    if ((error as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw error;
+    redirect(`/app/invoices/${parsed.data.invoiceId}?error=Refund+could+not+be+completed.`);
   }
 }

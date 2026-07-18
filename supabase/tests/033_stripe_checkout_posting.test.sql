@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(27);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(35);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','81000000-0000-4000-8000-000000000001','authenticated','authenticated','checkout-owner@example.test','',now(),'{}','{"display_name":"Checkout Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"81000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkout-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Checkout Test','checkout-test','Main','main','America/Chicago')$$,'tenant created');
@@ -28,4 +28,14 @@ select is((select status from bookings),'confirmed','paid deposit confirms booki
 select is((select count(*) from receipts),1::bigint,'receipt created');
 select is((select count(*) from transactional_message_outbox where message_type='payment_receipt'),1::bigint,'receipt delivery queued');
 select is((select status from processor_webhook_events),'processed','event closes after posting');
+set local role authenticated;
+select lives_ok($$select app.create_refund_request((select business_id from payments),(select id from payments),4000,'Customer-approved partial cancellation','checkout-refund')$$,'partial refund requested');
+select is(app.create_refund_request((select business_id from payments),(select id from payments),4000,'Customer-approved partial cancellation','checkout-refund'),(select id from refund_requests),'refund request retry is idempotent');
+set local role service_role;
+select lives_ok($$select app.finalize_refund_request((select id from refund_requests),'re_checkout','succeeded','')$$,'refund finalized');
+select is((select count(*) from refunds),1::bigint,'one immutable refund posted');
+select is((select count(*) from invoice_credits),1::bigint,'matching invoice credit posted');
+select is((select paid_minor from invoice_balances),6000::bigint,'refunded amount leaves net payment');
+select is((select count(*) from refund_receipts),1::bigint,'refund receipt created');
+select is((select count(*) from transactional_message_outbox where message_type='refund_issued'),1::bigint,'refund delivery queued once');
 select * from finish();rollback;
