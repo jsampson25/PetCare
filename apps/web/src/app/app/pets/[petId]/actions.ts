@@ -92,3 +92,54 @@ export async function reviewPetVaccination(formData: FormData) {
   if (error) redirect(`/app/pets/${parsed.data.petId}?error=The+review+could+not+be+saved.`);
   redirect(`/app/pets/${parsed.data.petId}?notice=Vaccination+review+saved.`);
 }
+
+const allergySchema = z.object({
+  allergen: z.string().trim().min(1).max(160),
+  careInstructions: z.string().trim().min(1).max(1000),
+  category: z.enum(['food', 'medication', 'environmental', 'contact', 'other']),
+  petId: z.uuid(),
+  reaction: z.string().trim().min(1).max(500),
+  severity: z.enum(['mild', 'moderate', 'severe', 'life_threatening']),
+  source: z.enum(['customer_reported', 'staff_observed', 'veterinary_documented']),
+});
+
+export async function addPetAllergy(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = allergySchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/customers?error=Check+the+allergy+details.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_pet_allergy', {
+    allergen_name: parsed.data.allergen,
+    allergy_category: parsed.data.category,
+    allergy_severity: parsed.data.severity,
+    handling_instructions: parsed.data.careInstructions,
+    reaction_description: parsed.data.reaction,
+    source_type: parsed.data.source,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+  });
+  if (error) redirect(`/app/pets/${parsed.data.petId}?error=The+allergy+could+not+be+saved.`);
+  redirect(`/app/pets/${parsed.data.petId}?notice=Allergy+safety+record+added.`);
+}
+
+const resolutionSchema = z.object({
+  allergyId: z.uuid(),
+  petId: z.uuid(),
+  resolutionReason: z.string().trim().min(1).max(1000),
+});
+
+export async function resolvePetAllergy(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = resolutionSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/customers?error=A+resolution+reason+is+required.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('resolve_pet_allergy', {
+    allergy_id: parsed.data.allergyId,
+    resolution_reason: parsed.data.resolutionReason,
+    target_business_id: context.businessId,
+  });
+  if (error) redirect(`/app/pets/${parsed.data.petId}?error=The+allergy+could+not+be+resolved.`);
+  redirect(`/app/pets/${parsed.data.petId}?notice=Allergy+record+resolved+with+history+preserved.`);
+}

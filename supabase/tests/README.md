@@ -21,3 +21,5 @@ Customer-household-pet foundation tests verify atomic creation, administrator me
 Additional-household-pet tests verify that authorized staff can add another dog to the resolved household while unrelated identities are denied.
 
 Vaccination-evidence tests cover structured submission, pending review, mandatory rejection reasons, acceptance, and tenant denial. Storage-provider and malware-scanner integration require environment-level tests in addition to pgTAP.
+
+Allergy-safety tests verify structured severity, mandatory resolution context, history-preserving resolution, and denial for an unrelated identity.

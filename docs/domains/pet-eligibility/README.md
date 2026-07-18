@@ -297,6 +297,8 @@ The first pet slice creates an explicit dog record linked to a business-scoped h
 
 The vaccination slice adds structured vaccine type, administration and expiration dates, provider, private evidence metadata, scan state, and staff review. Authorized staff can submit PDF/JPG/PNG evidence from the pet page, open it through a five-minute signed URL, and accept or reject it with rejection reasons preserved. Uploads begin in `pending` scan state; a production malware-scanning integration must promote clean files or block unsafe files before customer launch. Medical, feeding, medication, behavior, identifiers, automated vaccine compliance, and broader eligibility decisions remain subsequent E04 slices.
 
+The allergy-safety slice adds structured allergen category, severity, reaction, exact care instructions, and information provenance to the same pet care profile. Active records are visually prioritized; staff resolve rather than delete them, with actor, time, and required reason retained. Other health conditions, feeding, medication, behavior, identifiers, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
+
 ## Domain events
 
 - `pet.created`

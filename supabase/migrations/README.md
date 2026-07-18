@@ -21,3 +21,5 @@ The first E04 migration introduces business-scoped customers, households, househ
 The next E04 slice adds a permission-aware function for adding another dog to an existing active customer household. It derives the household from the tenant-scoped customer relationship rather than trusting a client-supplied household identifier.
 
 Vaccination evidence uses structured pet vaccination records and a private `pet-vaccine-evidence` bucket. PDFs and JPG/PNG images are limited to 10 MB, stored under tenant and pet path prefixes, and begin in pending scan and review states. Authorized staff may accept or reject pending evidence; rejected evidence requires a reason.
+
+Structured pet allergy records capture category, severity, reaction, care instructions, and information source. Records are resolved rather than deleted so safety history and the resolution reason remain available for audit and future visit review.
