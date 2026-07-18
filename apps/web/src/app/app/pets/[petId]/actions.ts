@@ -212,3 +212,70 @@ export async function discontinuePetMedicationPlan(formData: FormData) {
     `/app/pets/${parsed.data.petId}?notice=Medication+plan+discontinued+with+history+preserved.`,
   );
 }
+
+const feedingSchema = z.object({
+  amountPerMeal: z.string().trim().min(1).max(120),
+  feedSeparately: z.string().optional(),
+  foodName: z.string().trim().min(1).max(200),
+  foodSource: z.enum(['customer_provided', 'business_provided']),
+  informationSource: z.enum(['customer_reported', 'staff_confirmed', 'veterinary_documented']),
+  mealsPerDay: z.coerce.number().int().min(1).max(8),
+  petId: z.uuid(),
+  preparationInstructions: z.string().trim().min(1).max(1000),
+  scheduleDescription: z.string().trim().min(1).max(500),
+  separateFeedingReason: z.string().trim().max(500),
+  supplementInstructions: z.string().trim().max(1000),
+});
+
+export async function addPetFeedingPlan(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = feedingSchema.safeParse(Object.fromEntries(formData));
+  if (
+    !parsed.success ||
+    (parsed.data.feedSeparately === 'on' && !parsed.data.separateFeedingReason)
+  ) {
+    redirect('/app/customers?error=Check+the+feeding+plan+details.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_pet_feeding_plan', {
+    daily_meal_count: parsed.data.mealsPerDay,
+    food_product: parsed.data.foodName,
+    information_source_type: parsed.data.informationSource,
+    meal_amount: parsed.data.amountPerMeal,
+    preparation_text: parsed.data.preparationInstructions,
+    requires_separate_feeding: parsed.data.feedSeparately === 'on',
+    schedule_text: parsed.data.scheduleDescription,
+    separation_reason: parsed.data.separateFeedingReason,
+    source_type: parsed.data.foodSource,
+    supplement_text: parsed.data.supplementInstructions,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+  });
+  if (error) redirect(`/app/pets/${parsed.data.petId}?error=The+feeding+plan+could+not+be+saved.`);
+  redirect(`/app/pets/${parsed.data.petId}?notice=Feeding+plan+added.`);
+}
+
+const discontinueFeedingSchema = z.object({
+  feedingPlanId: z.uuid(),
+  petId: z.uuid(),
+  reason: z.string().trim().min(1).max(1000),
+});
+
+export async function discontinuePetFeedingPlan(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = discontinueFeedingSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/customers?error=A+discontinuation+reason+is+required.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('discontinue_pet_feeding_plan', {
+    feeding_plan_id: parsed.data.feedingPlanId,
+    reason: parsed.data.reason,
+    target_business_id: context.businessId,
+  });
+  if (error)
+    redirect(`/app/pets/${parsed.data.petId}?error=The+feeding+plan+could+not+be+discontinued.`);
+  redirect(
+    `/app/pets/${parsed.data.petId}?notice=Feeding+plan+discontinued+with+history+preserved.`,
+  );
+}

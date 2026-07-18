@@ -10,7 +10,9 @@ import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
 import {
   addPetAllergy,
+  addPetFeedingPlan,
   addPetMedicationPlan,
+  discontinuePetFeedingPlan,
   discontinuePetMedicationPlan,
   resolvePetAllergy,
   reviewPetVaccination,
@@ -63,6 +65,14 @@ export default async function PetVaccinationsPage({
     .eq('business_id', context.businessId)
     .eq('pet_id', petId)
     .order('created_at', { ascending: false });
+  const { data: feedingPlans } = await supabase
+    .from('pet_feeding_plans')
+    .select(
+      'id,food_name,food_source,amount_per_meal,meals_per_day,schedule_description,preparation_instructions,supplement_instructions,feed_separately,separate_feeding_reason,information_source,status,discontinued_reason,created_at',
+    )
+    .eq('business_id', context.businessId)
+    .eq('pet_id', petId)
+    .order('created_at', { ascending: false });
   const evidenceLinks = new Map<string, string>();
   await Promise.all(
     (vaccinations ?? []).map(async (record) => {
@@ -100,6 +110,121 @@ export default async function PetVaccinationsPage({
         <Alert title="Vaccination updated" tone="success">
           {notice}
         </Alert>
+      ) : null}
+      <Card
+        title="Feeding plan"
+        description="Only one plan is active at a time so staff have one authoritative source for meal-task generation."
+      >
+        {feedingPlans?.length ? (
+          <ul className="space-y-4">
+            {feedingPlans.map((plan) => (
+              <li
+                className="rounded-[var(--radius-md)] border border-[var(--border-default)] p-4"
+                key={plan.id}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-bold">{plan.food_name}</p>
+                    <p className="text-sm capitalize text-[var(--text-secondary)]">
+                      {plan.food_source.replaceAll('_', ' ')} ·{' '}
+                      {plan.information_source.replaceAll('_', ' ')}
+                    </p>
+                  </div>
+                  <Badge tone={plan.status === 'active' ? 'success' : 'neutral'}>
+                    {plan.status}
+                  </Badge>
+                </div>
+                <p className="mt-3 text-sm">
+                  <strong>Amount:</strong> {plan.amount_per_meal}, {plan.meals_per_day} meal
+                  {plan.meals_per_day === 1 ? '' : 's'} daily
+                </p>
+                <p className="mt-2 text-sm">
+                  <strong>Schedule:</strong> {plan.schedule_description}
+                </p>
+                <p className="mt-2 text-sm">
+                  <strong>Preparation:</strong> {plan.preparation_instructions}
+                </p>
+                {plan.supplement_instructions ? (
+                  <p className="mt-2 text-sm">
+                    <strong>Supplements:</strong> {plan.supplement_instructions}
+                  </p>
+                ) : null}
+                {plan.feed_separately ? (
+                  <Alert title="Feed separately" tone="warning">
+                    {plan.separate_feeding_reason}
+                  </Alert>
+                ) : null}
+                {plan.discontinued_reason ? (
+                  <p className="mt-2 text-sm">
+                    <strong>Discontinued:</strong> {plan.discontinued_reason}
+                  </p>
+                ) : null}
+                {canManage && plan.status === 'active' ? (
+                  <form
+                    action={discontinuePetFeedingPlan}
+                    className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end"
+                  >
+                    <input name="feedingPlanId" type="hidden" value={plan.id} />
+                    <input name="petId" type="hidden" value={pet.id} />
+                    <Field label="Discontinuation reason" name="reason" required />
+                    <Button type="submit" variant="secondary">
+                      Discontinue plan
+                    </Button>
+                  </form>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">No feeding plan has been added.</p>
+        )}
+      </Card>
+      {canManage && !feedingPlans?.some((plan) => plan.status === 'active') ? (
+        <Card
+          title="Add feeding plan"
+          description="Use explicit amounts and timing. Avoid vague instructions such as feed normally."
+        >
+          <form action={addPetFeedingPlan} className="grid gap-5 sm:grid-cols-2">
+            <input name="petId" type="hidden" value={pet.id} />
+            <Field label="Food brand and product" name="foodName" required />
+            <FeedingSelect
+              label="Food source"
+              name="foodSource"
+              options={['customer_provided', 'business_provided']}
+            />
+            <Field label="Amount per meal (include unit)" name="amountPerMeal" required />
+            <Field
+              label="Meals per day"
+              max={8}
+              min={1}
+              name="mealsPerDay"
+              required
+              type="number"
+            />
+            <TextArea label="Meal schedule or timing" name="scheduleDescription" required />
+            <TextArea label="Preparation instructions" name="preparationInstructions" required />
+            <TextArea label="Supplement instructions (optional)" name="supplementInstructions" />
+            <FeedingSelect
+              label="Information source"
+              name="informationSource"
+              options={['customer_reported', 'staff_confirmed', 'veterinary_documented']}
+            />
+            <label className="flex min-h-12 items-center gap-3 text-sm font-bold sm:col-span-2">
+              <input className="size-5" name="feedSeparately" type="checkbox" />
+              Feed separately from other pets
+            </label>
+            <div className="sm:col-span-2">
+              <Field
+                hint="Required when separate feeding is selected."
+                label="Separate-feeding reason"
+                name="separateFeedingReason"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Button type="submit">Add feeding plan</Button>
+            </div>
+          </form>
+        </Card>
       ) : null}
       <Card
         title={`Medication plans (${medications?.filter((plan) => plan.status === 'active').length ?? 0} active)`}
@@ -513,6 +638,35 @@ function TextArea({ label, name, required }: { label: string; name: string; requ
 }
 
 function MedicationSelect({
+  label,
+  name,
+  options,
+}: {
+  label: string;
+  name: string;
+  options: string[];
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-bold" htmlFor={name}>
+        {label}
+      </label>
+      <select
+        className="mt-2 min-h-12 w-full rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-[var(--surface-default)] px-3 capitalize"
+        id={name}
+        name={name}
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option.replaceAll('_', ' ')}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function FeedingSelect({
   label,
   name,
   options,

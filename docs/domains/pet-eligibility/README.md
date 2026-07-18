@@ -301,6 +301,8 @@ The allergy-safety slice adds structured allergen category, severity, reaction, 
 
 The medication-plan slice adds medication name, explicit dose and route, schedule, administration instructions, optional effective dates, as-needed indication, and information provenance. Plans are discontinued with preserved reason and history instead of being deleted. These profile plans are inputs to later check-in snapshots and operational medication tasks; they are not administration records. Other health conditions, feeding, behavior, identifiers, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
 
+The feeding-plan slice adds food source and product, amount per meal, meal count, schedule, preparation, supplements, separate-feeding controls, and information provenance. A pet has only one active plan; replacement requires discontinuing the prior plan with an auditable reason. These profile plans feed later check-in snapshots and operational meal tasks; they are not meal-completion records. Other health conditions, behavior, identifiers, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
+
 ## Domain events
 
 - `pet.created`

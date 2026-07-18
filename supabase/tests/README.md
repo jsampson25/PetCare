@@ -25,3 +25,5 @@ Vaccination-evidence tests cover structured submission, pending review, mandator
 Allergy-safety tests verify structured severity, mandatory resolution context, history-preserving resolution, and denial for an unrelated identity.
 
 Medication-plan tests cover required as-needed indications, explicit dose retention, history-preserving discontinuation, mandatory reasons, and tenant denial.
+
+Feeding-plan tests cover separate-feeding reasons, structured meal count, one-active-plan enforcement, history-preserving discontinuation, and tenant denial.

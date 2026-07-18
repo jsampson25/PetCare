@@ -25,3 +25,5 @@ Vaccination evidence uses structured pet vaccination records and a private `pet-
 Structured pet allergy records capture category, severity, reaction, care instructions, and information source. Records are resolved rather than deleted so safety history and the resolution reason remain available for audit and future visit review.
 
 Pet medication plans capture name, explicit dose, administration route, schedule, instructions, optional effective dates, as-needed indication, and information source. Plans are discontinued through an audited function with a required reason rather than overwritten or deleted.
+
+Pet feeding plans capture food source and product, explicit meal amount and count, schedule, preparation, supplements, information source, and separate-feeding safety. Only one plan may be active per pet; replacement plans require history-preserving discontinuation of the prior plan.
