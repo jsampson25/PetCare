@@ -90,7 +90,7 @@ returns uuid language plpgsql security definer set search_path='' as $$
 declare existing uuid;b public.bookings%rowtype;r public.booking_revisions%rowtype;new_revision uuid;outcome uuid;
 begin
  if not app.member_has_permission(target_business_id,'bookings.cancel') then raise exception 'no-show action unavailable' using errcode='42501';end if;
- select resulting_revision_id into existing from public.booking_changes where business_id=target_business_id and idempotency_key=trim(request_key);if existing is not null then return existing;end if;
+ select to_revision_id into existing from public.booking_changes where business_id=target_business_id and idempotency_key=trim(request_key);if existing is not null then return existing;end if;
  select * into b from public.bookings where business_id=target_business_id and id=target_booking_id for update;
  if b.id is null or b.status<>'confirmed' or not app.member_can_access_location(target_business_id,b.location_id) then raise exception 'confirmed booking unavailable' using errcode='P0002';end if;
  select * into r from public.booking_revisions where business_id=target_business_id and booking_id=b.id and revision_number=b.current_revision_number;
@@ -101,7 +101,7 @@ begin
  update public.bookings set status='no_show',current_revision_number=current_revision_number+1 where id=b.id;
  insert into public.booking_revisions(business_id,booking_id,revision_number,status,quote_id,policy_version_id,change_reason,customer_authority_snapshot,validation_snapshot)
  values(target_business_id,b.id,b.current_revision_number+1,'no_show',r.quote_id,r.policy_version_id,trim(reason_value),r.customer_authority_snapshot,jsonb_build_object('cancellation_outcome_id',outcome,'request_key',trim(request_key))) returning id into new_revision;
- insert into public.booking_changes(business_id,booking_id,change_type,from_revision_id,resulting_revision_id,reason,idempotency_key,details)
+ insert into public.booking_changes(business_id,booking_id,change_type,from_revision_id,to_revision_id,reason,idempotency_key,financial_impact)
  values(target_business_id,b.id,'no_show',r.id,new_revision,trim(reason_value),trim(request_key),jsonb_build_object('cancellation_outcome_id',outcome));
  update public.booking_action_items set status='cancelled' where business_id=target_business_id and booking_id=b.id and status='open';
  insert into public.booking_timeline_events(business_id,booking_id,event_type,customer_visible,summary,details,actor_id) values(target_business_id,b.id,'booking.no_show',true,'Booking marked as a no-show.',jsonb_build_object('reason',trim(reason_value),'cancellation_outcome_id',outcome),auth.uid());
@@ -121,7 +121,7 @@ begin
    update public.bookings set status='expired',current_revision_number=current_revision_number+1 where id=b.id;
    insert into public.booking_revisions(business_id,booking_id,revision_number,status,quote_id,policy_version_id,change_reason,customer_authority_snapshot,validation_snapshot)
    values(target_business_id,b.id,b.current_revision_number+1,'expired',r.quote_id,r.policy_version_id,'Capacity hold expired before confirmation.',r.customer_authority_snapshot,jsonb_build_object('request_key',key_value)) returning id into new_revision;
-   insert into public.booking_changes(business_id,booking_id,change_type,from_revision_id,resulting_revision_id,reason,idempotency_key,details) values(target_business_id,b.id,'request_expiry',r.id,new_revision,'Capacity hold expired before confirmation.',key_value,'{}');
+   insert into public.booking_changes(business_id,booking_id,change_type,from_revision_id,to_revision_id,reason,idempotency_key,financial_impact) values(target_business_id,b.id,'request_expiry',r.id,new_revision,'Capacity hold expired before confirmation.',key_value,'{}');
    update public.booking_action_items set status='expired' where business_id=target_business_id and booking_id=b.id and status='open';
    insert into public.booking_timeline_events(business_id,booking_id,event_type,customer_visible,summary,details,actor_id) values(target_business_id,b.id,'booking.expired',true,'Booking request expired before confirmation.','{}',auth.uid());
    expired_count:=expired_count+1;

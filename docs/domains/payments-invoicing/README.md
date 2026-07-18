@@ -364,3 +364,9 @@ Events include tenant/merchant, currency, amount in minor units, financial and s
 - Communications for invoices, receipts, failures, and refund notices
 - Audit/security capabilities for financial access and history
 - Accounting integration as a post-MVP consumer of balanced exports
+
+## Implementation status
+
+Migration `20260718000800_invoice_manual_payment_foundation.sql` begins E08 with the internal ledger rather than a processor shortcut. Authorized staff can issue one numbered invoice from the current immutable booking revision and quote. Versioned invoice lines retain their source quote lines, while the `invoice_balances` view derives paid, deposit-due, and remaining amounts exclusively from successful immutable allocations. Manual cash, check, and externally verified terminal payments are retry-safe, location-scoped, and require safe references where appropriate; no card credentials enter PetCare. A fully allocated deposit invokes Booking's existing confirmation orchestration, so payment success cannot bypass capacity or booking ownership. Every posted payment creates a receipt and both invoice and receipt events enter a durable transactional-message outbox. The `/app/invoices` ledger and detail views expose itemization, balances, payment history, receipts, and manual collection.
+
+The next E08 slices will add the merchant-account decision and Stripe Connect onboarding, processor-hosted payment methods/intents, signature-verified webhook ingestion, refunds and credits, delivery workers, and reconciliation. The current outbox intentionally records delivery work without pretending an email was sent.

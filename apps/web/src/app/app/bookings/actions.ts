@@ -245,3 +245,19 @@ export async function expireBookingRequests() {
   if (error) redirect('/app/bookings?error=Expired+requests+could+not+be+processed.');
   redirect(`/app/bookings?notice=${data ?? 0}+expired+request(s)+processed.`);
 }
+
+export async function issueBookingInvoice(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('payments.collect')) redirect('/denied');
+  const bookingId = z.uuid().safeParse(formData.get('bookingId'));
+  if (!bookingId.success) redirect('/app/bookings?error=Invoice+creation+failed.');
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc('issue_booking_invoice', {
+    request_key: `booking-invoice-${bookingId.data}`,
+    target_booking_id: bookingId.data,
+    target_business_id: context.businessId,
+  });
+  if (error || typeof data !== 'string')
+    redirect(`/app/bookings/${bookingId.data}?error=Invoice+could+not+be+issued.`);
+  redirect(`/app/invoices/${data}?notice=Invoice+issued.`);
+}

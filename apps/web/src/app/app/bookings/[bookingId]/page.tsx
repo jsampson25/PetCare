@@ -9,6 +9,7 @@ import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
 import {
   cancelBooking,
+  issueBookingInvoice,
   markBookingNoShow,
   rescheduleBooking,
   resolveBookingReview,
@@ -221,6 +222,19 @@ export default async function BookingDetailPage({
           ) : null}
         </Card>
       </section>
+      {context.permissions.has('payments.collect') ? (
+        <Card
+          title="Invoice"
+          description="Issue one immutable invoice from the current accepted booking quote."
+        >
+          <form action={issueBookingInvoice}>
+            <input name="bookingId" type="hidden" value={booking.id} />
+            <Button type="submit" variant="secondary">
+              Open or issue invoice
+            </Button>
+          </form>
+        </Card>
+      ) : null}
       <Card
         title="Validation"
         description="Each prerequisite is recorded against the immutable booking revision."

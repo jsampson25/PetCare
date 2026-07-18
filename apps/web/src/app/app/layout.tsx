@@ -8,6 +8,7 @@ const businessNavigation = [
   { href: '/app', label: 'Today' },
   { href: '/app/bookings', label: 'Bookings', requiredPermissions: ['bookings.view'] },
   { href: '/app/calendar', label: 'Calendar', requiredPermissions: ['bookings.view'] },
+  { href: '/app/invoices', label: 'Invoices', requiredPermissions: ['payments.view'] },
   {
     href: '/app/availability',
     label: 'Availability',
