@@ -17,3 +17,5 @@ Customer arrival and pickup windows are stored separately from operating hours. 
 Dated closures block location availability for a complete local calendar date. Authorized location managers may add, revise, or remove current and future closures with separate internal reasons and optional customer-facing messages.
 
 The first E04 migration introduces business-scoped customers, households, household membership, and pets. An authorized staff workflow creates the first customer, administrator relationship, household, and dog atomically while enforcing normalized tenant-unique email addresses.
+
+The next E04 slice adds a permission-aware function for adding another dog to an existing active customer household. It derives the household from the tenant-scoped customer relationship rather than trusting a client-supplied household identifier.

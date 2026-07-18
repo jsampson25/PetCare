@@ -1,5 +1,6 @@
 import { Alert } from '@petcare/ui/alert';
 import { Button } from '@petcare/ui/button';
+import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { Field } from '@petcare/ui/field';
 import { redirect } from 'next/navigation';
@@ -93,7 +94,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
           <ul className="divide-y divide-[var(--border-default)]">
             {customers.map((customer) => (
               <li
-                className="grid gap-1 py-4 sm:grid-cols-[1fr_1fr_auto] sm:items-center sm:gap-5"
+                className="grid gap-3 py-4 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-center sm:gap-5"
                 key={customer.id}
               >
                 <div>
@@ -111,6 +112,9 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
                   <p>{customer.phone}</p>
                 </div>
                 <span className="text-sm font-semibold capitalize">{customer.status}</span>
+                <ButtonLink href={`/app/customers/${customer.id}`} variant="secondary">
+                  View household
+                </ButtonLink>
               </li>
             ))}
           </ul>
