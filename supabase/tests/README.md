@@ -31,3 +31,5 @@ Feeding-plan tests cover separate-feeding reasons, structured meal count, one-ac
 Behavior-handling tests verify critical risk structure, required resolution context, retained history, and denial for an unrelated identity.
 
 Health-condition tests verify critical-condition emergency instructions, structured severity, required resolution context, retained history, and denial for an unrelated identity.
+
+Pet-identifier tests verify searchable normalization, formatting-insensitive duplicate prevention, history-preserving retirement, and denial for an unrelated identity.

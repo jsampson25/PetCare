@@ -307,6 +307,8 @@ The behavior-and-handling slice adds structured aggression, bite, escape, anxiet
 
 The health-condition slice adds structured medical category, severity, diagnosis date, care impact, emergency instructions, and information provenance. Severe and critical conditions cannot be recorded without emergency instructions and remain prominent for staff until resolved. Resolution preserves the original condition and requires historical context. Formal service evaluations, identifiers, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
 
+The pet-identifier slice adds microchip, license, registration, and other durable identifiers with issuer and effective-date metadata. Values are normalized for tenant-scoped, formatting-insensitive duplicate prevention while preserving the exact display value. Retirement retains the original identifier and requires a reason. Pet photo, formal service evaluations, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
+
 ## Domain events
 
 - `pet.created`

@@ -31,3 +31,5 @@ Pet feeding plans capture food source and product, explicit meal amount and coun
 Pet behavior records capture structured risk type and severity, incident or observation context, triggers, preferred and prohibited handling, calming strategies, group-play guidance, observation date, and source. Records are resolved with required context rather than deleted.
 
 Pet health conditions capture structured category, severity, diagnosis date, care impact, emergency instructions, and information source. Severe and critical conditions require emergency instructions, remain visually prominent, and are resolved with preserved history and a required reason rather than deleted.
+
+Pet identifiers capture microchips, licenses, registrations, and other durable identity values with issuer, issue date, and expiration date. Active values are normalized for tenant-scoped duplicate prevention and are retired with a required reason rather than deleted.

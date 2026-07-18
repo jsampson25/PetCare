@@ -433,3 +433,63 @@ export async function resolvePetHealthCondition(formData: FormData) {
     `/app/pets/${parsed.data.petId}?notice=Health+condition+resolved+with+history+preserved.`,
   );
 }
+
+const petIdentifierSchema = z.object({
+  expiresOn: z.union([z.literal(''), z.string().date()]),
+  identifierType: z.enum(['microchip', 'license', 'registration', 'other']),
+  identifierValue: z.string().trim().min(1).max(200),
+  issuedOn: z.union([z.literal(''), z.string().date()]),
+  issuer: z.string().trim().max(200),
+  petId: z.uuid(),
+});
+
+export async function addPetIdentifier(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = petIdentifierSchema.safeParse(Object.fromEntries(formData));
+  const today = new Date().toISOString().slice(0, 10);
+  if (
+    !parsed.success ||
+    !/[a-z0-9]/i.test(parsed.data.identifierValue) ||
+    (parsed.data.issuedOn && parsed.data.issuedOn > today) ||
+    (parsed.data.expiresOn && parsed.data.issuedOn && parsed.data.expiresOn < parsed.data.issuedOn)
+  ) {
+    redirect('/app/customers?error=Check+the+pet+identifier+details.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_pet_identifier', {
+    expiration_date: parsed.data.expiresOn || null,
+    identifier_kind: parsed.data.identifierType,
+    identifier_text: parsed.data.identifierValue,
+    issue_date: parsed.data.issuedOn || null,
+    issuer_name: parsed.data.issuer,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+  });
+  if (error)
+    redirect(
+      `/app/pets/${parsed.data.petId}?error=The+identifier+could+not+be+saved.+Check+for+a+duplicate.`,
+    );
+  redirect(`/app/pets/${parsed.data.petId}?notice=Pet+identifier+added.`);
+}
+
+const retireIdentifierSchema = z.object({
+  petId: z.uuid(),
+  petIdentifierId: z.uuid(),
+  reason: z.string().trim().min(1).max(1000),
+});
+
+export async function retirePetIdentifier(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = retireIdentifierSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/customers?error=A+retirement+reason+is+required.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('retire_pet_identifier', {
+    pet_identifier_id: parsed.data.petIdentifierId,
+    reason: parsed.data.reason,
+    target_business_id: context.businessId,
+  });
+  if (error) redirect(`/app/pets/${parsed.data.petId}?error=The+identifier+could+not+be+retired.`);
+  redirect(`/app/pets/${parsed.data.petId}?notice=Pet+identifier+retired+with+history+preserved.`);
+}

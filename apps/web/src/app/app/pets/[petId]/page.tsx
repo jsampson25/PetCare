@@ -13,12 +13,14 @@ import {
   addPetBehaviorRecord,
   addPetFeedingPlan,
   addPetHealthCondition,
+  addPetIdentifier,
   addPetMedicationPlan,
   discontinuePetFeedingPlan,
   discontinuePetMedicationPlan,
   resolvePetBehaviorRecord,
   resolvePetHealthCondition,
   resolvePetAllergy,
+  retirePetIdentifier,
   reviewPetVaccination,
   submitPetVaccination,
 } from './actions';
@@ -93,6 +95,14 @@ export default async function PetVaccinationsPage({
     .eq('business_id', context.businessId)
     .eq('pet_id', petId)
     .order('created_at', { ascending: false });
+  const { data: identifiers } = await supabase
+    .from('pet_identifiers')
+    .select(
+      'id,identifier_type,identifier_value,issuer,issued_on,expires_on,status,retired_reason,created_at',
+    )
+    .eq('business_id', context.businessId)
+    .eq('pet_id', petId)
+    .order('created_at', { ascending: false });
   const evidenceLinks = new Map<string, string>();
   await Promise.all(
     (vaccinations ?? []).map(async (record) => {
@@ -122,14 +132,99 @@ export default async function PetVaccinationsPage({
         </div>
       </header>
       {error ? (
-        <Alert title="Vaccination not updated" tone="danger">
+        <Alert title="Pet profile not updated" tone="danger">
           {error}
         </Alert>
       ) : null}
       {notice ? (
-        <Alert title="Vaccination updated" tone="success">
+        <Alert title="Pet profile updated" tone="success">
           {notice}
         </Alert>
+      ) : null}
+      <Card
+        title={`Identifiers (${identifiers?.filter((identifier) => identifier.status === 'active').length ?? 0} active)`}
+        description="Microchips, licenses, and registrations provide durable identity beyond name or photo. Formatting is normalized to prevent duplicate assignments."
+      >
+        {identifiers?.length ? (
+          <ul className="space-y-4">
+            {identifiers.map((identifier) => (
+              <li
+                className="rounded-[var(--radius-md)] border border-[var(--border-default)] p-4"
+                key={identifier.id}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-bold">{identifier.identifier_value}</p>
+                    <p className="text-sm capitalize text-[var(--text-secondary)]">
+                      {identifier.identifier_type.replaceAll('_', ' ')}
+                      {identifier.issuer ? ` · ${identifier.issuer}` : ''}
+                    </p>
+                  </div>
+                  <Badge tone={identifier.status === 'active' ? 'info' : 'neutral'}>
+                    {identifier.status}
+                  </Badge>
+                </div>
+                <p className="mt-3 text-sm text-[var(--text-secondary)]">
+                  {identifier.issued_on
+                    ? `Issued ${formatDate(identifier.issued_on)}`
+                    : 'Issue date not provided'}
+                  {' · '}
+                  {identifier.expires_on
+                    ? `Expires ${formatDate(identifier.expires_on)}`
+                    : 'No expiration recorded'}
+                </p>
+                {identifier.retired_reason ? (
+                  <p className="mt-2 text-sm">
+                    <strong>Retirement reason:</strong> {identifier.retired_reason}
+                  </p>
+                ) : null}
+                {canManage && identifier.status === 'active' ? (
+                  <form
+                    action={retirePetIdentifier}
+                    className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end"
+                  >
+                    <input name="petIdentifierId" type="hidden" value={identifier.id} />
+                    <input name="petId" type="hidden" value={pet.id} />
+                    <Field label="Retirement reason" name="reason" required />
+                    <Button type="submit" variant="secondary">
+                      Retire identifier
+                    </Button>
+                  </form>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">No identifiers have been added.</p>
+        )}
+      </Card>
+      {canManage ? (
+        <Card
+          title="Add pet identifier"
+          description="Use the exact number shown by the registry or issuing authority. Dashes and spaces are retained for display but ignored during duplicate checks."
+        >
+          <form action={addPetIdentifier} className="grid gap-5 sm:grid-cols-2">
+            <input name="petId" type="hidden" value={pet.id} />
+            <HealthSelect
+              label="Identifier type"
+              name="identifierType"
+              options={['microchip', 'license', 'registration', 'other']}
+            />
+            <Field label="Identifier value" name="identifierValue" required />
+            <Field label="Issuer or registry (optional)" name="issuer" />
+            <div />
+            <Field
+              label="Issue date (optional)"
+              max={new Date().toISOString().slice(0, 10)}
+              name="issuedOn"
+              type="date"
+            />
+            <Field label="Expiration date (optional)" name="expiresOn" type="date" />
+            <div className="sm:col-span-2">
+              <Button type="submit">Add identifier</Button>
+            </div>
+          </form>
+        </Card>
       ) : null}
       <Card
         title={`Health conditions (${healthConditions?.filter((condition) => condition.status === 'active').length ?? 0} active)`}
