@@ -605,3 +605,75 @@ export async function transitionPetServiceEvaluation(formData: FormData) {
     redirect(`/app/pets/${parsed.data.petId}?error=That+evaluation+transition+is+not+available.`);
   redirect(`/app/pets/${parsed.data.petId}?notice=Service+evaluation+updated.`);
 }
+
+const petIdentitySchema = z.object({
+  alteredStatus: z.enum(['altered', 'intact', 'unknown']),
+  birthDate: z.union([z.literal(''), z.string().date()]),
+  birthDateEstimated: z.string().optional(),
+  breed: z.string().trim().min(1).max(120),
+  colorMarkings: z.string().trim().max(300),
+  name: z.string().trim().min(1).max(100),
+  petId: z.uuid(),
+  preferredName: z.string().trim().max(100),
+  sex: z.enum(['female', 'male', 'unknown']),
+});
+
+export async function updatePetIdentity(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = petIdentitySchema.safeParse(Object.fromEntries(formData));
+  const today = new Date().toISOString().slice(0, 10);
+  if (
+    !parsed.success ||
+    (parsed.data.birthDate && parsed.data.birthDate > today) ||
+    (!parsed.data.birthDate && parsed.data.birthDateEstimated)
+  ) {
+    redirect('/app/customers?error=Check+the+pet+identity+details.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('update_pet_identity', {
+    alteration_value: parsed.data.alteredStatus,
+    birth_date_estimated: Boolean(parsed.data.birthDateEstimated),
+    breed_text: parsed.data.breed,
+    color_markings_text: parsed.data.colorMarkings,
+    date_of_birth: parsed.data.birthDate || null,
+    legal_name: parsed.data.name,
+    preferred_name_text: parsed.data.preferredName,
+    sex_value: parsed.data.sex,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+  });
+  if (error) redirect(`/app/pets/${parsed.data.petId}?error=The+pet+identity+could+not+be+saved.`);
+  redirect(`/app/pets/${parsed.data.petId}?notice=Pet+identity+updated.`);
+}
+
+const petWeightSchema = z.object({
+  measuredOn: z.string().date(),
+  note: z.string().trim().max(500),
+  petId: z.uuid(),
+  source: z.enum(['customer_reported', 'staff_measured', 'veterinary_documented']),
+  weightUnit: z.enum(['lb', 'kg']),
+  weightValue: z.coerce.number().positive(),
+});
+
+export async function addPetWeightRecord(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = petWeightSchema.safeParse(Object.fromEntries(formData));
+  const today = new Date().toISOString().slice(0, 10);
+  if (!parsed.success || parsed.data.measuredOn > today) {
+    redirect('/app/customers?error=Check+the+pet+weight+details.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_pet_weight_record', {
+    measurement_date: parsed.data.measuredOn,
+    note_text: parsed.data.note,
+    source_type: parsed.data.source,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+    weight_unit: parsed.data.weightUnit,
+    weight_value: parsed.data.weightValue,
+  });
+  if (error) redirect(`/app/pets/${parsed.data.petId}?error=The+pet+weight+could+not+be+saved.`);
+  redirect(`/app/pets/${parsed.data.petId}?notice=Pet+weight+recorded.`);
+}

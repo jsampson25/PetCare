@@ -15,6 +15,7 @@ import {
   addPetHealthCondition,
   addPetIdentifier,
   addPetMedicationPlan,
+  addPetWeightRecord,
   createPetServiceEvaluation,
   discontinuePetFeedingPlan,
   discontinuePetMedicationPlan,
@@ -26,6 +27,7 @@ import {
   reviewPetVaccination,
   submitPetVaccination,
   transitionPetServiceEvaluation,
+  updatePetIdentity,
 } from './actions';
 
 type PageParameters = Promise<{ petId: string }>;
@@ -45,7 +47,9 @@ export default async function PetVaccinationsPage({
   const supabase = await createSupabaseServerClient();
   const { data: pet } = await supabase
     .from('pets')
-    .select('id,name,breed,household_id,status,photo_object_path,photo_file_name')
+    .select(
+      'id,name,preferred_name,breed,color_markings,birth_date,birth_date_is_estimated,sex,altered_status,household_id,status,photo_object_path,photo_file_name',
+    )
     .eq('business_id', context.businessId)
     .eq('id', petId)
     .maybeSingle();
@@ -114,6 +118,16 @@ export default async function PetVaccinationsPage({
     .eq('business_id', context.businessId)
     .eq('pet_id', petId)
     .order('created_at', { ascending: false });
+  const { data: weightRecords } = await supabase
+    .from('pet_weight_records')
+    .select(
+      'id,weight_kg,reported_value,reported_unit,measured_on,information_source,note,created_at',
+    )
+    .eq('business_id', context.businessId)
+    .eq('pet_id', petId)
+    .order('measured_on', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(10);
   let petPhotoUrl: string | undefined;
   if (pet.photo_object_path) {
     const { data } = await supabase.storage
@@ -156,8 +170,11 @@ export default async function PetVaccinationsPage({
           )}
           <div>
             <p className="text-sm font-bold text-[var(--action-primary)]">Pet health record</p>
-            <h1 className="text-3xl font-black tracking-tight">{pet.name} care profile</h1>
+            <h1 className="text-3xl font-black tracking-tight">
+              {pet.preferred_name || pet.name} care profile
+            </h1>
             <p className="mt-2 text-[var(--text-secondary)]">
+              {pet.preferred_name ? `${pet.name} · ` : ''}
               {pet.breed} · {pet.status}
             </p>
           </div>
@@ -202,6 +219,154 @@ export default async function PetVaccinationsPage({
               ) : null}
             </div>
             <Button type="submit">{pet.photo_object_path ? 'Replace photo' : 'Add photo'}</Button>
+          </form>
+        </Card>
+      ) : null}
+      <Card
+        title="Identity and current details"
+        description="Structured identity supports recognition, eligibility, pricing, and safe matching without relying on the photo."
+      >
+        <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          <IdentityDetail label="Sex" value={pet.sex} />
+          <IdentityDetail label="Altered status" value={pet.altered_status} />
+          <IdentityDetail
+            label="Birth date"
+            value={
+              pet.birth_date
+                ? `${formatDate(pet.birth_date)}${pet.birth_date_is_estimated ? ' (estimated)' : ''}`
+                : 'Not provided'
+            }
+          />
+          <IdentityDetail
+            label="Latest weight"
+            value={
+              weightRecords?.[0]
+                ? `${weightRecords[0].reported_value} ${weightRecords[0].reported_unit}`
+                : 'Not recorded'
+            }
+          />
+          <div className="sm:col-span-2 lg:col-span-4">
+            <IdentityDetail
+              label="Color and markings"
+              value={pet.color_markings || 'Not provided'}
+            />
+          </div>
+        </dl>
+      </Card>
+      {canManage ? (
+        <Card
+          title="Edit pet identity"
+          description="Estimated birth dates remain explicitly labeled."
+        >
+          <form action={updatePetIdentity} className="grid gap-5 sm:grid-cols-2">
+            <input name="petId" type="hidden" value={pet.id} />
+            <Field defaultValue={pet.name} label="Name" name="name" required />
+            <Field
+              defaultValue={pet.preferred_name ?? ''}
+              label="Preferred name (optional)"
+              name="preferredName"
+            />
+            <Field defaultValue={pet.breed} label="Breed or mix" name="breed" required />
+            <Field
+              defaultValue={pet.color_markings ?? ''}
+              label="Color and markings"
+              name="colorMarkings"
+            />
+            <HealthSelect
+              defaultValue={pet.sex}
+              label="Sex"
+              name="sex"
+              options={['female', 'male', 'unknown']}
+            />
+            <HealthSelect
+              defaultValue={pet.altered_status}
+              label="Altered status"
+              name="alteredStatus"
+              options={['altered', 'intact', 'unknown']}
+            />
+            <Field
+              defaultValue={pet.birth_date ?? ''}
+              label="Birth date (optional)"
+              max={new Date().toISOString().slice(0, 10)}
+              name="birthDate"
+              type="date"
+            />
+            <label className="flex min-h-12 items-center gap-3 self-end rounded-[var(--radius-md)] border border-[var(--border-default)] px-4 text-sm font-bold">
+              <input
+                defaultChecked={pet.birth_date_is_estimated}
+                name="birthDateEstimated"
+                type="checkbox"
+                value="true"
+              />
+              Birth date is estimated
+            </label>
+            <div className="sm:col-span-2">
+              <Button type="submit">Save identity</Button>
+            </div>
+          </form>
+        </Card>
+      ) : null}
+      <Card
+        title="Weight history"
+        description="The original unit and normalized kilograms are retained for trustworthy rule evaluation."
+      >
+        {weightRecords?.length ? (
+          <ul className="divide-y divide-[var(--border-default)]">
+            {weightRecords.map((record) => (
+              <li className="flex flex-wrap justify-between gap-3 py-3 text-sm" key={record.id}>
+                <div>
+                  <p className="font-bold">
+                    {record.reported_value} {record.reported_unit}
+                  </p>
+                  <p className="capitalize text-[var(--text-secondary)]">
+                    {record.information_source.replaceAll('_', ' ')} ·{' '}
+                    {formatDate(record.measured_on)}
+                  </p>
+                </div>
+                <div className="text-right text-[var(--text-secondary)]">
+                  <p>{record.weight_kg} kg normalized</p>
+                  {record.note ? <p>{record.note}</p> : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">No weights have been recorded.</p>
+        )}
+      </Card>
+      {canManage ? (
+        <Card
+          title="Record weight"
+          description="Record what was reported or measured; the system normalizes it for comparisons."
+        >
+          <form action={addPetWeightRecord} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <input name="petId" type="hidden" value={pet.id} />
+            <Field
+              label="Weight"
+              min="0.01"
+              name="weightValue"
+              required
+              step="0.01"
+              type="number"
+            />
+            <HealthSelect label="Unit" name="weightUnit" options={['lb', 'kg']} />
+            <Field
+              defaultValue={new Date().toISOString().slice(0, 10)}
+              label="Measured or reported date"
+              max={new Date().toISOString().slice(0, 10)}
+              name="measuredOn"
+              required
+              type="date"
+            />
+            <HealthSelect
+              label="Source"
+              name="source"
+              options={['customer_reported', 'staff_measured', 'veterinary_documented']}
+            />
+            <Field className="lg:col-span-2" label="Note (optional)" name="note" />
+            <div className="sm:col-span-2 lg:col-span-3">
+              <Button type="submit">Record weight</Button>
+            </div>
           </form>
         </Card>
       ) : null}
@@ -1254,10 +1419,12 @@ function behaviorTone(severity: string): 'danger' | 'info' | 'neutral' | 'warnin
 }
 
 function HealthSelect({
+  defaultValue,
   label,
   name,
   options,
 }: {
+  defaultValue?: string;
   label: string;
   name: string;
   options: string[];
@@ -1269,6 +1436,7 @@ function HealthSelect({
       </label>
       <select
         className="mt-2 min-h-12 w-full rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-[var(--surface-default)] px-3 capitalize"
+        defaultValue={defaultValue}
         id={name}
         name={name}
       >
@@ -1278,6 +1446,15 @@ function HealthSelect({
           </option>
         ))}
       </select>
+    </div>
+  );
+}
+
+function IdentityDetail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="font-bold text-[var(--text-secondary)]">{label}</dt>
+      <dd className="mt-1 capitalize">{value.replaceAll('_', ' ')}</dd>
     </div>
   );
 }

@@ -37,3 +37,5 @@ Pet-identifier tests verify searchable normalization, formatting-insensitive dup
 Pet-photo tests verify tenant/pet path binding, validated image metadata, replacement cleanup references, and denial for an unrelated identity. Storage-provider upload and signed-URL behavior require environment-level tests in addition to pgTAP.
 
 Service-evaluation tests verify pending-request uniqueness, required conditional restrictions, controlled state transitions, retained transition history, and denial for an unrelated identity.
+
+Pet-identity and weight tests verify estimated-date consistency, structured alteration and markings, positive bounded weights, unit normalization with original-value retention, and denial for an unrelated identity.

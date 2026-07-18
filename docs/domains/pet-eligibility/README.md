@@ -313,6 +313,8 @@ The pet-photo slice adds a private, tenant-scoped profile image with signed disp
 
 The service-evaluation slice implements formal daycare/group-play requests and the pending, approved, conditional, suspended, failed, and expired lifecycle. Conditional approval requires explicit participation restrictions, transitions are state controlled, and every change is retained as a separate history record. Automated vaccine compliance and broader service/date eligibility decisions remain subsequent E05 work.
 
+The identity-completion slice adds preferred name, color/markings, altered status, and dated weight history with information source. Weight entries retain both the original value/unit and normalized kilograms instead of overwriting prior measurements. These fields complete the core age, alteration, and weight inputs needed by E05 eligibility and pricing rules. Veterinarian relationships, automated vaccine compliance, and broader service/date eligibility remain subsequent work.
+
 ## Domain events
 
 - `pet.created`

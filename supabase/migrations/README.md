@@ -37,3 +37,5 @@ Pet identifiers capture microchips, licenses, registrations, and other durable i
 Pet profile photos use a private `pet-profile-photos` bucket with 5 MB JPG, PNG, and WebP limits. Object paths are tenant and pet scoped, access follows pet permissions, replacement updates authoritative metadata atomically, and the superseded object is returned for storage cleanup.
 
 Pet service evaluations implement the daycare/group-play lifecycle from pending through approved, conditional, suspended, failed, or expired. Conditional decisions require explicit participation conditions, transitions follow a controlled state machine, duplicate pending requests are blocked, and immutable transition history supports later eligibility decisions.
+
+Pet identity completion adds preferred name, color/markings, and explicit altered status to the business-scoped pet. Append-only weight records retain the reported value and unit, normalized kilograms, measurement date, source, recorder, and note so future eligibility and pricing rules use dated evidence rather than an overwritten number.
