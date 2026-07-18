@@ -299,6 +299,8 @@ The vaccination slice adds structured vaccine type, administration and expiratio
 
 The allergy-safety slice adds structured allergen category, severity, reaction, exact care instructions, and information provenance to the same pet care profile. Active records are visually prioritized; staff resolve rather than delete them, with actor, time, and required reason retained. Other health conditions, feeding, medication, behavior, identifiers, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
 
+The medication-plan slice adds medication name, explicit dose and route, schedule, administration instructions, optional effective dates, as-needed indication, and information provenance. Plans are discontinued with preserved reason and history instead of being deleted. These profile plans are inputs to later check-in snapshots and operational medication tasks; they are not administration records. Other health conditions, feeding, behavior, identifiers, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
+
 ## Domain events
 
 - `pet.created`

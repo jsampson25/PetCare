@@ -143,3 +143,72 @@ export async function resolvePetAllergy(formData: FormData) {
   if (error) redirect(`/app/pets/${parsed.data.petId}?error=The+allergy+could+not+be+resolved.`);
   redirect(`/app/pets/${parsed.data.petId}?notice=Allergy+record+resolved+with+history+preserved.`);
 }
+
+const medicationSchema = z.object({
+  administrationInstructions: z.string().trim().min(1).max(1000),
+  asNeeded: z.string().optional(),
+  asNeededReason: z.string().trim().max(500),
+  dose: z.string().trim().min(1).max(120),
+  endsOn: z.union([z.literal(''), z.string().date()]),
+  medicationName: z.string().trim().min(1).max(160),
+  petId: z.uuid(),
+  route: z.enum(['oral', 'topical', 'otic', 'ophthalmic', 'inhaled', 'injection', 'other']),
+  scheduleDescription: z.string().trim().min(1).max(500),
+  source: z.enum(['customer_reported', 'staff_confirmed', 'veterinary_documented']),
+  startsOn: z.union([z.literal(''), z.string().date()]),
+});
+
+export async function addPetMedicationPlan(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = medicationSchema.safeParse(Object.fromEntries(formData));
+  if (
+    !parsed.success ||
+    (parsed.data.asNeeded === 'on' && !parsed.data.asNeededReason) ||
+    (parsed.data.endsOn && parsed.data.startsOn && parsed.data.endsOn < parsed.data.startsOn)
+  ) {
+    redirect('/app/customers?error=Check+the+medication+plan+details.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_pet_medication_plan', {
+    administration_route: parsed.data.route,
+    as_needed_indication: parsed.data.asNeededReason,
+    effective_end: parsed.data.endsOn || null,
+    effective_start: parsed.data.startsOn || null,
+    instruction_text: parsed.data.administrationInstructions,
+    is_as_needed: parsed.data.asNeeded === 'on',
+    medication: parsed.data.medicationName,
+    medication_dose: parsed.data.dose,
+    schedule_text: parsed.data.scheduleDescription,
+    source_type: parsed.data.source,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+  });
+  if (error)
+    redirect(`/app/pets/${parsed.data.petId}?error=The+medication+plan+could+not+be+saved.`);
+  redirect(`/app/pets/${parsed.data.petId}?notice=Medication+plan+added.`);
+}
+
+const discontinueMedicationSchema = z.object({
+  medicationPlanId: z.uuid(),
+  petId: z.uuid(),
+  reason: z.string().trim().min(1).max(1000),
+});
+
+export async function discontinuePetMedicationPlan(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = discontinueMedicationSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/customers?error=A+discontinuation+reason+is+required.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('discontinue_pet_medication_plan', {
+    medication_plan_id: parsed.data.medicationPlanId,
+    reason: parsed.data.reason,
+    target_business_id: context.businessId,
+  });
+  if (error)
+    redirect(`/app/pets/${parsed.data.petId}?error=The+medication+plan+could+not+be+discontinued.`);
+  redirect(
+    `/app/pets/${parsed.data.petId}?notice=Medication+plan+discontinued+with+history+preserved.`,
+  );
+}

@@ -23,3 +23,5 @@ Additional-household-pet tests verify that authorized staff can add another dog 
 Vaccination-evidence tests cover structured submission, pending review, mandatory rejection reasons, acceptance, and tenant denial. Storage-provider and malware-scanner integration require environment-level tests in addition to pgTAP.
 
 Allergy-safety tests verify structured severity, mandatory resolution context, history-preserving resolution, and denial for an unrelated identity.
+
+Medication-plan tests cover required as-needed indications, explicit dose retention, history-preserving discontinuation, mandatory reasons, and tenant denial.

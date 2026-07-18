@@ -23,3 +23,5 @@ The next E04 slice adds a permission-aware function for adding another dog to an
 Vaccination evidence uses structured pet vaccination records and a private `pet-vaccine-evidence` bucket. PDFs and JPG/PNG images are limited to 10 MB, stored under tenant and pet path prefixes, and begin in pending scan and review states. Authorized staff may accept or reject pending evidence; rejected evidence requires a reason.
 
 Structured pet allergy records capture category, severity, reaction, care instructions, and information source. Records are resolved rather than deleted so safety history and the resolution reason remain available for audit and future visit review.
+
+Pet medication plans capture name, explicit dose, administration route, schedule, instructions, optional effective dates, as-needed indication, and information source. Plans are discontinued through an audited function with a required reason rather than overwritten or deleted.
