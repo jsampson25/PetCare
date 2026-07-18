@@ -196,6 +196,14 @@ Occupancy is calculated from summed time, not by averaging percentages across da
 
 ## Functional requirements
 
+## Implemented MVP summary
+
+The first E13 vertical slice provides a role-aware business summary for a user-selected period of up to 366 days. It records each successful run immutably, displays its canonical definition version, UTC time basis, authorized-location scope, and freshness watermark, and keeps operational and financial permission boundaries independent.
+
+The summary distinguishes booking requests, scheduled confirmations, cancellations, completed bookings, current pets in care, and unresolved operational alerts. Financial visibility separately presents net invoiced charges, collected cash, refunded cash, and the current outstanding balance. The interface explicitly avoids describing these measures as accounting revenue or processor settlement.
+
+Report aggregation is performed only after tenant membership, permission, and location-scope checks. A staff member cannot use an aggregate to infer records outside their authorized locations. Future exports and drill-downs must reuse the same scope and definition version rather than reconstructing access in the browser.
+
 | ID         | Priority | Requirement                                                                                                                               |
 | ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | RPT-FR-001 |       P0 | The system shall provide only reports authorized for the user's tenant, role, and location scope.                                         |

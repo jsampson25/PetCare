@@ -48,6 +48,11 @@ const businessNavigation = [
   },
   { href: '/app/invoices', label: 'Invoices', requiredPermissions: ['payments.view'] },
   {
+    href: '/app/reports',
+    label: 'Reports',
+    requiredPermissions: ['reports.view_summary'],
+  },
+  {
     href: '/app/availability',
     label: 'Availability',
     requiredPermissions: ['capacity.view', 'pets.view'],
