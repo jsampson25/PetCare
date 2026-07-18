@@ -115,6 +115,8 @@ The platform console now requires an explicit platform-operator assignment and M
 
 The tenant directory exposes business name, slug, lifecycle state, location count, active-member count, and control timestamps. It deliberately excludes customers, pets, bookings, care records, invoices, and payment details. Platform administrators can move an active, restricted, or suspended tenant through controlled transitions with a documented reason. Suspension additionally requires typing the tenant slug, updates the coarse business access state, and creates an immutable platform event.
 
+The initial SaaS subscription projection contains versioned plans and entitlements plus one current subscription per tenant. Trialing, active, past-due, scheduled-cancellation, and cancelled states use controlled transitions and immutable events. The platform console labels this as the business-to-PetCare commercial relationship and keeps it entirely separate from customer invoices, deposits, payments, refunds, receipts, and tenant financial reporting.
+
 ```text
 Prospect
   -> Provisioning

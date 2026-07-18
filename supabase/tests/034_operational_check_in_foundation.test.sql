@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(222);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(232);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -228,4 +228,14 @@ select is((select lifecycle_status from platform_tenant_controls),'restricted','
 select lives_ok($$select app.transition_platform_tenant((select id from businesses where public_slug='checkin-test'),'suspended','security_review','Security containment requires temporary suspension.','checkin-test','platform-suspend')$$,'slug-confirmed suspension succeeds');
 select is((select status from businesses),'suspended','suspension updates coarse tenant access state');
 select is((select count(*) from platform_tenant_events),2::bigint,'platform lifecycle history is immutable and additive');
+select is(app.platform_has_permission('platform.subscriptions.manage'),true,'platform administrator receives SaaS subscription permission');
+select is(jsonb_array_length(app.list_saas_plans()),1,'active SaaS plan is listed');
+select lives_ok($$select app.assign_tenant_saas_subscription((select id from businesses where public_slug='checkin-test'),(select id from saas_plan_versions where status='active'),true,'Design partner trial subscription assignment.','saas-assign')$$,'platform assigns trial subscription');
+select is((select status from tenant_saas_subscriptions),'trialing','subscription begins in trial state');
+select is((select value from saas_plan_entitlements where entitlement_key='website.custom_domain'),'false'::jsonb,'plan entitlement remains typed JSON');
+select lives_ok($$select app.transition_tenant_saas_subscription((select id from businesses where public_slug='checkin-test'),'active','Trial converted after documented approval.','saas-activate')$$,'platform activates subscription');
+select is((select status from tenant_saas_subscriptions),'active','subscription reaches active state');
+select is((select count(*) from tenant_saas_subscription_events),2::bigint,'subscription history is additive');
+select is(jsonb_array_length(app.list_tenant_saas_subscriptions()),1,'tenant subscription directory remains safe and complete');
+select is((select count(*) from invoices),1::bigint,'SaaS subscription never creates customer invoice');
 select * from finish();rollback;

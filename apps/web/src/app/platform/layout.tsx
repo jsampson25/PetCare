@@ -11,6 +11,11 @@ const platformNavigation = [
     label: 'Businesses',
     requiredPermissions: ['platform.businesses.read'],
   },
+  {
+    href: '/platform/subscriptions',
+    label: 'Subscriptions',
+    requiredPermissions: ['platform.subscriptions.read'],
+  },
   { href: '/platform/audit', label: 'Audit', requiredPermissions: ['platform.audit.read'] },
 ] as const;
 
