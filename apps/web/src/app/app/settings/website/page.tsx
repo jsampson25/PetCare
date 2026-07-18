@@ -6,26 +6,28 @@ import { Field } from '@petcare/ui/field';
 import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { publishWebsite, saveWebsiteDraft } from './actions';
+import { publishWebsite, saveWebsiteDraft, unpublishWebsite } from './actions';
 type SP = Promise<Record<string, string | string[] | undefined>>;
 export default async function WebsiteSettingsPage({ searchParams }: { searchParams: SP }) {
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('website.edit')) redirect('/denied');
   const q = await searchParams;
   const supabase = await createSupabaseServerClient();
-  const [{ data: site }, { data: versions }, { data: business }] = await Promise.all([
-    supabase
-      .from('tenant_websites')
-      .select('id,status,theme_key,brand_tokens,draft_content,current_publication_number')
-      .eq('business_id', context.businessId)
-      .maybeSingle(),
-    supabase
-      .from('tenant_website_publications')
-      .select('id,publication_number,published_at')
-      .eq('business_id', context.businessId)
-      .order('publication_number', { ascending: false }),
-    supabase.from('businesses').select('public_slug').eq('id', context.businessId).single(),
-  ]);
+  const [{ data: site }, { data: versions }, { data: business }, { data: readiness }] =
+    await Promise.all([
+      supabase
+        .from('tenant_websites')
+        .select('id,status,theme_key,brand_tokens,draft_content,current_publication_number')
+        .eq('business_id', context.businessId)
+        .maybeSingle(),
+      supabase
+        .from('tenant_website_publications')
+        .select('id,publication_number,published_at')
+        .eq('business_id', context.businessId)
+        .order('publication_number', { ascending: false }),
+      supabase.from('businesses').select('public_slug').eq('id', context.businessId).single(),
+      supabase.rpc('get_tenant_website_readiness', { target_business_id: context.businessId }),
+    ]);
   const c = (site?.draft_content ?? {}) as Record<string, unknown>;
   const b = (site?.brand_tokens ?? {}) as Record<string, unknown>;
   const faq = Array.isArray(c.faqs) ? (c.faqs[0] as Record<string, string> | undefined) : undefined;
@@ -139,7 +141,20 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
         </form>
       </Card>
       <Card title="Preview & publish">
+        <div className="mb-5 flex flex-wrap gap-2 text-sm">
+          {Object.entries((readiness ?? {}) as Record<string, boolean>).map(([key, ready]) => (
+            <span
+              className={`rounded-full px-3 py-1 font-bold ${ready ? 'bg-green-100 text-green-900' : 'bg-amber-100 text-amber-900'}`}
+              key={key}
+            >
+              {key}: {ready ? 'ready' : 'needs work'}
+            </span>
+          ))}
+        </div>
         <div className="flex flex-wrap gap-3">
+          <ButtonLink href="/app/settings/website/preview" variant="secondary">
+            Preview draft
+          </ButtonLink>
           <ButtonLink href={`/site/${business?.public_slug ?? ''}`} variant="secondary">
             View live site
           </ButtonLink>
@@ -147,6 +162,13 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
             <form action={publishWebsite}>
               <input name="sourcePublicationId" type="hidden" value="" />
               <Button type="submit">Publish draft</Button>
+            </form>
+          ) : null}
+          {site?.status === 'published' && context.permissions.has('website.publish') ? (
+            <form action={unpublishWebsite}>
+              <Button type="submit" variant="secondary">
+                Unpublish
+              </Button>
             </form>
           ) : null}
         </div>

@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(158);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(163);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -162,4 +162,9 @@ select is((select current_publication_number from tenant_websites),1,'first publ
 select is((app.get_public_tenant_website('checkin-test')->'content'->>'hero_title'),'Care that feels like home','public site returns published content');
 select lives_ok($$select app.publish_tenant_website((select id from businesses where public_slug='checkin-test'),(select id from tenant_website_publications))$$,'rollback republishes prior snapshot');
 select is((select count(*) from tenant_website_publications),2::bigint,'publication history is immutable and additive');
+select lives_ok($$select app.submit_website_inquiry('checkin-test','Taylor Visitor','taylor@example.test','555-555-0100','I would like to learn more about boarding.',true,'/site/checkin-test','','inquiry-once')$$,'consented public inquiry is accepted');
+select is(app.submit_website_inquiry('checkin-test','Taylor Visitor','taylor@example.test','555-555-0100','I would like to learn more about boarding.',true,'/site/checkin-test','','inquiry-once'),(select id from website_inquiries),'inquiry retry is idempotent');
+select is((app.get_tenant_website_readiness((select id from businesses where public_slug='checkin-test'))->>'hero'),'true','readiness reports completed hero');
+select lives_ok($$select app.unpublish_tenant_website((select id from businesses where public_slug='checkin-test'))$$,'authorized staff unpublishes site');
+select is(app.get_public_tenant_website('checkin-test'),null::jsonb,'unpublished site no longer resolves publicly');
 select * from finish();rollback;

@@ -229,6 +229,9 @@ Requested -> Verification pending -> Verified -> Certificate provisioning
 - Rollback republishes a prior snapshot as a new publication and preserves complete history.
 - The public tenant route resolves only active businesses with a published site and projects active public-enabled services and locations from their source domains.
 - Home, services, about, FAQ, policies, contact, booking, and portal handoffs share one light customer-facing experience.
+- Draft preview is authenticated and non-indexable; unpublishing removes public resolution without disabling booking or the customer portal.
+- Public inquiries require explicit response consent and include a honeypot abuse-control field before entering the staff-visible tenant queue.
+- Tenant sitemap and robots endpoints expose only the published public route and exclude authenticated surfaces.
 
 ### Editing flow
 

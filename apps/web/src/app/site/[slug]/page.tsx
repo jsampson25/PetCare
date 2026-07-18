@@ -1,9 +1,12 @@
 import { ButtonLink } from '@petcare/ui/button-link';
+import { Button } from '@petcare/ui/button';
+import { Field } from '@petcare/ui/field';
 import { Card } from '@petcare/ui/card';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { CSSProperties } from 'react';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
+import { submitInquiry } from './actions';
 type Site = {
   business: { name: string; slug: string };
   brand_tokens: { primary: string; accent: string };
@@ -31,8 +34,15 @@ export async function generateMetadata({
       }
     : { title: 'Site unavailable', robots: { index: false, follow: false } };
 }
-export default async function TenantSitePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function TenantSitePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const site = await getSite((await params).slug);
+  const query = await searchParams;
   if (!site) notFound();
   const c = site.content;
   const faqs = Array.isArray(c.faqs) ? (c.faqs as Array<{ question: string; answer: string }>) : [];
@@ -112,6 +122,36 @@ export default async function TenantSitePage({ params }: { params: Promise<{ slu
               </p>
             ))}
           </div>
+          <form
+            action={submitInquiry}
+            className="grid gap-3 rounded-xl bg-white p-5 text-slate-950"
+          >
+            <h2 className="text-2xl font-black">Send an inquiry</h2>
+            {typeof query.notice === 'string' ? (
+              <p className="font-bold text-green-700">{query.notice}</p>
+            ) : null}
+            {typeof query.error === 'string' ? (
+              <p className="font-bold text-red-700">{query.error}</p>
+            ) : null}
+            <input name="slug" type="hidden" value={site.business.slug} />
+            <input className="hidden" name="website" tabIndex={-1} />
+            <Field label="Name" name="name" required />
+            <Field label="Email" name="email" required type="email" />
+            <Field label="Phone" name="phone" />
+            <label className="text-sm font-bold">
+              How can we help?
+              <textarea
+                className="mt-2 min-h-24 w-full rounded-lg border p-3"
+                name="message"
+                required
+              />
+            </label>
+            <label className="flex gap-3 text-sm">
+              <input name="consent" required type="checkbox" value="yes" />I agree that this
+              business may respond to my inquiry.
+            </label>
+            <Button type="submit">Send message</Button>
+          </form>
           <div>
             <h2 className="text-2xl font-black">Policies</h2>
             <p className="mt-4 leading-7 text-slate-300">{String(c.policies)}</p>

@@ -60,3 +60,15 @@ export async function publishWebsite(formData: FormData) {
   if (error) redirect('/app/settings/website?error=Publishing+readiness+checks+failed.');
   redirect('/app/settings/website?notice=Website+published.');
 }
+export async function unpublishWebsite() {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('website.publish')) redirect('/denied');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('unpublish_tenant_website', {
+    target_business_id: context.businessId,
+  });
+  if (error) redirect('/app/settings/website?error=Live+website+could+not+be+unpublished.');
+  redirect(
+    '/app/settings/website?notice=Website+unpublished.+Portal+and+bookings+remain+available.',
+  );
+}
