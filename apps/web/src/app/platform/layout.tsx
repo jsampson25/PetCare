@@ -1,5 +1,8 @@
 import { AppShell } from '@petcare/ui/app-shell';
+import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
+
+import { resolvePlatformContext } from '../../lib/auth/platform-context';
 
 const platformNavigation = [
   { href: '/platform', label: 'Platform health' },
@@ -11,15 +14,17 @@ const platformNavigation = [
   { href: '/platform/audit', label: 'Audit', requiredPermissions: ['platform.audit.read'] },
 ] as const;
 
-const demonstrationPermissions = new Set(['platform.businesses.read', 'platform.audit.read']);
-
-export default function PlatformLayout({ children }: { children: ReactNode }) {
+export default async function PlatformLayout({ children }: { children: ReactNode }) {
+  const context = await resolvePlatformContext();
+  if (!context) redirect('/denied');
+  if (context.requiresMfa && context.sessionAssuranceLevel !== 'aal2')
+    redirect('/auth/mfa?next=/platform');
   return (
     <AppShell
       contextLabel="PetCare operations"
       items={platformNavigation}
       kind="platform"
-      permissions={demonstrationPermissions}
+      permissions={context.permissions}
     >
       {children}
     </AppShell>

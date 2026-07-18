@@ -109,6 +109,12 @@ This domain is separate from a pet-care business's own settings. Business Config
 
 ## Tenant lifecycle
 
+## Implemented operator and tenant-control foundation
+
+The platform console now requires an explicit platform-operator assignment and MFA; ordinary tenant membership never grants entry. Initial roles are administrator, support, and auditor, with separate directory, lifecycle-management, and audit permissions. Operator grants are service-role-only bootstrap operations rather than self-service elevation.
+
+The tenant directory exposes business name, slug, lifecycle state, location count, active-member count, and control timestamps. It deliberately excludes customers, pets, bookings, care records, invoices, and payment details. Platform administrators can move an active, restricted, or suspended tenant through controlled transitions with a documented reason. Suspension additionally requires typing the tenant slug, updates the coarse business access state, and creates an immutable platform event.
+
 ```text
 Prospect
   -> Provisioning
