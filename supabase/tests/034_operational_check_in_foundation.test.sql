@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(101);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(108);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -104,4 +104,11 @@ select lives_ok($$select app.transition_operational_incident((select business_id
 select lives_ok($$select app.transition_operational_incident((select business_id from operational_incidents),(select id from operational_incidents),'resolved','Manager confirmed monitoring completed safely.',false,'','incident-resolved')$$,'manager resolves serious incident');
 select is((select status from operational_incidents),'resolved','incident reaches documented resolution');
 select is((select status from operational_alerts where incident_id is not null),'resolved','incident resolution closes its linked alert');
+select lives_ok($$select app.create_report_card_draft((select business_id from service_executions),(select id from service_executions),'Milo settled well and enjoyed calm supervised activities.','{"mood":"content","favorite_activity":"yard play"}','report-card-draft')$$,'report card drafted from authorized facts');
+select is((select jsonb_array_length(source_snapshot->'observations') from report_card_versions),1,'only customer-visible observation enters report card source');
+select is((select jsonb_array_length(source_snapshot->'customer_incidents') from report_card_versions),1,'customer-notified incident enters report card source');
+select lives_ok($$select app.transition_report_card((select business_id from report_cards),(select id from report_cards),'review','Ready for manager review.','report-card-review')$$,'report card submitted for review');
+select lives_ok($$select app.transition_report_card((select business_id from report_cards),(select id from report_cards),'approved','Manager verified customer-safe content.','report-card-approved')$$,'manager approves report card');
+select lives_ok($$select app.transition_report_card((select business_id from report_cards),(select id from report_cards),'published','Approved for customer delivery.','report-card-published')$$,'manager publishes report card');
+select is((select count(*) from transactional_message_outbox where message_type='report_card_published'),1::bigint,'published report card queues delivery once');
 select * from finish();rollback;

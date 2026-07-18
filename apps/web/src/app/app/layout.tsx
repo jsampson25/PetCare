@@ -35,6 +35,11 @@ const businessNavigation = [
     label: 'Incidents',
     requiredPermissions: ['operations.record_incident'],
   },
+  {
+    href: '/app/report-cards',
+    label: 'Report cards',
+    requiredPermissions: ['operations.manage_report_cards'],
+  },
   { href: '/app/invoices', label: 'Invoices', requiredPermissions: ['payments.view'] },
   {
     href: '/app/availability',

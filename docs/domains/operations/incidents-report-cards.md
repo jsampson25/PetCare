@@ -69,6 +69,13 @@ stateDiagram-v2
 - Serious incident resolution requires an owner or manager and closes the linked alert with the resolution evidence.
 - The incident queue is tenant- and location-scoped and retains resolved records for later checkout and reporting review.
 
+## Implemented E10 report-card foundation
+
+- Report-card drafts snapshot only customer-visible observations, recorded care outcomes, and incidents already communicated with an approved customer summary.
+- Draft, review, approval, publication, and correction review remain separate states; approval and publication require an owner or manager.
+- Published versions are immutable. A correction creates a new numbered version and the prior published version becomes superseded only when its replacement is published.
+- Publication queues one idempotent communications delivery and preserves the report card in tenant-scoped history for the customer portal.
+
 ## Acceptance scenarios
 
 | ID         | Scenario                                                                                                                    |
