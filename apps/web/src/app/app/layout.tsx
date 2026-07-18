@@ -19,6 +19,7 @@ const businessNavigation = [
   { href: '/app/settings/staff', label: 'Staff', requiredPermissions: ['staff.invite'] },
   { href: '/app/settings/services', label: 'Services', requiredPermissions: ['services.view'] },
   { href: '/app/settings/pricing', label: 'Pricing', requiredPermissions: ['pricing.view'] },
+  { href: '/app/settings/payments', label: 'Payments', requiredPermissions: ['payments.manage'] },
   { href: '/app/settings/security', label: 'Security' },
   { href: '/app/design-system', label: 'Design system' },
   { href: '/onboarding/setup', label: 'Setup', requiredPermissions: ['business.manage_profile'] },

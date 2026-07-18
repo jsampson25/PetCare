@@ -7,6 +7,7 @@ const publicEnvironmentSchema = z.object({
 });
 
 const serverEnvironmentSchema = publicEnvironmentSchema.extend({
+  STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 });
 
