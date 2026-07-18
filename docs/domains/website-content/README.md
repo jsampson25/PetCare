@@ -564,6 +564,18 @@ Initial website measures include:
 
 Marketing attribution is limited to consented, documented parameters. Website analytics must not silently introduce cross-tenant tracking or unnecessary personal profiling.
 
+## Inquiry operations
+
+Public inquiries enter a tenant-scoped staff queue rather than becoming untracked email. Authorized staff can move an inquiry through `new`, `in_review`, `responded`, `closed`, or `spam`. Every transition records an immutable event with the actor, timestamp, prior state, resulting state, and operational notes. Inquiry content remains tenant-isolated and is never exposed through public website APIs.
+
+## Custom domains
+
+Business editors may request a normalized custom hostname and receive a tenant-specific DNS TXT verification token. A request begins in `verification_pending`; editors cannot mark their own domain verified. Verification evidence, certificate provisioning, activation, degradation, and disconnection are controlled by trusted platform automation. Only one live binding may exist for a hostname, and the platform must not route traffic until ownership and certificate readiness are confirmed.
+
+## Brand continuity
+
+The current published website snapshot is the source of customer-facing brand tokens. The public site, tenant-aware booking entry, and authenticated customer portal use the same business name, primary color, and accent color. Draft edits do not leak into customer experiences before publication. Operational and staff interfaces retain platform accessibility and safety controls even when tenant colors are applied.
+
 ## Open decisions
 
 - Initial theme names and exact token controls

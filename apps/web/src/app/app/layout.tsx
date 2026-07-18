@@ -65,6 +65,11 @@ const businessNavigation = [
   { href: '/app/settings/payments', label: 'Payments', requiredPermissions: ['payments.manage'] },
   { href: '/app/settings/security', label: 'Security' },
   { href: '/app/settings/website', label: 'Website', requiredPermissions: ['website.edit'] },
+  {
+    href: '/app/website-inquiries',
+    label: 'Website inquiries',
+    requiredPermissions: ['website.edit'],
+  },
   { href: '/app/design-system', label: 'Design system' },
   { href: '/onboarding/setup', label: 'Setup', requiredPermissions: ['business.manage_profile'] },
   { href: '/app/settings', label: 'Settings', requiredPermissions: ['business.manage_profile'] },

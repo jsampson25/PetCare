@@ -72,3 +72,21 @@ export async function unpublishWebsite() {
     '/app/settings/website?notice=Website+unpublished.+Portal+and+bookings+remain+available.',
   );
 }
+export async function requestCustomDomain(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('website.publish')) redirect('/denied');
+  const hostname = z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9.-]+$/)
+    .safeParse(formData.get('hostname'));
+  if (!hostname.success) redirect('/app/settings/website?error=Enter+a+valid+hostname.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('request_tenant_custom_domain', {
+    target_business_id: context.businessId,
+    hostname_value: hostname.data,
+  });
+  if (error) redirect('/app/settings/website?error=That+hostname+cannot+be+requested.');
+  redirect('/app/settings/website?notice=Domain+verification+requested.');
+}

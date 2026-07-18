@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 import { visibleNavigation, type NavigationItem } from './navigation';
 
@@ -16,22 +16,34 @@ export function AppShell({
   items,
   kind,
   permissions = new Set<string>(),
+  brandName = 'PetCare',
+  brandTokens,
 }: {
   children: ReactNode;
   contextLabel: string;
   items: readonly NavigationItem[];
   kind: ShellKind;
   permissions?: ReadonlySet<string>;
+  brandName?: string;
+  brandTokens?: { primary?: string; accent?: string };
 }) {
   const navigation = visibleNavigation(items, permissions);
 
   return (
-    <div className={`min-h-screen lg:grid lg:grid-cols-[17rem_1fr] shell-${kind}`}>
+    <div
+      className={`min-h-screen lg:grid lg:grid-cols-[17rem_1fr] shell-${kind}`}
+      style={
+        {
+          '--action-primary': brandTokens?.primary,
+          '--focus-ring': brandTokens?.accent,
+        } as CSSProperties
+      }
+    >
       <aside className="border-b border-[var(--border-default)] bg-[var(--shell-background)] px-5 py-5 text-[var(--shell-foreground)] lg:min-h-screen lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between lg:block">
           <div>
             <a className="text-lg font-bold" href="/">
-              PetCare
+              {brandName}
             </a>
             <p className="mt-1 text-xs font-semibold opacity-75">{shellNames[kind]}</p>
           </div>

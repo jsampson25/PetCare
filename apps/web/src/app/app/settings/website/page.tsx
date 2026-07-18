@@ -6,28 +6,38 @@ import { Field } from '@petcare/ui/field';
 import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { publishWebsite, saveWebsiteDraft, unpublishWebsite } from './actions';
+import { publishWebsite, requestCustomDomain, saveWebsiteDraft, unpublishWebsite } from './actions';
 type SP = Promise<Record<string, string | string[] | undefined>>;
 export default async function WebsiteSettingsPage({ searchParams }: { searchParams: SP }) {
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('website.edit')) redirect('/denied');
   const q = await searchParams;
   const supabase = await createSupabaseServerClient();
-  const [{ data: site }, { data: versions }, { data: business }, { data: readiness }] =
-    await Promise.all([
-      supabase
-        .from('tenant_websites')
-        .select('id,status,theme_key,brand_tokens,draft_content,current_publication_number')
-        .eq('business_id', context.businessId)
-        .maybeSingle(),
-      supabase
-        .from('tenant_website_publications')
-        .select('id,publication_number,published_at')
-        .eq('business_id', context.businessId)
-        .order('publication_number', { ascending: false }),
-      supabase.from('businesses').select('public_slug').eq('id', context.businessId).single(),
-      supabase.rpc('get_tenant_website_readiness', { target_business_id: context.businessId }),
-    ]);
+  const [
+    { data: site },
+    { data: versions },
+    { data: business },
+    { data: readiness },
+    { data: domains },
+  ] = await Promise.all([
+    supabase
+      .from('tenant_websites')
+      .select('id,status,theme_key,brand_tokens,draft_content,current_publication_number')
+      .eq('business_id', context.businessId)
+      .maybeSingle(),
+    supabase
+      .from('tenant_website_publications')
+      .select('id,publication_number,published_at')
+      .eq('business_id', context.businessId)
+      .order('publication_number', { ascending: false }),
+    supabase.from('businesses').select('public_slug').eq('id', context.businessId).single(),
+    supabase.rpc('get_tenant_website_readiness', { target_business_id: context.businessId }),
+    supabase
+      .from('tenant_domain_bindings')
+      .select('id,hostname,status,verification_token,last_checked_at,last_result')
+      .eq('business_id', context.businessId)
+      .order('requested_at', { ascending: false }),
+  ]);
   const c = (site?.draft_content ?? {}) as Record<string, unknown>;
   const b = (site?.brand_tokens ?? {}) as Record<string, unknown>;
   const faq = Array.isArray(c.faqs) ? (c.faqs[0] as Record<string, string> | undefined) : undefined;
@@ -139,6 +149,33 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
             <Button type="submit">Save draft</Button>
           </div>
         </form>
+      </Card>
+      <Card
+        title="Custom domain"
+        description="The platform subdomain remains available while DNS ownership and TLS are verified."
+      >
+        <form action={requestCustomDomain} className="flex flex-wrap items-end gap-3">
+          <Field label="Hostname" name="hostname" placeholder="www.example.com" required />
+          <Button type="submit">Request verification</Button>
+        </form>
+        {domains?.length ? (
+          <div className="mt-5 grid gap-3">
+            {domains.map((domain) => (
+              <div className="rounded-lg border p-4" key={domain.id}>
+                <p className="font-black">
+                  {domain.hostname} · {domain.status.replaceAll('_', ' ')}
+                </p>
+                <p className="mt-2 break-all font-mono text-xs">
+                  Create a DNS TXT record: {domain.verification_token}
+                </p>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                  Verification is performed by the platform worker; the website editor cannot
+                  self-approve domain ownership.
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </Card>
       <Card title="Preview & publish">
         <div className="mb-5 flex flex-wrap gap-2 text-sm">
