@@ -39,3 +39,5 @@ Pet-photo tests verify tenant/pet path binding, validated image metadata, replac
 Service-evaluation tests verify pending-request uniqueness, required conditional restrictions, controlled state transitions, retained transition history, and denial for an unrelated identity.
 
 Pet-identity and weight tests verify estimated-date consistency, structured alteration and markings, positive bounded weights, unit normalization with original-value retention, and denial for an unrelated identity.
+
+Veterinary-contact tests verify required role assignment, normalized email, one-active-contact-per-role enforcement, history-preserving retirement, and denial for an unrelated identity.

@@ -677,3 +677,68 @@ export async function addPetWeightRecord(formData: FormData) {
   if (error) redirect(`/app/pets/${parsed.data.petId}?error=The+pet+weight+could+not+be+saved.`);
   redirect(`/app/pets/${parsed.data.petId}?notice=Pet+weight+recorded.`);
 }
+
+const veterinaryContactSchema = z
+  .object({
+    address: z.string().trim().max(500),
+    clinicName: z.string().trim().min(1).max(200),
+    email: z.union([z.literal(''), z.email()]),
+    isEmergency: z.string().optional(),
+    isPrimary: z.string().optional(),
+    notes: z.string().trim().max(1000),
+    petId: z.uuid(),
+    phone: z.string().trim().min(7).max(40),
+    source: z.enum(['customer_reported', 'staff_confirmed', 'veterinary_documented']),
+    veterinarianName: z.string().trim().max(200),
+  })
+  .refine((value) => value.isPrimary || value.isEmergency);
+
+export async function addPetVeterinaryContact(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = veterinaryContactSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/customers?error=Check+the+veterinary+contact+details.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_pet_veterinary_contact', {
+    clinic: parsed.data.clinicName,
+    email_address: parsed.data.email,
+    emergency_contact: Boolean(parsed.data.isEmergency),
+    note_text: parsed.data.notes,
+    phone_number: parsed.data.phone,
+    primary_contact: Boolean(parsed.data.isPrimary),
+    source_type: parsed.data.source,
+    street_address: parsed.data.address,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+    veterinarian: parsed.data.veterinarianName,
+  });
+  if (error)
+    redirect(
+      `/app/pets/${parsed.data.petId}?error=The+veterinary+contact+could+not+be+saved.+Retire+an+existing+contact+with+the+same+role+first.`,
+    );
+  redirect(`/app/pets/${parsed.data.petId}?notice=Veterinary+contact+added.`);
+}
+
+const retireVeterinaryContactSchema = z.object({
+  petId: z.uuid(),
+  reason: z.string().trim().min(1).max(1000),
+  veterinaryContactId: z.uuid(),
+});
+
+export async function retirePetVeterinaryContact(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = retireVeterinaryContactSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/customers?error=A+retirement+reason+is+required.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('retire_pet_veterinary_contact', {
+    reason: parsed.data.reason,
+    target_business_id: context.businessId,
+    veterinary_contact_id: parsed.data.veterinaryContactId,
+  });
+  if (error)
+    redirect(`/app/pets/${parsed.data.petId}?error=The+veterinary+contact+could+not+be+retired.`);
+  redirect(
+    `/app/pets/${parsed.data.petId}?notice=Veterinary+contact+retired+with+history+preserved.`,
+  );
+}

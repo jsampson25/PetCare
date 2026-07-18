@@ -16,6 +16,7 @@ import {
   addPetIdentifier,
   addPetMedicationPlan,
   addPetWeightRecord,
+  addPetVeterinaryContact,
   createPetServiceEvaluation,
   discontinuePetFeedingPlan,
   discontinuePetMedicationPlan,
@@ -24,6 +25,7 @@ import {
   resolvePetAllergy,
   replacePetProfilePhoto,
   retirePetIdentifier,
+  retirePetVeterinaryContact,
   reviewPetVaccination,
   submitPetVaccination,
   transitionPetServiceEvaluation,
@@ -128,6 +130,14 @@ export default async function PetVaccinationsPage({
     .order('measured_on', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(10);
+  const { data: veterinaryContacts } = await supabase
+    .from('pet_veterinary_contacts')
+    .select(
+      'id,clinic_name,veterinarian_name,phone,email,address,is_primary,is_emergency,information_source,notes,status,retired_reason,created_at',
+    )
+    .eq('business_id', context.businessId)
+    .eq('pet_id', petId)
+    .order('created_at', { ascending: false });
   let petPhotoUrl: string | undefined;
   if (pet.photo_object_path) {
     const { data } = await supabase.storage
@@ -366,6 +376,103 @@ export default async function PetVaccinationsPage({
             <Field className="lg:col-span-2" label="Note (optional)" name="note" />
             <div className="sm:col-span-2 lg:col-span-3">
               <Button type="submit">Record weight</Button>
+            </div>
+          </form>
+        </Card>
+      ) : null}
+      <Card
+        title="Veterinary contacts"
+        description="Primary and emergency provider roles remain explicit so staff know whom to contact during routine and urgent care."
+      >
+        {veterinaryContacts?.length ? (
+          <ul className="space-y-4">
+            {veterinaryContacts.map((contact) => (
+              <li
+                className="rounded-[var(--radius-md)] border border-[var(--border-default)] p-4"
+                key={contact.id}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-bold">{contact.clinic_name}</p>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      {contact.veterinarian_name || 'Veterinarian not specified'} · {contact.phone}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {contact.is_primary ? <Badge tone="info">Primary</Badge> : null}
+                    {contact.is_emergency ? <Badge tone="danger">Emergency</Badge> : null}
+                    <Badge tone={contact.status === 'active' ? 'success' : 'neutral'}>
+                      {contact.status}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="mt-3 space-y-1 text-sm">
+                  {contact.email ? <p>{contact.email}</p> : null}
+                  {contact.address ? <p>{contact.address}</p> : null}
+                  {contact.notes ? (
+                    <p>
+                      <strong>Notes:</strong> {contact.notes}
+                    </p>
+                  ) : null}
+                  <p className="capitalize text-[var(--text-secondary)]">
+                    Source: {contact.information_source.replaceAll('_', ' ')}
+                  </p>
+                  {contact.retired_reason ? (
+                    <p>
+                      <strong>Retirement:</strong> {contact.retired_reason}
+                    </p>
+                  ) : null}
+                </div>
+                {canManage && contact.status === 'active' ? (
+                  <form
+                    action={retirePetVeterinaryContact}
+                    className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end"
+                  >
+                    <input name="veterinaryContactId" type="hidden" value={contact.id} />
+                    <input name="petId" type="hidden" value={pet.id} />
+                    <Field label="Retirement reason" name="reason" required />
+                    <Button type="submit" variant="secondary">
+                      Retire contact
+                    </Button>
+                  </form>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">
+            No veterinary contacts have been added.
+          </p>
+        )}
+      </Card>
+      {canManage ? (
+        <Card
+          title="Add veterinary contact"
+          description="A pet may have one active primary contact and one active emergency contact; one clinic may serve both roles."
+        >
+          <form action={addPetVeterinaryContact} className="grid gap-5 sm:grid-cols-2">
+            <input name="petId" type="hidden" value={pet.id} />
+            <Field label="Clinic name" name="clinicName" required />
+            <Field label="Veterinarian name (optional)" name="veterinarianName" />
+            <Field label="Phone" name="phone" required type="tel" />
+            <Field label="Email (optional)" name="email" type="email" />
+            <Field label="Address (optional)" name="address" />
+            <HealthSelect
+              label="Information source"
+              name="source"
+              options={['customer_reported', 'staff_confirmed', 'veterinary_documented']}
+            />
+            <label className="flex min-h-12 items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border-default)] px-4 text-sm font-bold">
+              <input name="isPrimary" type="checkbox" value="true" /> Primary veterinarian
+            </label>
+            <label className="flex min-h-12 items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border-default)] px-4 text-sm font-bold">
+              <input name="isEmergency" type="checkbox" value="true" /> Emergency veterinarian
+            </label>
+            <div className="sm:col-span-2">
+              <TextArea label="Contact notes (optional)" name="notes" />
+            </div>
+            <div className="sm:col-span-2">
+              <Button type="submit">Add veterinary contact</Button>
             </div>
           </form>
         </Card>

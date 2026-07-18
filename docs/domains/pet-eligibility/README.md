@@ -315,6 +315,8 @@ The service-evaluation slice implements formal daycare/group-play requests and t
 
 The identity-completion slice adds preferred name, color/markings, altered status, and dated weight history with information source. Weight entries retain both the original value/unit and normalized kilograms instead of overwriting prior measurements. These fields complete the core age, alteration, and weight inputs needed by E05 eligibility and pricing rules. Veterinarian relationships, automated vaccine compliance, and broader service/date eligibility remain subsequent work.
 
+The veterinary-contact slice adds structured clinic and provider details with explicit primary and emergency roles. A pet may have one active provider per role, the same clinic may fill both roles, and replacement requires retiring the prior contact with historical context. Automated vaccine compliance and broader service/date eligibility remain subsequent E05 work.
+
 ## Domain events
 
 - `pet.created`

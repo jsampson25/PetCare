@@ -39,3 +39,5 @@ Pet profile photos use a private `pet-profile-photos` bucket with 5 MB JPG, PNG,
 Pet service evaluations implement the daycare/group-play lifecycle from pending through approved, conditional, suspended, failed, or expired. Conditional decisions require explicit participation conditions, transitions follow a controlled state machine, duplicate pending requests are blocked, and immutable transition history supports later eligibility decisions.
 
 Pet identity completion adds preferred name, color/markings, and explicit altered status to the business-scoped pet. Append-only weight records retain the reported value and unit, normalized kilograms, measurement date, source, recorder, and note so future eligibility and pricing rules use dated evidence rather than an overwritten number.
+
+Pet veterinary contacts capture clinic, named veterinarian, phone, email, address, source, notes, and explicit primary/emergency roles. Each pet may have one active contact per role, a single clinic may serve both roles, and contacts are retired with a required reason rather than deleted.
