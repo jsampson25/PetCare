@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(93);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(101);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -96,4 +96,12 @@ select throws_ok($$select app.record_daycare_evaluation((select business_id from
 select throws_ok($$select app.record_grooming_intake((select business_id from service_executions),(select id from service_executions),'Short trim','Healthy coat','No visible concerns','none','','','','false','false','wrong-service-intake')$$,'22023','structured grooming intake required','boarding execution cannot receive grooming intake');
 select throws_ok($$select app.record_grooming_quality_review((select business_id from service_executions),(select id from service_executions),'passed','{"style_verified":true}','Review complete.','wrong-service-quality')$$,'22023','structured grooming quality review required','boarding execution cannot receive grooming quality review');
 select is((select count(*) from role_permissions where permission_key='operations.manage_grooming' and role_key in('owner','manager','groomer')),3::bigint,'grooming controls are limited to configured operational roles');
+select lives_ok($$select app.create_operational_incident((select business_id from pet_visits),(select id from pet_visits),(select id from service_executions),'injury','serious',now(),'Small superficial scrape observed on left paw.','Separated pet and completed an immediate visual check.','Manager reviewing yard surface.','A small scrape was observed and the pet is comfortable while we monitor.','incident-serious')$$,'serious incident reported with immediate actions');
+select is((select severity from operational_incidents),'serious','incident preserves original severity');
+select is((select status from operational_incidents),'escalated','serious incident starts escalated');
+select is((select count(*) from operational_alerts),3::bigint,'serious incident adds an operational alert');
+select lives_ok($$select app.transition_operational_incident((select business_id from operational_incidents),(select id from operational_incidents),'under_review','Manager reviewed immediate actions.',true,'We reviewed the scrape and continue to monitor comfort.','incident-review')$$,'incident review records customer-safe communication');
+select lives_ok($$select app.transition_operational_incident((select business_id from operational_incidents),(select id from operational_incidents),'resolved','Manager confirmed monitoring completed safely.',false,'','incident-resolved')$$,'manager resolves serious incident');
+select is((select status from operational_incidents),'resolved','incident reaches documented resolution');
+select is((select status from operational_alerts where incident_id is not null),'resolved','incident resolution closes its linked alert');
 select * from finish();rollback;

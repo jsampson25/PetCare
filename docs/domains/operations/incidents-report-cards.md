@@ -61,6 +61,14 @@ stateDiagram-v2
 - AI-generated language cannot invent appetite, medication, activity, behavior, or wellness outcomes.
 - Report-card media must belong to the correct pet/visit and pass staff review before publication.
 
+## Implemented E10 incident foundation
+
+- `operational_incidents` separates verified initial facts, immediate safety actions, internal notes, and an approved customer-safe summary.
+- Serious and critical reports immediately create operational alerts, require manager review, and place an active related service on hold when safe to do so.
+- Incident status changes and customer-contact evidence append immutable events; severity is never silently downgraded.
+- Serious incident resolution requires an owner or manager and closes the linked alert with the resolution evidence.
+- The incident queue is tenant- and location-scoped and retains resolved records for later checkout and reporting review.
+
 ## Acceptance scenarios
 
 | ID         | Scenario                                                                                                                    |

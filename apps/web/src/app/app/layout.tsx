@@ -30,6 +30,11 @@ const businessNavigation = [
     label: 'Grooming QA',
     requiredPermissions: ['operations.manage_grooming'],
   },
+  {
+    href: '/app/incidents',
+    label: 'Incidents',
+    requiredPermissions: ['operations.record_incident'],
+  },
   { href: '/app/invoices', label: 'Invoices', requiredPermissions: ['payments.view'] },
   {
     href: '/app/availability',
