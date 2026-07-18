@@ -212,6 +212,8 @@ The financial-reconciliation report is scoped by invoice issue time and shows th
 
 The care-compliance report measures eligible feeding and medication tasks by their due-window start. Completion inside the configured window contributes to the on-time numerator; partial, refused, held, missed, unable, and adverse outcomes remain visible as exceptions. Incident counts use occurrence time and severity, report-card publishing uses cards created in the selected period, and unresolved alerts are clearly labeled as a current as-of guardrail.
 
+The customer-and-service report uses completed bookings only. A first-time completed customer has no earlier authorized completed booking; a returning completed customer has an earlier completion before the selected period and another inside it. Service mix groups completed booking items by their immutable service-version name and category. It does not infer lifetime value, retention beyond the observed completion cohort, or marketing attribution.
+
 | ID         | Priority | Requirement                                                                                                                               |
 | ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | RPT-FR-001 |       P0 | The system shall provide only reports authorized for the user's tenant, role, and location scope.                                         |

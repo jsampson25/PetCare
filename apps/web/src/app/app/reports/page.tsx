@@ -116,6 +116,12 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
         >
           View care compliance
         </ButtonLink>
+        <ButtonLink
+          href={`/app/reports/customers?start=${inputDate(start)}&end=${inputDate(endDay)}`}
+          variant="secondary"
+        >
+          View customer return
+        </ButtonLink>
         {context.permissions.has('reports.view_financial') ? (
           <ButtonLink
             href={`/app/reports/financial?start=${inputDate(start)}&end=${inputDate(endDay)}`}
