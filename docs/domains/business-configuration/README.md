@@ -237,6 +237,8 @@ The first implementation slice extends businesses and locations with required co
 
 New verified identities without a tenant enter `/onboarding`, create a draft business and first location atomically, enroll MFA, and then complete the combined business/location/hours form. `get_business_setup_readiness` calculates the three foundation checks server-side and returns no saved-state inference to an unauthorized or AAL1 privileged session. This foundation score is not the final launch gate; services, capacity, pricing, policies, payments, communications, and operational readiness remain later checks.
 
+The next E03 slice adds separately managed customer arrival and pickup windows. Weekday windows must fit within the location's regular operating hours, weekends begin closed, and the database remains authoritative for tenant access, validation, audit events, and retry-safe upserts.
+
 ## Domain events
 
 - `business.created`

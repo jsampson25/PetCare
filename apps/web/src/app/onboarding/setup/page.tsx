@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
-import { saveOnboardingSetup } from '../actions';
+import { saveLocationCustomerWindows, saveOnboardingSetup } from '../actions';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 
@@ -23,7 +23,12 @@ export default async function OnboardingSetupPage({
   const error = typeof parameters.error === 'string' ? parameters.error : undefined;
   const notice = typeof parameters.notice === 'string' ? parameters.notice : undefined;
   const supabase = await createSupabaseServerClient();
-  const [{ data: business }, { data: locations }, { data: readinessRows }] = await Promise.all([
+  const [
+    { data: business },
+    { data: locations },
+    { data: readinessRows },
+    { data: customerWindows },
+  ] = await Promise.all([
     supabase
       .from('businesses')
       .select(
@@ -40,10 +45,21 @@ export default async function OnboardingSetupPage({
       .order('created_at')
       .limit(1),
     supabase.rpc('get_business_setup_readiness', { target_business_id: context.businessId }),
+    supabase
+      .from('location_customer_windows')
+      .select('location_id,window_type,day_of_week,starts_at,ends_at,is_closed')
+      .eq('business_id', context.businessId)
+      .eq('day_of_week', 1),
   ]);
   const location = locations?.[0];
   if (!business || !location) redirect('/denied');
   const readiness = readinessRows?.[0];
+  const arrivalWindow = customerWindows?.find(
+    (window) => window.location_id === location.id && window.window_type === 'arrival',
+  );
+  const pickupWindow = customerWindows?.find(
+    (window) => window.location_id === location.id && window.window_type === 'pickup',
+  );
 
   return (
     <div className="space-y-6">
@@ -193,8 +209,57 @@ export default async function OnboardingSetupPage({
           <Button type="submit">Save setup progress</Button>
         </form>
       </Card>
+      <Card
+        title="Customer arrival and pickup windows"
+        description="Choose when customers may drop off and collect pets on weekdays. These times must fit inside regular operating hours."
+      >
+        <form action={saveLocationCustomerWindows} className="space-y-6">
+          <input name="locationId" type="hidden" value={location.id} />
+          <div className="grid gap-5 sm:grid-cols-2">
+            <fieldset className="grid gap-4 rounded-2xl border border-[var(--border-default)] p-5 sm:grid-cols-2">
+              <legend className="px-2 text-base font-bold">Arrival window</legend>
+              <Field
+                defaultValue={formatDatabaseTime(arrivalWindow?.starts_at, '07:00')}
+                label="Starts"
+                name="arrivalStart"
+                required
+                type="time"
+              />
+              <Field
+                defaultValue={formatDatabaseTime(arrivalWindow?.ends_at, '10:00')}
+                label="Ends"
+                name="arrivalEnd"
+                required
+                type="time"
+              />
+            </fieldset>
+            <fieldset className="grid gap-4 rounded-2xl border border-[var(--border-default)] p-5 sm:grid-cols-2">
+              <legend className="px-2 text-base font-bold">Pickup window</legend>
+              <Field
+                defaultValue={formatDatabaseTime(pickupWindow?.starts_at, '16:00')}
+                label="Starts"
+                name="pickupStart"
+                required
+                type="time"
+              />
+              <Field
+                defaultValue={formatDatabaseTime(pickupWindow?.ends_at, '19:00')}
+                label="Ends"
+                name="pickupEnd"
+                required
+                type="time"
+              />
+            </fieldset>
+          </div>
+          <Button type="submit">Save customer windows</Button>
+        </form>
+      </Card>
     </div>
   );
+}
+
+function formatDatabaseTime(value: string | null | undefined, fallback: string) {
+  return value?.slice(0, 5) ?? fallback;
 }
 
 function SelectField({

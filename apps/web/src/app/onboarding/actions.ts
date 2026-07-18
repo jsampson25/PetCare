@@ -136,3 +136,41 @@ export async function saveOnboardingSetup(formData: FormData) {
   }
   redirect('/onboarding/setup?notice=Business,+location,+and+hours+saved.');
 }
+
+const customerWindowsSchema = z.object({
+  arrivalEnd: z.string().regex(/^\d{2}:\d{2}$/),
+  arrivalStart: z.string().regex(/^\d{2}:\d{2}$/),
+  locationId: z.uuid(),
+  pickupEnd: z.string().regex(/^\d{2}:\d{2}$/),
+  pickupStart: z.string().regex(/^\d{2}:\d{2}$/),
+});
+
+export async function saveLocationCustomerWindows(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('business.manage_locations')) redirect('/denied');
+  const parsed = customerWindowsSchema.safeParse(Object.fromEntries(formData));
+  if (
+    !parsed.success ||
+    parsed.data.arrivalStart >= parsed.data.arrivalEnd ||
+    parsed.data.pickupStart >= parsed.data.pickupEnd
+  ) {
+    redirect('/onboarding/setup?error=Check+the+arrival+and+pickup+time+windows.');
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('save_location_customer_windows', {
+    target_arrival_end: parsed.data.arrivalEnd,
+    target_arrival_start: parsed.data.arrivalStart,
+    target_business_id: context.businessId,
+    target_location_id: parsed.data.locationId,
+    target_pickup_end: parsed.data.pickupEnd,
+    target_pickup_start: parsed.data.pickupStart,
+  });
+
+  if (error) {
+    redirect(
+      '/onboarding/setup?error=Customer+windows+must+be+valid+and+fit+inside+regular+operating+hours.',
+    );
+  }
+  redirect('/onboarding/setup?notice=Customer+arrival+and+pickup+windows+saved.');
+}

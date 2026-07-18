@@ -11,3 +11,5 @@ Invitation preview is a narrow token-bound RPC. It returns only the intended bus
 Privileged MFA enforcement is part of the database authorization helpers. Memberships holding any role marked `requires_mfa` receive no permission or location grant until the current JWT has AAL2 assurance.
 
 The E03 onboarding foundation adds business/location contact and address data, validated weekly location hours, configuration audit triggers, and a tenant-safe foundation readiness function.
+
+Customer arrival and pickup windows are stored separately from operating hours. The initial slice configures weekday windows, closes weekends, validates every window against location operating hours, and preserves tenant-scoped audit history.
