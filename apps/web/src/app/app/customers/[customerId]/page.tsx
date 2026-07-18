@@ -7,7 +7,8 @@ import { notFound, redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { addPetToCustomerHousehold } from './actions';
+import { addPetToCustomerHousehold, revokeCustomerPortalAccess } from './actions';
+import { PortalInvitationForm } from './portal-invitation-form';
 
 type PageParameters = Promise<{ customerId: string }>;
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
@@ -39,22 +40,36 @@ export default async function CustomerHouseholdPage({
     .eq('business_id', context.businessId)
     .eq('customer_id', customerId)
     .maybeSingle();
-  const [{ data: household }, { data: pets }] = membership
-    ? await Promise.all([
-        supabase
-          .from('households')
-          .select('id,display_name,status')
-          .eq('business_id', context.businessId)
-          .eq('id', membership.household_id)
-          .maybeSingle(),
-        supabase
-          .from('pets')
-          .select('id,name,breed,birth_date,birth_date_is_estimated,sex,status')
-          .eq('business_id', context.businessId)
-          .eq('household_id', membership.household_id)
-          .order('name'),
-      ])
-    : [{ data: null }, { data: [] }];
+  const [{ data: household }, { data: pets }, { data: portalAccess }, { data: portalInvitations }] =
+    membership
+      ? await Promise.all([
+          supabase
+            .from('households')
+            .select('id,display_name,status')
+            .eq('business_id', context.businessId)
+            .eq('id', membership.household_id)
+            .maybeSingle(),
+          supabase
+            .from('pets')
+            .select('id,name,breed,birth_date,birth_date_is_estimated,sex,status')
+            .eq('business_id', context.businessId)
+            .eq('household_id', membership.household_id)
+            .order('name'),
+          supabase
+            .from('customer_portal_access')
+            .select('id,status,granted_at')
+            .eq('business_id', context.businessId)
+            .eq('customer_id', customerId)
+            .maybeSingle(),
+          supabase
+            .from('customer_portal_invitations')
+            .select('id,state,expires_at,created_at')
+            .eq('business_id', context.businessId)
+            .eq('customer_id', customerId)
+            .order('created_at', { ascending: false })
+            .limit(1),
+        ])
+      : [{ data: null }, { data: [] }, { data: null }, { data: [] }];
 
   const error = typeof query.error === 'string' ? query.error : undefined;
   const notice = typeof query.notice === 'string' ? query.notice : undefined;
@@ -122,6 +137,47 @@ export default async function CustomerHouseholdPage({
           </p>
         )}
       </Card>
+      {context.permissions.has('customers.manage') ? (
+        <Card
+          title="Customer portal access"
+          description="Portal authority is separate from pickup and emergency-contact authority."
+        >
+          {portalAccess?.status === 'active' ? (
+            <div className="space-y-4">
+              <Alert title="Portal access active" tone="success">
+                Granted{' '}
+                {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(
+                  new Date(portalAccess.granted_at),
+                )}
+              </Alert>
+              <form
+                action={revokeCustomerPortalAccess}
+                className="grid gap-3 sm:grid-cols-[1fr_auto]"
+              >
+                <input name="customerId" type="hidden" value={customer.id} />
+                <Field label="Revocation reason" name="reason" required />
+                <Button type="submit" variant="secondary">
+                  Revoke access
+                </Button>
+              </form>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <PortalInvitationForm customerId={customer.id} />
+              {portalInvitations?.[0]?.state === 'pending' ? (
+                <p className="text-sm text-[var(--text-secondary)]">
+                  A pending invitation expires{' '}
+                  {new Intl.DateTimeFormat('en-US', {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  }).format(new Date(portalInvitations[0].expires_at))}
+                  . Creating another supersedes it.
+                </p>
+              ) : null}
+            </div>
+          )}
+        </Card>
+      ) : null}
       {canAddPet ? (
         <Card title="Add another dog" description="Create another pet under the same household.">
           <form action={addPetToCustomerHousehold} className="grid gap-5 sm:grid-cols-2">

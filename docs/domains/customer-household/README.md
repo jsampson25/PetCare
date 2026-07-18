@@ -19,6 +19,8 @@ The Customer and Household Domain is the authoritative source for the people and
 - Customers may submit booking change and cancellation requests, but those requests never rewrite a confirmed booking directly.
 - Staff process each request through an audited review state machine with notes and append-only events.
 - Portal customers may update only safe profile fields in this slice; legal name and login email changes remain controlled support workflows.
+- Portal invitations are purpose-bound, expire, are single-use, store only a SHA-256 token digest, and require the signed-in identity email to match the invited customer email.
+- Staff can revoke portal access independently of the customer, household, booking, pickup-authority, and historical visit records.
 
 This domain identifies who may act. The Pet Domain owns the pet, the Booking Domain owns booking authorization snapshots, and the Payments Domain owns money movement.
 
