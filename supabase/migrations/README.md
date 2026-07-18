@@ -33,3 +33,5 @@ Pet behavior records capture structured risk type and severity, incident or obse
 Pet health conditions capture structured category, severity, diagnosis date, care impact, emergency instructions, and information source. Severe and critical conditions require emergency instructions, remain visually prominent, and are resolved with preserved history and a required reason rather than deleted.
 
 Pet identifiers capture microchips, licenses, registrations, and other durable identity values with issuer, issue date, and expiration date. Active values are normalized for tenant-scoped duplicate prevention and are retired with a required reason rather than deleted.
+
+Pet profile photos use a private `pet-profile-photos` bucket with 5 MB JPG, PNG, and WebP limits. Object paths are tenant and pet scoped, access follows pet permissions, replacement updates authoritative metadata atomically, and the superseded object is returned for storage cleanup.

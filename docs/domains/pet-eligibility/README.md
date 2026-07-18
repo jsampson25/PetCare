@@ -309,6 +309,8 @@ The health-condition slice adds structured medical category, severity, diagnosis
 
 The pet-identifier slice adds microchip, license, registration, and other durable identifiers with issuer and effective-date metadata. Values are normalized for tenant-scoped, formatting-insensitive duplicate prevention while preserving the exact display value. Retirement retains the original identifier and requires a reason. Pet photo, formal service evaluations, automated compliance, and broader eligibility decisions remain subsequent E04 slices.
 
+The pet-photo slice adds a private, tenant-scoped profile image with signed display access and controlled replacement. Only JPG, PNG, and WebP files up to 5 MB are accepted, and the prior object is removed after authoritative metadata changes successfully. The interface deliberately presents the photo alongside structured identity rather than treating appearance as identity. Formal service evaluations, automated compliance, and broader eligibility decisions remain subsequent slices.
+
 ## Domain events
 
 - `pet.created`

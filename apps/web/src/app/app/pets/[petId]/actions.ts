@@ -8,6 +8,8 @@ import { createSupabaseServerClient } from '../../../../lib/supabase/server';
 
 const acceptedTypes = new Set(['application/pdf', 'image/jpeg', 'image/png']);
 const maxBytes = 10 * 1024 * 1024;
+const acceptedPhotoTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const maxPhotoBytes = 5 * 1024 * 1024;
 const vaccinationSchema = z.object({
   administeredOn: z.union([z.literal(''), z.string().date()]),
   expiresOn: z.string().date(),
@@ -91,6 +93,51 @@ export async function reviewPetVaccination(formData: FormData) {
   });
   if (error) redirect(`/app/pets/${parsed.data.petId}?error=The+review+could+not+be+saved.`);
   redirect(`/app/pets/${parsed.data.petId}?notice=Vaccination+review+saved.`);
+}
+
+const petPhotoSchema = z.object({ petId: z.uuid() });
+
+export async function replacePetProfilePhoto(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const photo = formData.get('photo');
+  const parsed = petPhotoSchema.safeParse(Object.fromEntries(formData));
+  const petId = parsed.success ? parsed.data.petId : String(formData.get('petId') ?? '');
+  const failurePath = z.uuid().safeParse(petId).success ? `/app/pets/${petId}` : '/app/customers';
+  if (
+    !parsed.success ||
+    !(photo instanceof File) ||
+    photo.size < 1 ||
+    photo.size > maxPhotoBytes ||
+    !acceptedPhotoTypes.has(photo.type)
+  ) {
+    redirect(`${failurePath}?error=Choose+a+JPG,+PNG,+or+WebP+photo+under+5+MB.`);
+  }
+
+  const extension =
+    photo.type === 'image/png' ? 'png' : photo.type === 'image/webp' ? 'webp' : 'jpg';
+  const objectPath = `${context.businessId}/${parsed.data.petId}/${crypto.randomUUID()}.${extension}`;
+  const supabase = await createSupabaseServerClient();
+  const { error: uploadError } = await supabase.storage
+    .from('pet-profile-photos')
+    .upload(objectPath, photo, { contentType: photo.type, upsert: false });
+  if (uploadError) redirect(`${failurePath}?error=The+pet+photo+could+not+be+uploaded.`);
+
+  const { data: previousPath, error } = await supabase.rpc('replace_pet_profile_photo', {
+    mime_type: photo.type,
+    object_path: objectPath,
+    original_file_name: photo.name,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+  });
+  if (error) {
+    await supabase.storage.from('pet-profile-photos').remove([objectPath]);
+    redirect(`${failurePath}?error=The+pet+photo+could+not+be+saved.`);
+  }
+  if (typeof previousPath === 'string' && previousPath) {
+    await supabase.storage.from('pet-profile-photos').remove([previousPath]);
+  }
+  redirect(`${failurePath}?notice=Pet+photo+updated.`);
 }
 
 const allergySchema = z.object({

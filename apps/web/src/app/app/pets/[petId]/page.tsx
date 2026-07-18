@@ -20,6 +20,7 @@ import {
   resolvePetBehaviorRecord,
   resolvePetHealthCondition,
   resolvePetAllergy,
+  replacePetProfilePhoto,
   retirePetIdentifier,
   reviewPetVaccination,
   submitPetVaccination,
@@ -42,7 +43,7 @@ export default async function PetVaccinationsPage({
   const supabase = await createSupabaseServerClient();
   const { data: pet } = await supabase
     .from('pets')
-    .select('id,name,breed,household_id,status')
+    .select('id,name,breed,household_id,status,photo_object_path,photo_file_name')
     .eq('business_id', context.businessId)
     .eq('id', petId)
     .maybeSingle();
@@ -103,6 +104,13 @@ export default async function PetVaccinationsPage({
     .eq('business_id', context.businessId)
     .eq('pet_id', petId)
     .order('created_at', { ascending: false });
+  let petPhotoUrl: string | undefined;
+  if (pet.photo_object_path) {
+    const { data } = await supabase.storage
+      .from('pet-profile-photos')
+      .createSignedUrl(pet.photo_object_path, 300);
+    petPhotoUrl = data?.signedUrl;
+  }
   const evidenceLinks = new Map<string, string>();
   await Promise.all(
     (vaccinations ?? []).map(async (record) => {
@@ -123,12 +131,26 @@ export default async function PetVaccinationsPage({
         <ButtonLink href="/app/customers" variant="secondary">
           Back to customers
         </ButtonLink>
-        <div>
-          <p className="text-sm font-bold text-[var(--action-primary)]">Pet health record</p>
-          <h1 className="text-3xl font-black tracking-tight">{pet.name} care profile</h1>
-          <p className="mt-2 text-[var(--text-secondary)]">
-            {pet.breed} · {pet.status}
-          </p>
+        <div className="flex flex-wrap items-center gap-5">
+          {petPhotoUrl ? (
+            <div
+              aria-label={`${pet.name} profile photo`}
+              className="h-28 w-28 shrink-0 rounded-full border border-[var(--border-default)] bg-cover bg-center shadow-sm"
+              role="img"
+              style={{ backgroundImage: `url(${JSON.stringify(petPhotoUrl)})` }}
+            />
+          ) : (
+            <div className="grid h-28 w-28 shrink-0 place-items-center rounded-full bg-[var(--surface-subtle)] text-4xl font-black text-[var(--text-secondary)]">
+              {pet.name.slice(0, 1).toUpperCase()}
+            </div>
+          )}
+          <div>
+            <p className="text-sm font-bold text-[var(--action-primary)]">Pet health record</p>
+            <h1 className="text-3xl font-black tracking-tight">{pet.name} care profile</h1>
+            <p className="mt-2 text-[var(--text-secondary)]">
+              {pet.breed} · {pet.status}
+            </p>
+          </div>
         </div>
       </header>
       {error ? (
@@ -140,6 +162,38 @@ export default async function PetVaccinationsPage({
         <Alert title="Pet profile updated" tone="success">
           {notice}
         </Alert>
+      ) : null}
+      {canManage ? (
+        <Card
+          title={pet.photo_object_path ? 'Replace profile photo' : 'Add profile photo'}
+          description="A photo helps staff recognize the pet but never replaces structured identity. JPG, PNG, or WebP up to 5 MB."
+        >
+          <form
+            action={replacePetProfilePhoto}
+            className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"
+          >
+            <input name="petId" type="hidden" value={pet.id} />
+            <div>
+              <label className="block text-sm font-bold" htmlFor="photo">
+                Pet photo
+              </label>
+              <input
+                accept="image/jpeg,image/png,image/webp"
+                className="mt-2 block w-full rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-[var(--surface-default)] p-3 text-sm file:mr-4 file:min-h-10 file:rounded-[var(--radius-sm)] file:border-0 file:bg-[var(--surface-subtle)] file:px-4 file:font-bold"
+                id="photo"
+                name="photo"
+                required
+                type="file"
+              />
+              {pet.photo_file_name ? (
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                  Current file: {pet.photo_file_name}
+                </p>
+              ) : null}
+            </div>
+            <Button type="submit">{pet.photo_object_path ? 'Replace photo' : 'Add photo'}</Button>
+          </form>
+        </Card>
       ) : null}
       <Card
         title={`Identifiers (${identifiers?.filter((identifier) => identifier.status === 'active').length ?? 0} active)`}

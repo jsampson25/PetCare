@@ -33,3 +33,5 @@ Behavior-handling tests verify critical risk structure, required resolution cont
 Health-condition tests verify critical-condition emergency instructions, structured severity, required resolution context, retained history, and denial for an unrelated identity.
 
 Pet-identifier tests verify searchable normalization, formatting-insensitive duplicate prevention, history-preserving retirement, and denial for an unrelated identity.
+
+Pet-photo tests verify tenant/pet path binding, validated image metadata, replacement cleanup references, and denial for an unrelated identity. Storage-provider upload and signed-URL behavior require environment-level tests in addition to pgTAP.
