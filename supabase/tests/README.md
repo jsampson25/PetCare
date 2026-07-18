@@ -13,3 +13,5 @@ Privileged-MFA tests prove the same owner receives no permission/location access
 Business-onboarding tests exercise tenant provisioning, profile persistence, a seven-day schedule, readiness calculation, audit evidence, and AAL1 denial.
 
 Customer-window tests verify the seven-day arrival/pickup schedule, tenant-authorized saves, and rejection of windows outside regular operating hours.
+
+Location-closure tests verify future-date validation, secure tenant-scoped removal, and persistence of customer communication context.

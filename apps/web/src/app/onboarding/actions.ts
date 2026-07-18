@@ -174,3 +174,48 @@ export async function saveLocationCustomerWindows(formData: FormData) {
   }
   redirect('/onboarding/setup?notice=Customer+arrival+and+pickup+windows+saved.');
 }
+
+const closureSchema = z.object({
+  closureDate: z.string().date(),
+  customerMessage: z.string().trim().max(500),
+  locationId: z.uuid(),
+  reason: z.string().trim().min(2).max(200),
+});
+
+export async function saveLocationClosure(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('business.manage_locations')) redirect('/denied');
+  const parsed = closureSchema.safeParse(Object.fromEntries(formData));
+  const today = new Date().toISOString().slice(0, 10);
+  if (!parsed.success || parsed.data.closureDate < today) {
+    redirect('/onboarding/setup?error=Choose+a+current+or+future+closure+date+and+add+a+reason.');
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('save_location_closure', {
+    target_business_id: context.businessId,
+    target_closure_date: parsed.data.closureDate,
+    target_customer_message: parsed.data.customerMessage,
+    target_location_id: parsed.data.locationId,
+    target_reason: parsed.data.reason,
+  });
+  if (error) redirect('/onboarding/setup?error=The+closure+could+not+be+saved.');
+  redirect('/onboarding/setup?notice=Upcoming+closure+saved.');
+}
+
+const deleteClosureSchema = z.object({ closureId: z.uuid() });
+
+export async function deleteLocationClosure(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('business.manage_locations')) redirect('/denied');
+  const parsed = deleteClosureSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/onboarding/setup?error=The+closure+could+not+be+removed.');
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('delete_location_closure', {
+    target_business_id: context.businessId,
+    target_closure_id: parsed.data.closureId,
+  });
+  if (error) redirect('/onboarding/setup?error=The+closure+could+not+be+removed.');
+  redirect('/onboarding/setup?notice=Closure+removed.');
+}

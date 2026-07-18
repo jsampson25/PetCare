@@ -13,3 +13,5 @@ Privileged MFA enforcement is part of the database authorization helpers. Member
 The E03 onboarding foundation adds business/location contact and address data, validated weekly location hours, configuration audit triggers, and a tenant-safe foundation readiness function.
 
 Customer arrival and pickup windows are stored separately from operating hours. The initial slice configures weekday windows, closes weekends, validates every window against location operating hours, and preserves tenant-scoped audit history.
+
+Dated closures block location availability for a complete local calendar date. Authorized location managers may add, revise, or remove current and future closures with separate internal reasons and optional customer-facing messages.

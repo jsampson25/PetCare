@@ -6,7 +6,12 @@ import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
-import { saveLocationCustomerWindows, saveOnboardingSetup } from '../actions';
+import {
+  deleteLocationClosure,
+  saveLocationClosure,
+  saveLocationCustomerWindows,
+  saveOnboardingSetup,
+} from '../actions';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 
@@ -28,6 +33,7 @@ export default async function OnboardingSetupPage({
     { data: locations },
     { data: readinessRows },
     { data: customerWindows },
+    { data: closures },
   ] = await Promise.all([
     supabase
       .from('businesses')
@@ -50,6 +56,13 @@ export default async function OnboardingSetupPage({
       .select('location_id,window_type,day_of_week,starts_at,ends_at,is_closed')
       .eq('business_id', context.businessId)
       .eq('day_of_week', 1),
+    supabase
+      .from('location_closures')
+      .select('id,location_id,closure_date,reason,customer_message')
+      .eq('business_id', context.businessId)
+      .gte('closure_date', new Date().toISOString().slice(0, 10))
+      .order('closure_date')
+      .limit(12),
   ]);
   const location = locations?.[0];
   if (!business || !location) redirect('/denied');
@@ -60,6 +73,7 @@ export default async function OnboardingSetupPage({
   const pickupWindow = customerWindows?.find(
     (window) => window.location_id === location.id && window.window_type === 'pickup',
   );
+  const locationClosures = closures?.filter((closure) => closure.location_id === location.id) ?? [];
 
   return (
     <div className="space-y-6">
@@ -254,12 +268,84 @@ export default async function OnboardingSetupPage({
           <Button type="submit">Save customer windows</Button>
         </form>
       </Card>
+      <Card
+        title="Upcoming closures"
+        description="Block booking on holidays, maintenance days, or other dates when this location cannot accept customers."
+      >
+        <form action={saveLocationClosure} className="grid gap-5 sm:grid-cols-2">
+          <input name="locationId" type="hidden" value={location.id} />
+          <Field
+            label="Closure date"
+            min={new Date().toISOString().slice(0, 10)}
+            name="closureDate"
+            required
+            type="date"
+          />
+          <Field
+            label="Internal reason"
+            maxLength={200}
+            name="reason"
+            placeholder="Holiday or facility maintenance"
+            required
+          />
+          <Field
+            className="sm:col-span-2"
+            hint="Optional message shown to customers when the date is unavailable."
+            label="Customer message"
+            maxLength={500}
+            name="customerMessage"
+          />
+          <div className="sm:col-span-2">
+            <Button type="submit">Add closure</Button>
+          </div>
+        </form>
+        <div className="mt-6 border-t border-[var(--border-default)] pt-5">
+          <h3 className="font-bold">Scheduled dates</h3>
+          {locationClosures.length ? (
+            <ul className="mt-3 divide-y divide-[var(--border-default)]">
+              {locationClosures.map((closure) => (
+                <li
+                  className="flex flex-wrap items-center justify-between gap-4 py-4"
+                  key={closure.id}
+                >
+                  <div>
+                    <p className="font-bold">{formatClosureDate(closure.closure_date)}</p>
+                    <p className="text-sm text-[var(--text-secondary)]">{closure.reason}</p>
+                    {closure.customer_message ? (
+                      <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                        Customer message: {closure.customer_message}
+                      </p>
+                    ) : null}
+                  </div>
+                  <form action={deleteLocationClosure}>
+                    <input name="closureId" type="hidden" value={closure.id} />
+                    <Button type="submit" variant="quiet">
+                      Remove
+                    </Button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm text-[var(--text-secondary)]">
+              No upcoming closures have been added.
+            </p>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }
 
 function formatDatabaseTime(value: string | null | undefined, fallback: string) {
   return value?.slice(0, 5) ?? fallback;
+}
+
+function formatClosureDate(value: string) {
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'long',
+    timeZone: 'UTC',
+  }).format(new Date(`${value}T00:00:00Z`));
 }
 
 function SelectField({

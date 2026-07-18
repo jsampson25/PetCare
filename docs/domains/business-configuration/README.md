@@ -239,6 +239,8 @@ New verified identities without a tenant enter `/onboarding`, create a draft bus
 
 The next E03 slice adds separately managed customer arrival and pickup windows. Weekday windows must fit within the location's regular operating hours, weekends begin closed, and the database remains authoritative for tenant access, validation, audit events, and retry-safe upserts.
 
+Dated location closures are also managed during onboarding. Each closure records a local calendar date, internal reason, and optional customer message; tenant-scoped functions prevent past-date creation and unauthorized updates or removal.
+
 ## Domain events
 
 - `business.created`
