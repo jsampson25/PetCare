@@ -7,7 +7,7 @@ describe('getSafeRedirect', () => {
     expect(getSafeRedirect('/app/calendar?view=week')).toBe('/app/calendar?view=week');
   });
 
-  it.each(['https://evil.example', '//evil.example', 'javascript:alert(1)', 'app']) (
+  it.each(['https://evil.example', '//evil.example', 'javascript:alert(1)', 'app'])(
     'rejects unsafe redirect %s',
     (value) => expect(getSafeRedirect(value)).toBe('/app'),
   );

@@ -1,5 +1,10 @@
 export type TenantThemeResult =
-  | { accepted: true; actionColor: string; actionTextColor: '#000000' | '#ffffff'; contrast: number }
+  | {
+      accepted: true;
+      actionColor: string;
+      actionTextColor: '#000000' | '#ffffff';
+      contrast: number;
+    }
   | { accepted: false; reason: string };
 
 const hexPattern = /^#[0-9a-f]{6}$/i;

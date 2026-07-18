@@ -24,7 +24,11 @@ export function DataTable<Row>({
         <thead className="bg-[var(--surface-subtle)]">
           <tr>
             {columns.map((column) => (
-              <th className="border-b border-[var(--border-strong)] px-4 py-3 font-bold" key={column.key} scope="col">
+              <th
+                className="border-b border-[var(--border-strong)] px-4 py-3 font-bold"
+                key={column.key}
+                scope="col"
+              >
                 {column.header}
               </th>
             ))}
@@ -32,9 +36,14 @@ export function DataTable<Row>({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr className="border-b border-[var(--border-default)] last:border-0" key={getRowKey(row)}>
+            <tr
+              className="border-b border-[var(--border-default)] last:border-0"
+              key={getRowKey(row)}
+            >
               {columns.map((column) => (
-                <td className="px-4 py-3 align-top" key={column.key}>{column.render(row)}</td>
+                <td className="px-4 py-3 align-top" key={column.key}>
+                  {column.render(row)}
+                </td>
               ))}
             </tr>
           ))}

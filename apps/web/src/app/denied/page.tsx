@@ -6,7 +6,10 @@ import type { Metadata } from 'next';
 
 import { getSafeRedirect } from '../../lib/auth/safe-redirect';
 
-export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Access unavailable' };
+export const metadata: Metadata = {
+  robots: { follow: false, index: false },
+  title: 'Access unavailable',
+};
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 
@@ -18,11 +21,13 @@ export default async function DeniedPage({ searchParams }: { searchParams: Searc
     '/',
   );
 
-  console.warn(JSON.stringify({
-    event: 'authorization.denied_page_viewed',
-    reference,
-    timestamp: new Date().toISOString(),
-  }));
+  console.warn(
+    JSON.stringify({
+      event: 'authorization.denied_page_viewed',
+      reference,
+      timestamp: new Date().toISOString(),
+    }),
+  );
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-24">
@@ -31,7 +36,9 @@ export default async function DeniedPage({ searchParams }: { searchParams: Searc
         description="Your current account cannot use this area. The requested information may be unavailable or you may need different access. Ask a business owner if this seems incorrect."
         title="Access unavailable"
       />
-      <p className="mt-5 text-center text-xs text-[var(--text-secondary)]">Support reference: {reference}</p>
+      <p className="mt-5 text-center text-xs text-[var(--text-secondary)]">
+        Support reference: {reference}
+      </p>
     </main>
   );
 }

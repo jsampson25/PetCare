@@ -9,7 +9,11 @@ import { createSupabaseServerClient } from '../../lib/supabase/server';
 
 export type CreateBusinessState = { error?: string };
 
-const slugSchema = z.string().min(3).max(63).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+const slugSchema = z
+  .string()
+  .min(3)
+  .max(63)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const createSchema = z.object({
   businessName: z.string().trim().min(2).max(160),
   businessSlug: slugSchema,
@@ -19,7 +23,12 @@ const createSchema = z.object({
 });
 
 function validTimeZone(value: string) {
-  try { new Intl.DateTimeFormat('en-US', { timeZone: value }).format(); return true; } catch { return false; }
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: value }).format();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function createFirstBusiness(
@@ -47,12 +56,16 @@ export async function createFirstBusiness(
       .eq('public_slug', parsed.data.businessSlug)
       .maybeSingle();
     businessId = existing?.id;
-    if (!businessId) return { error: 'This business could not be created. Try a different web address.' };
+    if (!businessId)
+      return { error: 'This business could not be created. Try a different web address.' };
   }
 
   const cookieStore = await cookies();
   cookieStore.set(businessContextCookie, businessId, {
-    httpOnly: true, maxAge: 60 * 60 * 12, path: '/', sameSite: 'lax',
+    httpOnly: true,
+    maxAge: 60 * 60 * 12,
+    path: '/',
+    sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   });
   redirect('/auth/mfa?next=/onboarding/setup');
@@ -80,13 +93,23 @@ export async function saveOnboardingSetup(formData: FormData) {
   const context = await resolveBusinessContext();
   if (!context || !context.permissions.has('business.manage_profile')) redirect('/denied');
   const parsed = profileSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success || !validTimeZone(parsed.data.timeZone) || parsed.data.weekdayOpen >= parsed.data.weekdayClose) {
-    redirect('/onboarding/setup?error=Check+the+required+profile,+address,+time+zone,+and+hours+fields.');
+  if (
+    !parsed.success ||
+    !validTimeZone(parsed.data.timeZone) ||
+    parsed.data.weekdayOpen >= parsed.data.weekdayClose
+  ) {
+    redirect(
+      '/onboarding/setup?error=Check+the+required+profile,+address,+time+zone,+and+hours+fields.',
+    );
   }
 
   const supabase = await createSupabaseServerClient();
   const { data: location } = await supabase
-    .from('locations').select('id').eq('business_id', context.businessId).eq('id', parsed.data.locationId).maybeSingle();
+    .from('locations')
+    .select('id')
+    .eq('business_id', context.businessId)
+    .eq('id', parsed.data.locationId)
+    .maybeSingle();
   if (!location) redirect('/denied');
 
   const { error } = await supabase.rpc('save_business_onboarding_foundation', {

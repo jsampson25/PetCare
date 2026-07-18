@@ -9,18 +9,18 @@ The canonical vocabulary is now defined in the [Product Glossary](glossary.md). 
 
 ## Canonical decisions
 
-| Topic | Decision | Rationale |
-|---|---|---|
-| Booking vs. reservation | `Booking` is canonical | It already owns the domain and lifecycle; two object names would split APIs, metrics, and events |
-| Booking vs. operational visit | Booking is commercial; operational visit is execution/custody | A cancelled booking may have no visit; one visit may coordinate several service executions |
-| Stay vs. visit | Stay is boarding-specific; operational visit is cross-service | Grooming/daycare do not always represent an overnight stay |
-| Customer vs. pet owner | Customer is general; pet owner only when ownership is established | Household access, emergency contact, and pickup authority are separate relationships |
-| Business vs. tenant | Business is product language; tenant is the security/SaaS boundary | Keeps customer-facing language natural without weakening architecture meaning |
-| Business owner vs. platform operator | These are separate roles | Avoids confusing tenant authority with PetCare authority |
-| Resource vs. housing unit | Resource is general; housing unit is the pet-housing subset | Kennels, suites, staff, yards, and tables have different meanings |
-| Capacity hold vs. reservation | Capacity hold is temporary demand protection | Avoids collision with booking terminology |
-| Invoice vs. payment | Invoice records what is owed; payment records money movement | Required for reconciliation and reporting accuracy |
-| Refund vs. credit | Refund returns money; customer account credit stores business-specific value | Different financial and customer consequences |
+| Topic                                | Decision                                                                     | Rationale                                                                                        |
+| ------------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Booking vs. reservation              | `Booking` is canonical                                                       | It already owns the domain and lifecycle; two object names would split APIs, metrics, and events |
+| Booking vs. operational visit        | Booking is commercial; operational visit is execution/custody                | A cancelled booking may have no visit; one visit may coordinate several service executions       |
+| Stay vs. visit                       | Stay is boarding-specific; operational visit is cross-service                | Grooming/daycare do not always represent an overnight stay                                       |
+| Customer vs. pet owner               | Customer is general; pet owner only when ownership is established            | Household access, emergency contact, and pickup authority are separate relationships             |
+| Business vs. tenant                  | Business is product language; tenant is the security/SaaS boundary           | Keeps customer-facing language natural without weakening architecture meaning                    |
+| Business owner vs. platform operator | These are separate roles                                                     | Avoids confusing tenant authority with PetCare authority                                         |
+| Resource vs. housing unit            | Resource is general; housing unit is the pet-housing subset                  | Kennels, suites, staff, yards, and tables have different meanings                                |
+| Capacity hold vs. reservation        | Capacity hold is temporary demand protection                                 | Avoids collision with booking terminology                                                        |
+| Invoice vs. payment                  | Invoice records what is owed; payment records money movement                 | Required for reconciliation and reporting accuracy                                               |
+| Refund vs. credit                    | Refund returns money; customer account credit stores business-specific value | Different financial and customer consequences                                                    |
 
 ## Corrections applied in this milestone
 
@@ -71,4 +71,3 @@ Before accepting a document or implementation:
 - [Operations domain](../domains/operations/README.md)
 - [Reporting domain](../domains/reporting/README.md)
 - [Platform test strategy](../quality/test-strategy.md)
-

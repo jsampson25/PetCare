@@ -6,11 +6,11 @@ This index controls the platform requirements. It converts product intent into u
 
 Use the format `DOMAIN-TYPE-NNN`.
 
-| Segment | Meaning | Examples |
-|---|---|---|
-| Domain | Stable domain abbreviation | `BCFG`, `CUST`, `PET`, `BOOK`, `PRICE`, `PAY`, `OPS` |
-| Type | Requirement category | `FR` functional, `BR` business rule, `NFR` non-functional, `SEC` security, `DATA` data |
-| Number | Three-digit sequence within the domain and type | `001`, `002` |
+| Segment | Meaning                                         | Examples                                                                               |
+| ------- | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Domain  | Stable domain abbreviation                      | `BCFG`, `CUST`, `PET`, `BOOK`, `PRICE`, `PAY`, `OPS`                                   |
+| Type    | Requirement category                            | `FR` functional, `BR` business rule, `NFR` non-functional, `SEC` security, `DATA` data |
+| Number  | Three-digit sequence within the domain and type | `001`, `002`                                                                           |
 
 Example: `BOOK-BR-014` identifies Booking business rule 14.
 
@@ -26,32 +26,32 @@ Proposed → Accepted → Designed → Implemented → Verified
 
 ## Priority definitions
 
-| Priority | Meaning |
-|---|---|
-| P0 | Required for the MVP to operate safely or deliver its core value. |
-| P1 | Important shortly after MVP or necessary for strong market competitiveness. |
-| P2 | Valuable enhancement that does not block launch. |
-| Future | Deliberately outside the current planning horizon. |
+| Priority | Meaning                                                                     |
+| -------- | --------------------------------------------------------------------------- |
+| P0       | Required for the MVP to operate safely or deliver its core value.           |
+| P1       | Important shortly after MVP or necessary for strong market competitiveness. |
+| P2       | Valuable enhancement that does not block launch.                            |
+| Future   | Deliberately outside the current planning horizon.                          |
 
 ## Domain register
 
-| Domain | Prefix | MVP importance | Specification | Status |
-|---|---|---:|---|---|
-| Business Configuration | BCFG | P0 | [Specification](../domains/business-configuration/README.md) | In progress |
-| Identity and Access | IAM | P0 | [Specification](../domains/identity-access/README.md) | In progress |
-| Customer and Household | CUST | P0 | [Specification](../domains/customer-household/README.md) | In progress |
-| Pet and Eligibility | PET | P0 | [Specification](../domains/pet-eligibility/README.md) | In progress |
-| Service Catalog | SERV | P0 | [Specification](../domains/service-catalog/README.md) | In progress |
-| Resource and Capacity | CAP | P0 | [Specification](../domains/resource-capacity/README.md) | In progress |
-| Booking and Waitlist | BOOK | P0 | [Specification](../domains/booking-waitlist/README.md) | In progress |
-| Pricing and Policies | PRICE | P0 | [Specification](../domains/pricing-policies/README.md) | In progress |
-| Payments and Invoicing | PAY | P0 | [Specification](../domains/payments-invoicing/README.md) | In progress |
-| Operations | OPS | P0 | [Specification](../domains/operations/README.md) | In progress |
-| Communications | COMM | P0 | [Specification](../domains/communications/README.md) | In progress |
-| Reporting | RPT | P0/P1 | [Specification](../domains/reporting/README.md) | In progress |
-| Website and Content | WEB | P0/P1 | [Specification](../domains/website-content/README.md) | In progress |
-| Platform Administration | ADMIN | P0 | [Specification](../domains/platform-administration/README.md) | In progress |
-| AI Assistance | AI | Future | Planned | Deferred |
+| Domain                  | Prefix | MVP importance | Specification                                                 | Status      |
+| ----------------------- | ------ | -------------: | ------------------------------------------------------------- | ----------- |
+| Business Configuration  | BCFG   |             P0 | [Specification](../domains/business-configuration/README.md)  | In progress |
+| Identity and Access     | IAM    |             P0 | [Specification](../domains/identity-access/README.md)         | In progress |
+| Customer and Household  | CUST   |             P0 | [Specification](../domains/customer-household/README.md)      | In progress |
+| Pet and Eligibility     | PET    |             P0 | [Specification](../domains/pet-eligibility/README.md)         | In progress |
+| Service Catalog         | SERV   |             P0 | [Specification](../domains/service-catalog/README.md)         | In progress |
+| Resource and Capacity   | CAP    |             P0 | [Specification](../domains/resource-capacity/README.md)       | In progress |
+| Booking and Waitlist    | BOOK   |             P0 | [Specification](../domains/booking-waitlist/README.md)        | In progress |
+| Pricing and Policies    | PRICE  |             P0 | [Specification](../domains/pricing-policies/README.md)        | In progress |
+| Payments and Invoicing  | PAY    |             P0 | [Specification](../domains/payments-invoicing/README.md)      | In progress |
+| Operations              | OPS    |             P0 | [Specification](../domains/operations/README.md)              | In progress |
+| Communications          | COMM   |             P0 | [Specification](../domains/communications/README.md)          | In progress |
+| Reporting               | RPT    |          P0/P1 | [Specification](../domains/reporting/README.md)               | In progress |
+| Website and Content     | WEB    |          P0/P1 | [Specification](../domains/website-content/README.md)         | In progress |
+| Platform Administration | ADMIN  |             P0 | [Specification](../domains/platform-administration/README.md) | In progress |
+| AI Assistance           | AI     |         Future | Planned                                                       | Deferred    |
 
 ## Cross-cutting requirement areas
 

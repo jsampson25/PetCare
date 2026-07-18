@@ -322,13 +322,13 @@ Start local Supabase
 
 ## 9. Environment model
 
-| Environment | Application | Supabase/data | Purpose |
-|---|---|---|---|
-| Local | Developer machine | Local Supabase stack | Fast coding, migrations, tests |
-| CI ephemeral | GitHub runner/test process | Disposable PostgreSQL/Supabase-compatible stack | Automated verification |
-| Preview | Vercel branch deployment | Approved isolated nonproduction backend | Product/design review; no production data |
-| Staging | Stable Vercel environment | Dedicated staging Supabase project | Release rehearsal and provider sandboxes |
-| Production | Vercel production | Dedicated production Supabase project | Real tenant operation |
+| Environment  | Application                | Supabase/data                                   | Purpose                                   |
+| ------------ | -------------------------- | ----------------------------------------------- | ----------------------------------------- |
+| Local        | Developer machine          | Local Supabase stack                            | Fast coding, migrations, tests            |
+| CI ephemeral | GitHub runner/test process | Disposable PostgreSQL/Supabase-compatible stack | Automated verification                    |
+| Preview      | Vercel branch deployment   | Approved isolated nonproduction backend         | Product/design review; no production data |
+| Staging      | Stable Vercel environment  | Dedicated staging Supabase project              | Release rehearsal and provider sandboxes  |
+| Production   | Vercel production          | Dedicated production Supabase project           | Real tenant operation                     |
 
 ### Environment rules
 
@@ -769,4 +769,3 @@ Any change requires a new ADR; do not rewrite this accepted historical decision.
 - [Supabase CLI local workflow](https://supabase.com/docs/guides/local-development/cli-workflows)
 - [GitHub Actions: building and testing Node.js](https://docs.github.com/en/actions/tutorials/build-and-test-code/nodejs)
 - [GitHub Actions dependency-cache security](https://docs.github.com/en/actions/concepts/workflows-and-actions/dependency-caching)
-

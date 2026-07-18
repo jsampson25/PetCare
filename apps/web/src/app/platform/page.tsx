@@ -15,8 +15,8 @@ export default function PlatformHomePage() {
         </Alert>
         <Card title="Tenant access boundary">
           <p className="leading-7 text-[var(--text-secondary)]">
-            Platform operators must explicitly select and justify tenant support access. This shell never
-            impersonates tenant branding.
+            Platform operators must explicitly select and justify tenant support access. This shell
+            never impersonates tenant branding.
           </p>
         </Card>
       </div>

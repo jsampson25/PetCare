@@ -5,7 +5,12 @@ import { getSafeRedirect } from '../../../lib/auth/safe-redirect';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
 
 const supportedOtpTypes = new Set<EmailOtpType>([
-  'email', 'email_change', 'invite', 'magiclink', 'recovery', 'signup',
+  'email',
+  'email_change',
+  'invite',
+  'magiclink',
+  'recovery',
+  'signup',
 ]);
 
 export async function GET(request: NextRequest) {

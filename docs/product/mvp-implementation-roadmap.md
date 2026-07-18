@@ -53,15 +53,15 @@ AI may draft code and tests, but accepted requirements, human review, real datab
 
 ## 4. Roadmap horizons
 
-| Horizon | Meaning | Exit outcome |
-|---|---|---|
-| H0 Foundation | Repository and deployable skeleton | Secure application can deploy to nonproduction |
-| H1 First booking | Business configuration through paid booking | One controlled customer booking succeeds end to end |
-| H2 First stay/visit | Check-in through checkout | Staff can safely execute the service journey |
-| H3 Design-partner alpha | Complete minimum business loop | Founder and selected businesses test realistic workflows |
-| H4 Private beta | Hardened multi-tenant operation | Several businesses use isolated production tenants |
-| H5 Paid MVP | Supported commercial launch | Billing, support, reliability, and core reporting are ready |
-| H6 Post-MVP | Validated expansion | Deferred capabilities enter evidence-based planning |
+| Horizon                 | Meaning                                     | Exit outcome                                                |
+| ----------------------- | ------------------------------------------- | ----------------------------------------------------------- |
+| H0 Foundation           | Repository and deployable skeleton          | Secure application can deploy to nonproduction              |
+| H1 First booking        | Business configuration through paid booking | One controlled customer booking succeeds end to end         |
+| H2 First stay/visit     | Check-in through checkout                   | Staff can safely execute the service journey                |
+| H3 Design-partner alpha | Complete minimum business loop              | Founder and selected businesses test realistic workflows    |
+| H4 Private beta         | Hardened multi-tenant operation             | Several businesses use isolated production tenants          |
+| H5 Paid MVP             | Supported commercial launch                 | Billing, support, reliability, and core reporting are ready |
+| H6 Post-MVP             | Validated expansion                         | Deferred capabilities enter evidence-based planning         |
 
 ## 5. Epic map
 
@@ -571,24 +571,24 @@ Prove the product with real businesses and make it supportable as a paid service
 
 The epics are delivered through smaller increments:
 
-| Increment | Demonstrable outcome |
-|---:|---|
-| I00 | Repository builds, tests, and deploys a secure skeleton |
-| I01 | Accessible shells and shared components render in preview |
-| I02 | Owner signs in and creates isolated business/location |
-| I03 | Owner invites staff and verifies scoped access |
-| I04 | Staff/customer creates household and pet with vaccine evidence |
-| I05 | Owner publishes one boarding service with capacity and requirements |
-| I06 | System produces a correct quote and policy review |
-| I07 | Customer completes one paid confirmed booking |
-| I08 | Staff sees the booking on Today/calendar and processes check-in |
-| I09 | Staff records feeding and medication tasks |
-| I10 | Staff checks out and reconciles payment/receipt |
-| I11 | Same lifecycle supports minimum daycare and grooming variations |
-| I12 | Customer portal and public website are launch-complete |
-| I13 | Owner views reconciled minimum reports |
-| I14 | Platform operator safely provisions/supports multiple tenants |
-| I15 | Design-partner beta passes launch gates |
+| Increment | Demonstrable outcome                                                |
+| --------: | ------------------------------------------------------------------- |
+|       I00 | Repository builds, tests, and deploys a secure skeleton             |
+|       I01 | Accessible shells and shared components render in preview           |
+|       I02 | Owner signs in and creates isolated business/location               |
+|       I03 | Owner invites staff and verifies scoped access                      |
+|       I04 | Staff/customer creates household and pet with vaccine evidence      |
+|       I05 | Owner publishes one boarding service with capacity and requirements |
+|       I06 | System produces a correct quote and policy review                   |
+|       I07 | Customer completes one paid confirmed booking                       |
+|       I08 | Staff sees the booking on Today/calendar and processes check-in     |
+|       I09 | Staff records feeding and medication tasks                          |
+|       I10 | Staff checks out and reconciles payment/receipt                     |
+|       I11 | Same lifecycle supports minimum daycare and grooming variations     |
+|       I12 | Customer portal and public website are launch-complete              |
+|       I13 | Owner views reconciled minimum reports                              |
+|       I14 | Platform operator safely provisions/supports multiple tenants       |
+|       I15 | Design-partner beta passes launch gates                             |
 
 Each increment must be demoable using realistic data and include its required tests, not merely merged backend code.
 
@@ -779,31 +779,31 @@ Additions are recorded in the MVP scope, roadmap, requirements, and affected tes
 
 ## 34. Measurement by horizon
 
-| Horizon | Evidence |
-|---|---|
-| H0 | Build success, CI duration, deployment success, foundation defect rate |
-| H1 | Valid quote/booking/payment completion, capacity correctness, booking usability |
-| H2 | Check-in/out completion, task compliance, safety exceptions, staff usability |
-| H3 | Design-partner task success, defects, support needs, configuration gaps |
-| H4 | Tenant isolation, reliability, provider success, repeat real workflows |
-| H5 | Activation, paid conversion, booking volume, operational adoption, retention signals |
+| Horizon | Evidence                                                                             |
+| ------- | ------------------------------------------------------------------------------------ |
+| H0      | Build success, CI duration, deployment success, foundation defect rate               |
+| H1      | Valid quote/booking/payment completion, capacity correctness, booking usability      |
+| H2      | Check-in/out completion, task compliance, safety exceptions, staff usability         |
+| H3      | Design-partner task success, defects, support needs, configuration gaps              |
+| H4      | Tenant isolation, reliability, provider success, repeat real workflows               |
+| H5      | Activation, paid conversion, booking volume, operational adoption, retention signals |
 
 Metrics require canonical definitions from Reporting and must not substitute activity volume for validated product value.
 
 ## 35. Major delivery risks and mitigations
 
-| Risk | Mitigation |
-|---|---|
-| Building too much before customer use | Deliver first booking and first visit early; use design partners |
-| AI-generated inconsistency | Shared standards, small changes, human review, requirement-linked tests |
-| Tenant data leak | RLS from first migration, two-tenant fixtures, release gate |
-| Availability/pricing complexity | Narrow supported rules, deterministic engine, snapshots, property tests |
-| Payment ambiguity | Verified webhooks, idempotency, reconciliation queue, provider adapter |
-| Operational safety gaps | Pet identity pattern, immutable timeline, exception/escalation paths |
-| Solo-founder overload | WIP limits, modular monolith, managed services, defer noncore capabilities |
-| Provider lock-in | Domain adapters and persisted internal state without premature abstraction |
-| Poor first-business onboarding | Founder-assisted beta onboarding, readiness checklist, observable failures |
-| Documentation outruns implementation | Just-in-time implementation artifacts and acceptance evidence |
+| Risk                                  | Mitigation                                                                 |
+| ------------------------------------- | -------------------------------------------------------------------------- |
+| Building too much before customer use | Deliver first booking and first visit early; use design partners           |
+| AI-generated inconsistency            | Shared standards, small changes, human review, requirement-linked tests    |
+| Tenant data leak                      | RLS from first migration, two-tenant fixtures, release gate                |
+| Availability/pricing complexity       | Narrow supported rules, deterministic engine, snapshots, property tests    |
+| Payment ambiguity                     | Verified webhooks, idempotency, reconciliation queue, provider adapter     |
+| Operational safety gaps               | Pet identity pattern, immutable timeline, exception/escalation paths       |
+| Solo-founder overload                 | WIP limits, modular monolith, managed services, defer noncore capabilities |
+| Provider lock-in                      | Domain adapters and persisted internal state without premature abstraction |
+| Poor first-business onboarding        | Founder-assisted beta onboarding, readiness checklist, observable failures |
+| Documentation outruns implementation  | Just-in-time implementation artifacts and acceptance evidence              |
 
 ## 36. Roadmap status model
 

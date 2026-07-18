@@ -294,13 +294,13 @@ Differences are shown by category, with prior and proposed values where safe.
 
 ### Change outcomes
 
-| Outcome | Behavior |
-|---|---|
-| Accept for this visit | Included in care-plan snapshot; may propose master-profile update |
-| Accept and update master | Authorized structured update plus snapshot |
-| Needs manager review | Check-in waits or follows controlled conditional path |
-| Needs veterinary/customer clarification | Record contact action and response |
-| Cannot accommodate | Alternative service, delayed intake, cancellation, or refusal under policy |
+| Outcome                                 | Behavior                                                                   |
+| --------------------------------------- | -------------------------------------------------------------------------- |
+| Accept for this visit                   | Included in care-plan snapshot; may propose master-profile update          |
+| Accept and update master                | Authorized structured update plus snapshot                                 |
+| Needs manager review                    | Check-in waits or follows controlled conditional path                      |
+| Needs veterinary/customer clarification | Record contact action and response                                         |
+| Cannot accommodate                      | Alternative service, delayed intake, cancellation, or refusal under policy |
 
 Staff do not diagnose. Observed symptoms or reported medical changes use structured safety escalation.
 
@@ -882,15 +882,15 @@ If checkout starts but the pet remains:
 
 ## Network and dependency failures
 
-| Failure | Check-in behavior | Checkout behavior |
-|---|---|---|
-| Booking unavailable | Do not create unverified normal visit; use approved downtime process | Preserve pet custody; use safe read cache/downtime procedure |
-| Eligibility delayed | Manager/policy pending path or wait | Usually informational unless unresolved safety issue |
-| Payment unavailable | Follow arrival exception policy; no manual success | Follow departure policy and record pending financial action |
-| Communications unavailable | Check-in can complete; queue confirmation | Checkout can complete; queue receipt/report delivery |
-| Reporting unavailable | No effect on care workflow | No effect on care workflow |
-| Storage upload failed | Preserve structured record; retry required evidence | Preserve structured record; retry required evidence |
-| Client loses connection during completion | Reconcile idempotent status before retry | Reconcile idempotent status before retry |
+| Failure                                   | Check-in behavior                                                    | Checkout behavior                                            |
+| ----------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Booking unavailable                       | Do not create unverified normal visit; use approved downtime process | Preserve pet custody; use safe read cache/downtime procedure |
+| Eligibility delayed                       | Manager/policy pending path or wait                                  | Usually informational unless unresolved safety issue         |
+| Payment unavailable                       | Follow arrival exception policy; no manual success                   | Follow departure policy and record pending financial action  |
+| Communications unavailable                | Check-in can complete; queue confirmation                            | Checkout can complete; queue receipt/report delivery         |
+| Reporting unavailable                     | No effect on care workflow                                           | No effect on care workflow                                   |
+| Storage upload failed                     | Preserve structured record; retry required evidence                  | Preserve structured record; retry required evidence          |
+| Client loses connection during completion | Reconcile idempotent status before retry                             | Reconcile idempotent status before retry                     |
 
 A formal downtime runbook will define minimum local/read access, paper fallback if required, later reconciliation, and audit expectations. The UI never claims a critical completion succeeded without authoritative confirmation.
 
@@ -937,17 +937,17 @@ When a customer signs or confirms information on a staff device:
 
 ## Permissions presentation
 
-| Action | Front desk | Care staff | Groomer | Manager | Customer/pickup |
-|---|:---:|:---:|:---:|:---:|:---:|
-| Record arrival | Yes | Configurable | Assigned appointment | Yes | No |
-| Verify person/pet | Yes | Configurable | Grooming intake | Yes | Participate |
-| Review care plan | Relevant | Assigned | Grooming relevant | Yes | Confirm customer-safe data |
-| Intake medication | Permission based | Permission based | No by default | Permission based | Present/confirm |
-| Override blocker | No | No | No | Restricted | No |
-| Complete check-in | Yes | Configurable | Grooming-specific | Yes | No |
-| Verify pickup | Yes | No by default | Configurable | Yes | Present identity |
-| Collect payment | Permission based | No | Configurable | Yes | Pay |
-| Complete checkout | Yes | No by default | Grooming-specific | Yes | Receive/acknowledge |
+| Action            |    Front desk    |    Care staff    |       Groomer        |     Manager      |      Customer/pickup       |
+| ----------------- | :--------------: | :--------------: | :------------------: | :--------------: | :------------------------: |
+| Record arrival    |       Yes        |   Configurable   | Assigned appointment |       Yes        |             No             |
+| Verify person/pet |       Yes        |   Configurable   |   Grooming intake    |       Yes        |        Participate         |
+| Review care plan  |     Relevant     |     Assigned     |  Grooming relevant   |       Yes        | Confirm customer-safe data |
+| Intake medication | Permission based | Permission based |    No by default     | Permission based |      Present/confirm       |
+| Override blocker  |        No        |        No        |          No          |    Restricted    |             No             |
+| Complete check-in |       Yes        |   Configurable   |  Grooming-specific   |       Yes        |             No             |
+| Verify pickup     |       Yes        |  No by default   |     Configurable     |       Yes        |      Present identity      |
+| Collect payment   | Permission based |        No        |     Configurable     |       Yes        |            Pay             |
+| Complete checkout |       Yes        |  No by default   |  Grooming-specific   |       Yes        |    Receive/acknowledge     |
 
 The UI may hide unavailable actions, but server authorization and domain state rules make the decision.
 
@@ -1213,4 +1213,3 @@ Metrics distinguish operational delay from customer arrival/pickup behavior and 
 - [Payments and Invoicing](../domains/payments-invoicing/README.md)
 - [Operations: Check-In and Checkout](../domains/operations/check-in-checkout.md)
 - [Operations Domain](../domains/operations/README.md)
-

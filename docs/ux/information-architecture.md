@@ -44,14 +44,14 @@ flowchart LR
 
 ### Surface boundaries
 
-| Surface | Audience | Primary objective | Identity context |
-|---|---|---|---|
-| Public Website | Anonymous visitor and customer | Learn, trust, and start booking | Trusted tenant hostname; authentication optional |
-| Booking Flow | Visitor or authenticated customer | Create a valid booking or waitlist request | Tenant required; customer may authenticate during flow |
-| Customer Portal | Customer and household member | Manage pets, bookings, documents, payments, messages, and account | Identity plus business-scoped customer relationship |
-| Business Portal | Owner, manager, front desk, accountant, marketing | Configure and manage the business | Identity plus tenant membership, role, and location scope |
-| Staff Operations | Front desk, care staff, groomer, manager | Execute today's pet-care work safely | Same membership as Business Portal with task-focused navigation |
-| Platform Console | Authorized PetCare operator | Operate tenants and the SaaS platform | Platform identity and, when needed, support session |
+| Surface          | Audience                                          | Primary objective                                                 | Identity context                                                |
+| ---------------- | ------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------- |
+| Public Website   | Anonymous visitor and customer                    | Learn, trust, and start booking                                   | Trusted tenant hostname; authentication optional                |
+| Booking Flow     | Visitor or authenticated customer                 | Create a valid booking or waitlist request                        | Tenant required; customer may authenticate during flow          |
+| Customer Portal  | Customer and household member                     | Manage pets, bookings, documents, payments, messages, and account | Identity plus business-scoped customer relationship             |
+| Business Portal  | Owner, manager, front desk, accountant, marketing | Configure and manage the business                                 | Identity plus tenant membership, role, and location scope       |
+| Staff Operations | Front desk, care staff, groomer, manager          | Execute today's pet-care work safely                              | Same membership as Business Portal with task-focused navigation |
+| Platform Console | Authorized PetCare operator                       | Operate tenants and the SaaS platform                             | Platform identity and, when needed, support session             |
 
 The Business Portal and Staff Operations may be delivered by one responsive application shell. They are distinct information-architecture modes because their priorities and default pages differ.
 
@@ -59,14 +59,14 @@ The Business Portal and Staff Operations may be delivered by one responsive appl
 
 The final implementation may refine literal URLs, but boundaries remain stable.
 
-| Namespace | Purpose | Example |
-|---|---|---|
-| Tenant hostname root | Public website | `https://happy-paws.example.com/services` |
-| `/book` | Tenant-aware booking flow | `/book/availability` |
-| `/account` | Customer portal | `/account/bookings/123` |
-| `/app` | Business and staff portal | `/app/operations/today` |
-| `/platform` | Internal Platform Console | `/platform/tenants/123` |
-| `/auth` | Authentication and recovery | `/auth/sign-in` |
+| Namespace            | Purpose                     | Example                                   |
+| -------------------- | --------------------------- | ----------------------------------------- |
+| Tenant hostname root | Public website              | `https://happy-paws.example.com/services` |
+| `/book`              | Tenant-aware booking flow   | `/book/availability`                      |
+| `/account`           | Customer portal             | `/account/bookings/123`                   |
+| `/app`               | Business and staff portal   | `/app/operations/today`                   |
+| `/platform`          | Internal Platform Console   | `/platform/tenants/123`                   |
+| `/auth`              | Authentication and recovery | `/auth/sign-in`                           |
 
 Custom tenant domains use the same public, booking, and customer paths where supported. Internal business and platform routes use controlled application hostnames so public-domain changes cannot strand staff access.
 
@@ -82,13 +82,13 @@ Custom tenant domains use the same public, booking, and customer paths where sup
 
 ### Location selection
 
-| Situation | Behavior |
-|---|---|
-| Single authorized location | Location selector may be hidden, but context remains in page metadata and authorization. |
-| Multiple authorized locations | Persistent selector is visible in the business/staff shell. |
-| All-locations report | Selector explicitly says `All locations`; location-specific actions are disabled until a location is chosen. |
-| Object belongs to one location | Object header displays that location and does not silently change it. |
-| Cross-location object | Header shows participating locations and the user's effective scope. |
+| Situation                      | Behavior                                                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| Single authorized location     | Location selector may be hidden, but context remains in page metadata and authorization.                     |
+| Multiple authorized locations  | Persistent selector is visible in the business/staff shell.                                                  |
+| All-locations report           | Selector explicitly says `All locations`; location-specific actions are disabled until a location is chosen. |
+| Object belongs to one location | Object header displays that location and does not silently change it.                                        |
+| Cross-location object          | Header shows participating locations and the user's effective scope.                                         |
 
 Changing location updates list, dashboard, and creation defaults but does not mutate an already-open object's location. Unsaved work receives a warning before context changes.
 
@@ -417,13 +417,13 @@ Operations
 
 Role-specific default:
 
-| Role | Default operations view |
-|---|---|
-| Front desk | Arrivals and departures |
-| Care staff | Due care tasks |
-| Groomer | Grooming board |
+| Role              | Default operations view                            |
+| ----------------- | -------------------------------------------------- |
+| Front desk        | Arrivals and departures                            |
+| Care staff        | Due care tasks                                     |
+| Groomer           | Grooming board                                     |
 | Daycare attendant | Daycare attendance/playgroup view when implemented |
-| Manager | Operational exceptions |
+| Manager           | Operational exceptions                             |
 
 Operations screens prioritize rapid recording, safe confirmation, offline/error clarity, and minimal navigation steps. Medication and incident workflows use deliberate confirmation rather than one-click completion.
 
@@ -701,19 +701,19 @@ An empty state is not a generic illustration and `Nothing here`. It explains wha
 
 ## Role-based navigation summary
 
-| Destination | Owner | Manager | Front desk | Care staff | Groomer | Accountant | Marketing |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Today | Yes | Yes | Yes | Yes | Yes | Optional | Optional |
-| Calendar | Yes | Yes | Yes | Assigned | Assigned | Optional | No |
-| Customers | Yes | Yes | Yes | Limited | Limited | Limited | Limited |
-| Pets | Yes | Yes | Yes | Yes | Assigned | Limited | No |
-| Bookings | Yes | Yes | Yes | Assigned | Assigned | Limited | No |
-| Operations | Yes | Yes | Yes | Yes | Grooming | No | No |
-| Payments | Yes | Configurable | Configurable | No | Tips/assigned only later | Yes | No |
-| Messages | Yes | Yes | Yes | Configurable | Configurable | Limited | Configurable |
-| Reports | Yes | Configurable | Operational subset | Assigned subset | Assigned subset | Financial | Marketing subset later |
-| Website | Yes | Configurable | No | No | No | No | Yes |
-| Settings | Yes | Configurable | Limited | No | No | Limited | Website subset |
+| Destination | Owner |   Manager    |     Front desk     |   Care staff    |         Groomer          | Accountant |       Marketing        |
+| ----------- | :---: | :----------: | :----------------: | :-------------: | :----------------------: | :--------: | :--------------------: |
+| Today       |  Yes  |     Yes      |        Yes         |       Yes       |           Yes            |  Optional  |        Optional        |
+| Calendar    |  Yes  |     Yes      |        Yes         |    Assigned     |         Assigned         |  Optional  |           No           |
+| Customers   |  Yes  |     Yes      |        Yes         |     Limited     |         Limited          |  Limited   |        Limited         |
+| Pets        |  Yes  |     Yes      |        Yes         |       Yes       |         Assigned         |  Limited   |           No           |
+| Bookings    |  Yes  |     Yes      |        Yes         |    Assigned     |         Assigned         |  Limited   |           No           |
+| Operations  |  Yes  |     Yes      |        Yes         |       Yes       |         Grooming         |     No     |           No           |
+| Payments    |  Yes  | Configurable |    Configurable    |       No        | Tips/assigned only later |    Yes     |           No           |
+| Messages    |  Yes  |     Yes      |        Yes         |  Configurable   |       Configurable       |  Limited   |      Configurable      |
+| Reports     |  Yes  | Configurable | Operational subset | Assigned subset |     Assigned subset      | Financial  | Marketing subset later |
+| Website     |  Yes  | Configurable |         No         |       No        |            No            |     No     |          Yes           |
+| Settings    |  Yes  | Configurable |      Limited       |       No        |            No            |  Limited   |     Website subset     |
 
 This is a presentation guide, not the permission source of truth. IAM permissions and domain policies control actual access.
 
@@ -905,4 +905,3 @@ The inventory identifies destinations; it is not authorization to implement ever
 - [Reporting](../domains/reporting/README.md)
 - [Website and Content](../domains/website-content/README.md)
 - [Platform Administration](../domains/platform-administration/README.md)
-

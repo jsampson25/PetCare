@@ -44,18 +44,18 @@ This document does not:
 
 ## 5. Access concepts users must understand
 
-| Concept | User-facing meaning | System meaning |
-|---|---|---|
-| Identity | The signed-in person | Stable authenticated identity |
-| Account type | Customer, business user, or platform operator experience | Classification and allowed portal context |
-| Business membership | Access to work for one business | Identity-to-tenant relationship |
-| Role | A named set of job-related capabilities | Platform-defined permission template |
-| Location access | Places where the role applies | Dynamic all-location or explicit location scope |
-| Assignment | Work or records currently assigned to the user | Domain restriction inside granted scope |
-| Permission | An allowed action category | Stable action-oriented permission key |
-| Approval | A required second decision | Domain workflow, not a general permission |
-| Step-up verification | Reconfirm identity for a sensitive action | Temporary higher session assurance |
-| Support access | Time-limited platform assistance | Audited platform support session |
+| Concept              | User-facing meaning                                      | System meaning                                  |
+| -------------------- | -------------------------------------------------------- | ----------------------------------------------- |
+| Identity             | The signed-in person                                     | Stable authenticated identity                   |
+| Account type         | Customer, business user, or platform operator experience | Classification and allowed portal context       |
+| Business membership  | Access to work for one business                          | Identity-to-tenant relationship                 |
+| Role                 | A named set of job-related capabilities                  | Platform-defined permission template            |
+| Location access      | Places where the role applies                            | Dynamic all-location or explicit location scope |
+| Assignment           | Work or records currently assigned to the user           | Domain restriction inside granted scope         |
+| Permission           | An allowed action category                               | Stable action-oriented permission key           |
+| Approval             | A required second decision                               | Domain workflow, not a general permission       |
+| Step-up verification | Reconfirm identity for a sensitive action                | Temporary higher session assurance              |
+| Support access       | Time-limited platform assistance                         | Audited platform support session                |
 
 The UI should use plain language such as `Can issue refunds` or `Access to Downtown and Airport locations`. Internal permission keys may appear only in advanced diagnostic or platform-administration views.
 
@@ -118,16 +118,16 @@ One identity may be a customer of one business, staff at another, and owner of a
 
 ### 8.1 MVP predefined roles
 
-| Role | Plain-language summary |
-|---|---|
-| Owner | Full business administration, security, billing, and authorized business operations |
-| Manager | Broad operational oversight for assigned locations, with selected administrative rights |
-| Front desk | Customers, pets, bookings, arrivals, departures, routine payments, and communications |
-| Care staff | Daily pet care, assigned operational tasks, observations, and permitted incidents |
-| Groomer | Grooming schedule, assigned pets, service work, notes, and approved media |
-| Accountant | Invoices, payments, reconciliation, and authorized financial reporting |
-| Marketing editor | Website content and approved customer communications |
-| Read-only auditor | Selected records and reports without modification |
+| Role              | Plain-language summary                                                                  |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| Owner             | Full business administration, security, billing, and authorized business operations     |
+| Manager           | Broad operational oversight for assigned locations, with selected administrative rights |
+| Front desk        | Customers, pets, bookings, arrivals, departures, routine payments, and communications   |
+| Care staff        | Daily pet care, assigned operational tasks, observations, and permitted incidents       |
+| Groomer           | Grooming schedule, assigned pets, service work, notes, and approved media               |
+| Accountant        | Invoices, payments, reconciliation, and authorized financial reporting                  |
+| Marketing editor  | Website content and approved customer communications                                    |
+| Read-only auditor | Selected records and reports without modification                                       |
 
 Role summaries must state what the role is intended for, not promise access to every record. Location, assignment, tenant configuration, and domain rules still apply.
 
@@ -188,15 +188,15 @@ User pinning or reordering may affect visible authorized destinations only. Pers
 
 Use the following decision order:
 
-| Condition | Presentation |
-|---|---|
-| User can act now | Show enabled control |
-| User is authorized but a correctable prerequisite is missing | Show disabled control with reason or show enabled control leading to prerequisite resolution |
-| User is authorized but approval/step-up is required | Show enabled control and begin the required verification or approval flow |
-| User lacks the permission and cannot request it in context | Hide the control |
-| User lacks permission but access request is an intentional workflow | Show a clear `Request access` or contact-owner path |
-| Action is impossible due to final domain state | Hide it or show final state, depending on whether explanation is useful |
-| Destructive action is policy-blocked | Show blocked state and safe explanation to authorized administrators |
+| Condition                                                           | Presentation                                                                                 |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| User can act now                                                    | Show enabled control                                                                         |
+| User is authorized but a correctable prerequisite is missing        | Show disabled control with reason or show enabled control leading to prerequisite resolution |
+| User is authorized but approval/step-up is required                 | Show enabled control and begin the required verification or approval flow                    |
+| User lacks the permission and cannot request it in context          | Hide the control                                                                             |
+| User lacks permission but access request is an intentional workflow | Show a clear `Request access` or contact-owner path                                          |
+| Action is impossible due to final domain state                      | Hide it or show final state, depending on whether explanation is useful                      |
+| Destructive action is policy-blocked                                | Show blocked state and safe explanation to authorized administrators                         |
 
 ### 10.1 When to hide
 
@@ -378,12 +378,12 @@ After a successful change:
 
 ## 17. Access removal and suspension
 
-| Action | Intended use | User experience |
-|---|---|---|
-| Suspend | Temporarily block work access | Sessions revoked; membership retained; reactivation available |
-| End access | Relationship ended normally | Access removed; historical authorship retained |
-| Revoke | Immediate explicit removal | Sessions revoked; audit reason required |
-| Disable identity | Platform/account security action | All memberships become ineffective |
+| Action           | Intended use                     | User experience                                               |
+| ---------------- | -------------------------------- | ------------------------------------------------------------- |
+| Suspend          | Temporarily block work access    | Sessions revoked; membership retained; reactivation available |
+| End access       | Relationship ended normally      | Access removed; historical authorship retained                |
+| Revoke           | Immediate explicit removal       | Sessions revoked; audit reason required                       |
+| Disable identity | Platform/account security action | All memberships become ineffective                            |
 
 Before removal, administrators see impacts such as assigned future shifts, grooming appointments, open approvals, scheduled reports, or owned drafts. Domains define reassignment requirements.
 
@@ -498,20 +498,20 @@ Each entry includes actor, action, subject, tenant, relevant scope, timestamp, r
 
 ## 27. Error and state catalog
 
-| State | Recommended user-facing treatment |
-|---|---|
-| Not signed in | Sign-in prompt with safe return route |
-| Session expired | Reauthenticate; preserve safe unsaved work where possible |
-| Wrong tenant context | Offer authorized context switch without revealing protected object details |
-| Wrong location context but authorized | Explain location and offer switch |
-| Permission missing | Explain limitation or hide action according to this model |
-| Domain state blocks action | Explain the state and valid next step |
-| Step-up required | Explain verification and resume action afterward |
-| Approval required | Identify approval process without exposing unauthorized approver data |
-| Membership suspended | State that work access is suspended and provide administrator contact path |
-| Tenant suspended | Use tenant lifecycle messaging; do not imply a personal permission problem |
-| Access changed mid-task | Stop safely, preserve non-sensitive draft where allowed, and explain change |
-| Record unavailable | Neutral non-enumerating response |
+| State                                 | Recommended user-facing treatment                                           |
+| ------------------------------------- | --------------------------------------------------------------------------- |
+| Not signed in                         | Sign-in prompt with safe return route                                       |
+| Session expired                       | Reauthenticate; preserve safe unsaved work where possible                   |
+| Wrong tenant context                  | Offer authorized context switch without revealing protected object details  |
+| Wrong location context but authorized | Explain location and offer switch                                           |
+| Permission missing                    | Explain limitation or hide action according to this model                   |
+| Domain state blocks action            | Explain the state and valid next step                                       |
+| Step-up required                      | Explain verification and resume action afterward                            |
+| Approval required                     | Identify approval process without exposing unauthorized approver data       |
+| Membership suspended                  | State that work access is suspended and provide administrator contact path  |
+| Tenant suspended                      | Use tenant lifecycle messaging; do not imply a personal permission problem  |
+| Access changed mid-task               | Stop safely, preserve non-sensitive draft where allowed, and explain change |
+| Record unavailable                    | Neutral non-enumerating response                                            |
 
 ## 28. Analytics and telemetry
 
@@ -623,4 +623,3 @@ A permission-aware feature is complete only when:
 - [Responsive and accessibility interaction standards](responsive-accessibility-standards.md)
 - [Business onboarding journey](business-onboarding-journey.md)
 - [Requirements traceability](../requirements/traceability.md)
-

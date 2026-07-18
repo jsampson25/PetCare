@@ -16,7 +16,8 @@ export default async function MfaPage({ searchParams }: { searchParams: SearchPa
   const error = typeof parameters.error === 'string' ? parameters.error : undefined;
   const supabase = await createSupabaseServerClient();
   const { data: claimsData } = await supabase.auth.getClaims();
-  if (!claimsData?.claims?.sub) redirect(`/auth/sign-in?next=${encodeURIComponent(`/auth/mfa?next=${next}`)}`);
+  if (!claimsData?.claims?.sub)
+    redirect(`/auth/sign-in?next=${encodeURIComponent(`/auth/mfa?next=${next}`)}`);
 
   const [{ data: assurance }, { data: factors }] = await Promise.all([
     supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
@@ -29,13 +30,26 @@ export default async function MfaPage({ searchParams }: { searchParams: SearchPa
     <AuthCard error={error} title={verifiedFactor ? 'Security check' : 'Protect your account'}>
       {verifiedFactor ? (
         <form action={verifyMfaCode} className="space-y-5">
-          <p className="text-sm leading-6 text-[var(--text-secondary)]">Enter the current code from your authenticator app.</p>
+          <p className="text-sm leading-6 text-[var(--text-secondary)]">
+            Enter the current code from your authenticator app.
+          </p>
           <input name="factorId" type="hidden" value={verifiedFactor.id} />
           <input name="next" type="hidden" value={next} />
-          <Field autoComplete="one-time-code" autoFocus inputMode="numeric" label="Six-digit code" maxLength={6} name="code" pattern="[0-9]{6}" required />
+          <Field
+            autoComplete="one-time-code"
+            autoFocus
+            inputMode="numeric"
+            label="Six-digit code"
+            maxLength={6}
+            name="code"
+            pattern="[0-9]{6}"
+            required
+          />
           <Button type="submit">Verify and continue</Button>
         </form>
-      ) : <MfaEnrollmentForm next={next} />}
+      ) : (
+        <MfaEnrollmentForm next={next} />
+      )}
     </AuthCard>
   );
 }

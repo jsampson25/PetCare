@@ -21,12 +21,12 @@ It does not own customer, pet, booking, price calculation, payment processing, o
 
 ## Personas
 
-| Persona | Primary needs |
-|---|---|
-| Business owner | Complete setup, control policies, connect payments, publish booking. |
-| Location manager | Maintain location hours, capacity, resources, and operational settings. |
-| Platform support | Diagnose setup issues without silently changing tenant configuration. |
-| Staff member | View effective configuration relevant to daily work, usually without edit rights. |
+| Persona          | Primary needs                                                                     |
+| ---------------- | --------------------------------------------------------------------------------- |
+| Business owner   | Complete setup, control policies, connect payments, publish booking.              |
+| Location manager | Maintain location hours, capacity, resources, and operational settings.           |
+| Platform support | Diagnose setup issues without silently changing tenant configuration.             |
+| Staff member     | View effective configuration relevant to daily work, usually without edit rights. |
 
 ## Domain boundaries
 
@@ -56,41 +56,41 @@ It does not own customer, pet, booking, price calculation, payment processing, o
 
 ## Functional requirements
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| BCFG-FR-001 | P0 | The platform shall provide a resumable guided setup experience for a newly created business. | Accepted |
-| BCFG-FR-002 | P0 | The business shall configure its legal/display name, contact details, locale, currency, and default time zone. | Accepted |
-| BCFG-FR-003 | P0 | The business shall create at least one physical location before accepting bookings. | Accepted |
-| BCFG-FR-004 | P0 | Each location shall define address, time zone, contact details, operating status, and customer-facing instructions. | Accepted |
-| BCFG-FR-005 | P0 | Each location shall configure regular hours and dated closures or exceptions. | Accepted |
-| BCFG-FR-006 | P0 | A business shall enable boarding, daycare, grooming, or any supported combination by location. | Accepted |
-| BCFG-FR-007 | P0 | Enabling a service category shall reveal only the setup sections required by that category. | Accepted |
-| BCFG-FR-008 | P0 | Authorized users shall configure resources such as kennels, suites, play areas, grooming stations, and staff-requiring services. | Accepted |
-| BCFG-FR-009 | P0 | The business shall define vaccine and required-document rules by service category and location. | Accepted |
-| BCFG-FR-010 | P0 | The business shall define deposit, cancellation, no-show, and refund policy references consumed by Pricing and Booking. | Accepted |
-| BCFG-FR-011 | P0 | The business shall enable or disable customer online booking independently by location and service category. | Accepted |
-| BCFG-FR-012 | P0 | The platform shall calculate readiness and block launch when a safety-critical or transaction-critical prerequisite is missing. | Accepted |
-| BCFG-FR-013 | P0 | Authorized users shall save progress without publishing incomplete changes. | Accepted |
-| BCFG-FR-014 | P1 | A business shall configure brand colors, logo, images, typography preference, and public-site content. | Accepted |
-| BCFG-FR-015 | P1 | The system shall support business defaults with explicit location overrides. | Accepted |
-| BCFG-FR-016 | P1 | The system shall show the effective value and its source when inheritance applies. | Accepted |
-| BCFG-FR-017 | P1 | Configuration changes shall support immediate or scheduled effective dates where relevant. | Proposed |
-| BCFG-FR-018 | P1 | Platform support shall be able to view readiness failures and configuration history without tenant impersonation. | Proposed |
+| ID          | Priority | Requirement                                                                                                                      | Status   |
+| ----------- | -------: | -------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| BCFG-FR-001 |       P0 | The platform shall provide a resumable guided setup experience for a newly created business.                                     | Accepted |
+| BCFG-FR-002 |       P0 | The business shall configure its legal/display name, contact details, locale, currency, and default time zone.                   | Accepted |
+| BCFG-FR-003 |       P0 | The business shall create at least one physical location before accepting bookings.                                              | Accepted |
+| BCFG-FR-004 |       P0 | Each location shall define address, time zone, contact details, operating status, and customer-facing instructions.              | Accepted |
+| BCFG-FR-005 |       P0 | Each location shall configure regular hours and dated closures or exceptions.                                                    | Accepted |
+| BCFG-FR-006 |       P0 | A business shall enable boarding, daycare, grooming, or any supported combination by location.                                   | Accepted |
+| BCFG-FR-007 |       P0 | Enabling a service category shall reveal only the setup sections required by that category.                                      | Accepted |
+| BCFG-FR-008 |       P0 | Authorized users shall configure resources such as kennels, suites, play areas, grooming stations, and staff-requiring services. | Accepted |
+| BCFG-FR-009 |       P0 | The business shall define vaccine and required-document rules by service category and location.                                  | Accepted |
+| BCFG-FR-010 |       P0 | The business shall define deposit, cancellation, no-show, and refund policy references consumed by Pricing and Booking.          | Accepted |
+| BCFG-FR-011 |       P0 | The business shall enable or disable customer online booking independently by location and service category.                     | Accepted |
+| BCFG-FR-012 |       P0 | The platform shall calculate readiness and block launch when a safety-critical or transaction-critical prerequisite is missing.  | Accepted |
+| BCFG-FR-013 |       P0 | Authorized users shall save progress without publishing incomplete changes.                                                      | Accepted |
+| BCFG-FR-014 |       P1 | A business shall configure brand colors, logo, images, typography preference, and public-site content.                           | Accepted |
+| BCFG-FR-015 |       P1 | The system shall support business defaults with explicit location overrides.                                                     | Accepted |
+| BCFG-FR-016 |       P1 | The system shall show the effective value and its source when inheritance applies.                                               | Accepted |
+| BCFG-FR-017 |       P1 | Configuration changes shall support immediate or scheduled effective dates where relevant.                                       | Proposed |
+| BCFG-FR-018 |       P1 | Platform support shall be able to view readiness failures and configuration history without tenant impersonation.                | Proposed |
 
 ## Business rules
 
-| ID | Priority | Rule |
-|---|---:|---|
-| BCFG-BR-001 | P0 | A business cannot accept bookings without an active location, active service, valid hours, capacity/resource configuration, applicable price, and connected payment capability when payment is required. |
-| BCFG-BR-002 | P0 | Every location time is interpreted in the location's configured IANA time zone. |
-| BCFG-BR-003 | P0 | Location closures override regular hours. A dated special opening may override a closure only when explicitly permitted. |
-| BCFG-BR-004 | P0 | Vaccine and document requirements may become stricter at a location but cannot silently weaken a locked business-level safety policy. |
-| BCFG-BR-005 | P0 | Historical bookings retain their policy and configuration snapshots after configuration changes. |
-| BCFG-BR-006 | P0 | Deactivating a service or resource must not delete or invalidate historical bookings and operational records. |
-| BCFG-BR-007 | P0 | Safety-critical changes require an audit entry containing actor, timestamp, previous value, new value, and reason when required. |
-| BCFG-BR-008 | P0 | A user may edit configuration only for businesses and locations within their authorized scope. |
-| BCFG-BR-009 | P1 | Overrides must be explicit and removable so the value can return to inheritance. |
-| BCFG-BR-010 | P1 | Draft website or brand changes do not affect the published customer experience until published. |
+| ID          | Priority | Rule                                                                                                                                                                                                     |
+| ----------- | -------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BCFG-BR-001 |       P0 | A business cannot accept bookings without an active location, active service, valid hours, capacity/resource configuration, applicable price, and connected payment capability when payment is required. |
+| BCFG-BR-002 |       P0 | Every location time is interpreted in the location's configured IANA time zone.                                                                                                                          |
+| BCFG-BR-003 |       P0 | Location closures override regular hours. A dated special opening may override a closure only when explicitly permitted.                                                                                 |
+| BCFG-BR-004 |       P0 | Vaccine and document requirements may become stricter at a location but cannot silently weaken a locked business-level safety policy.                                                                    |
+| BCFG-BR-005 |       P0 | Historical bookings retain their policy and configuration snapshots after configuration changes.                                                                                                         |
+| BCFG-BR-006 |       P0 | Deactivating a service or resource must not delete or invalidate historical bookings and operational records.                                                                                            |
+| BCFG-BR-007 |       P0 | Safety-critical changes require an audit entry containing actor, timestamp, previous value, new value, and reason when required.                                                                         |
+| BCFG-BR-008 |       P0 | A user may edit configuration only for businesses and locations within their authorized scope.                                                                                                           |
+| BCFG-BR-009 |       P1 | Overrides must be explicit and removable so the value can return to inheritance.                                                                                                                         |
+| BCFG-BR-010 |       P1 | Draft website or brand changes do not affect the published customer experience until published.                                                                                                          |
 
 ## Configuration areas
 
@@ -200,34 +200,34 @@ Readiness has two outputs:
 
 ## Permissions
 
-| Capability | Owner | Manager | Staff | Platform support |
-|---|:---:|:---:|:---:|:---:|
-| Edit business profile | Yes | Configurable | No | No |
-| Create/archive locations | Yes | Configurable | No | No |
-| Edit location hours/resources | Yes | Yes within scope | No | No |
-| Edit safety requirements | Yes | Configurable | No | No |
-| Connect merchant account | Yes | No by default | No | No |
-| Publish website/booking | Yes | Configurable | No | No |
-| View effective configuration | Yes | Yes | Relevant subset | Yes |
-| View configuration audit | Yes | Configurable | No | Yes |
-| Modify tenant configuration | Yes | Configurable | No | Only via explicit support workflow, future |
+| Capability                    | Owner |     Manager      |      Staff      |              Platform support              |
+| ----------------------------- | :---: | :--------------: | :-------------: | :----------------------------------------: |
+| Edit business profile         |  Yes  |   Configurable   |       No        |                     No                     |
+| Create/archive locations      |  Yes  |   Configurable   |       No        |                     No                     |
+| Edit location hours/resources |  Yes  | Yes within scope |       No        |                     No                     |
+| Edit safety requirements      |  Yes  |   Configurable   |       No        |                     No                     |
+| Connect merchant account      |  Yes  |  No by default   |       No        |                     No                     |
+| Publish website/booking       |  Yes  |   Configurable   |       No        |                     No                     |
+| View effective configuration  |  Yes  |       Yes        | Relevant subset |                    Yes                     |
+| View configuration audit      |  Yes  |   Configurable   |       No        |                    Yes                     |
+| Modify tenant configuration   |  Yes  |   Configurable   |       No        | Only via explicit support workflow, future |
 
 ## Core entities
 
-| Entity | Purpose |
-|---|---|
-| Business | Tenant identity and top-level defaults |
-| Location | Physical facility and local operating context |
-| LocationServiceCategory | Enables a category at a location |
-| BusinessHoursRule | Recurring weekly hours and service windows |
-| CalendarException | Dated closure, special opening, or restricted window |
-| ResourceDefinition | Configured kennel, suite, play area, or grooming resource |
-| RequirementPolicy | Vaccine, document, evaluation, or eligibility requirement definition |
-| CommercialPolicyReference | Link to effective deposit/cancellation/pricing policy |
-| BrandProfile | Design tokens and brand assets |
-| WebsitePublication | Draft/published customer-site configuration |
-| ConfigurationRevision | Auditable version/change record |
-| ReadinessAssessment | Point-in-time readiness result and findings |
+| Entity                    | Purpose                                                              |
+| ------------------------- | -------------------------------------------------------------------- |
+| Business                  | Tenant identity and top-level defaults                               |
+| Location                  | Physical facility and local operating context                        |
+| LocationServiceCategory   | Enables a category at a location                                     |
+| BusinessHoursRule         | Recurring weekly hours and service windows                           |
+| CalendarException         | Dated closure, special opening, or restricted window                 |
+| ResourceDefinition        | Configured kennel, suite, play area, or grooming resource            |
+| RequirementPolicy         | Vaccine, document, evaluation, or eligibility requirement definition |
+| CommercialPolicyReference | Link to effective deposit/cancellation/pricing policy                |
+| BrandProfile              | Design tokens and brand assets                                       |
+| WebsitePublication        | Draft/published customer-site configuration                          |
+| ConfigurationRevision     | Auditable version/change record                                      |
+| ReadinessAssessment       | Point-in-time readiness result and findings                          |
 
 Additional tables and migrations are created incrementally with each implementation slice.
 
@@ -257,27 +257,27 @@ Events must include `business_id`, actor context, timestamp, event version, and 
 
 ## Non-functional requirements
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| BCFG-NFR-001 | P0 | Saved setup progress shall survive logout, browser closure, and session expiration. |
-| BCFG-NFR-002 | P0 | All tenant-scoped configuration reads and writes shall enforce business and location authorization. |
-| BCFG-NFR-003 | P0 | Readiness recalculation shall complete quickly enough to provide interactive feedback after a configuration change. |
-| BCFG-NFR-004 | P0 | Safety-critical and launch-gating configuration changes shall be auditable. |
-| BCFG-NFR-005 | P0 | Configuration interfaces shall meet WCAG 2.2 AA targets. |
-| BCFG-NFR-006 | P1 | The wizard shall be usable on tablet-sized screens; complex resource setup may optimize for desktop. |
+| ID           | Priority | Requirement                                                                                                         |
+| ------------ | -------: | ------------------------------------------------------------------------------------------------------------------- |
+| BCFG-NFR-001 |       P0 | Saved setup progress shall survive logout, browser closure, and session expiration.                                 |
+| BCFG-NFR-002 |       P0 | All tenant-scoped configuration reads and writes shall enforce business and location authorization.                 |
+| BCFG-NFR-003 |       P0 | Readiness recalculation shall complete quickly enough to provide interactive feedback after a configuration change. |
+| BCFG-NFR-004 |       P0 | Safety-critical and launch-gating configuration changes shall be auditable.                                         |
+| BCFG-NFR-005 |       P0 | Configuration interfaces shall meet WCAG 2.2 AA targets.                                                            |
+| BCFG-NFR-006 |       P1 | The wizard shall be usable on tablet-sized screens; complex resource setup may optimize for desktop.                |
 
 ## Acceptance scenarios
 
-| ID | Covers | Scenario |
-|---|---|---|
-| BCFG-AT-001 | BCFG-FR-001, 002 | A new owner completes profile steps, logs out, returns, and resumes at the correct point with saved values. |
-| BCFG-AT-002 | BCFG-FR-003–006 | An owner configures one location offering boarding, daycare, and grooming with independent hours. |
-| BCFG-AT-003 | BCFG-FR-009, BCFG-BR-004 | A manager creates a stricter boarding vaccine requirement without weakening the locked business minimum. |
-| BCFG-AT-004 | BCFG-FR-012, BCFG-BR-001 | Launch is blocked and explains all missing pricing, capacity, agreement, and payment prerequisites. |
-| BCFG-AT-005 | BCFG-FR-015, 016 | A manager overrides a location value, sees its source, removes the override, and returns to the inherited value. |
-| BCFG-AT-006 | BCFG-BR-005–007 | A safety-policy change preserves historical snapshots and produces a complete audit record. |
-| BCFG-AT-007 | BCFG-BR-008 | A manager cannot read or modify another business or unauthorized location through either UI or direct request. |
-| BCFG-AT-008 | BCFG-BR-010 | Draft branding changes remain invisible until an authorized user publishes them. |
+| ID          | Covers                   | Scenario                                                                                                         |
+| ----------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| BCFG-AT-001 | BCFG-FR-001, 002         | A new owner completes profile steps, logs out, returns, and resumes at the correct point with saved values.      |
+| BCFG-AT-002 | BCFG-FR-003–006          | An owner configures one location offering boarding, daycare, and grooming with independent hours.                |
+| BCFG-AT-003 | BCFG-FR-009, BCFG-BR-004 | A manager creates a stricter boarding vaccine requirement without weakening the locked business minimum.         |
+| BCFG-AT-004 | BCFG-FR-012, BCFG-BR-001 | Launch is blocked and explains all missing pricing, capacity, agreement, and payment prerequisites.              |
+| BCFG-AT-005 | BCFG-FR-015, 016         | A manager overrides a location value, sees its source, removes the override, and returns to the inherited value. |
+| BCFG-AT-006 | BCFG-BR-005–007          | A safety-policy change preserves historical snapshots and produces a complete audit record.                      |
+| BCFG-AT-007 | BCFG-BR-008              | A manager cannot read or modify another business or unauthorized location through either UI or direct request.   |
+| BCFG-AT-008 | BCFG-BR-010              | Draft branding changes remain invisible until an authorized user publishes them.                                 |
 
 ## Open decisions
 

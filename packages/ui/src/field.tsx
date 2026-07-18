@@ -25,7 +25,10 @@ export function Field({ className = '', error, hint, id, label, ...props }: Fiel
         {...props}
       />
       {error ? (
-        <p className="mt-2 text-sm font-semibold text-[var(--danger-foreground)]" id={descriptionId}>
+        <p
+          className="mt-2 text-sm font-semibold text-[var(--danger-foreground)]"
+          id={descriptionId}
+        >
           {error}
         </p>
       ) : hint ? (

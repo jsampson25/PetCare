@@ -76,4 +76,3 @@ Allow a single-location boarding, daycare, and grooming business to configure it
 ## MVP guardrail
 
 A deferred capability may shape an interface or data boundary, but it must not become a dependency for launching the core booking and operations journey.
-

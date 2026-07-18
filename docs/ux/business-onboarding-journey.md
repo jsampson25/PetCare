@@ -62,20 +62,20 @@ The owner may complete some areas in a different order after the first location 
 
 ## Onboarding stages
 
-| Stage | Outcome | Required for launch |
-|---|---|:---:|
-| Account and tenant | Secure owner account and provisioned tenant | Yes |
-| Business basics | Identity, locale, currency, time zone, contacts | Yes |
-| Location | Physical operating context and hours | Yes |
-| Services | Customer-bookable offering definitions | Yes |
-| Resources/capacity | Safe sellable limits | Yes |
-| Safety and policies | Eligibility, documents, waivers, cancellation | Yes |
-| Pricing | Deterministic bookable quote and deposit | Yes |
-| Customer payments | Merchant capable of required collection | Conditional but normally yes |
-| Communications | Required transactional email path | Yes |
-| Staff access | At least owner; operational staffing recommended | Conditional |
-| Website/brand | Valid public booking entry and required pages | Yes for included-site launch |
-| Test and readiness | End-to-end verification | Yes |
+| Stage               | Outcome                                          |     Required for launch      |
+| ------------------- | ------------------------------------------------ | :--------------------------: |
+| Account and tenant  | Secure owner account and provisioned tenant      |             Yes              |
+| Business basics     | Identity, locale, currency, time zone, contacts  |             Yes              |
+| Location            | Physical operating context and hours             |             Yes              |
+| Services            | Customer-bookable offering definitions           |             Yes              |
+| Resources/capacity  | Safe sellable limits                             |             Yes              |
+| Safety and policies | Eligibility, documents, waivers, cancellation    |             Yes              |
+| Pricing             | Deterministic bookable quote and deposit         |             Yes              |
+| Customer payments   | Merchant capable of required collection          | Conditional but normally yes |
+| Communications      | Required transactional email path                |             Yes              |
+| Staff access        | At least owner; operational staffing recommended |         Conditional          |
+| Website/brand       | Valid public booking entry and required pages    | Yes for included-site launch |
+| Test and readiness  | End-to-end verification                          |             Yes              |
 
 ## Onboarding shell
 
@@ -681,20 +681,20 @@ Create a clearly labeled test customer, pet, and booking that cannot be confused
 
 ### Readiness categories
 
-| Category | Examples |
-|---|---|
-| Identity/security | Verified owner, MFA, active tenant/subscription |
-| Business/location | Required contact, address, time zone, hours |
-| Service | Active customer-visible service and valid time model |
-| Capacity | Required pools/resources, limits, hours, buffers |
-| Safety | Vaccine/document/eligibility rules reviewed |
-| Legal/policy | Required agreements and cancellation terms published |
-| Pricing | Applicable active deterministic price and deposit |
-| Payments | Connected live merchant capability when collection required |
-| Communications | Required transactional sender/template ready |
-| Website/booking | Valid public entry, required pages, booking channel |
-| Operations | Check-in/care/checkout defaults and access ready |
-| Test | Required end-to-end test completed after material configuration |
+| Category          | Examples                                                        |
+| ----------------- | --------------------------------------------------------------- |
+| Identity/security | Verified owner, MFA, active tenant/subscription                 |
+| Business/location | Required contact, address, time zone, hours                     |
+| Service           | Active customer-visible service and valid time model            |
+| Capacity          | Required pools/resources, limits, hours, buffers                |
+| Safety            | Vaccine/document/eligibility rules reviewed                     |
+| Legal/policy      | Required agreements and cancellation terms published            |
+| Pricing           | Applicable active deterministic price and deposit               |
+| Payments          | Connected live merchant capability when collection required     |
+| Communications    | Required transactional sender/template ready                    |
+| Website/booking   | Valid public entry, required pages, booking channel             |
+| Operations        | Check-in/care/checkout defaults and access ready                |
+| Test              | Required end-to-end test completed after material configuration |
 
 ### Severity
 
@@ -885,18 +885,18 @@ Import is not required to configure and test the platform.
 
 ## Failure and recovery matrix
 
-| Failure | User experience | Recovery |
-|---|---|---|
-| Tenant provisioning step fails | Setup not ready, no duplicate signup | Resume same provisioning run |
-| Autosave fails | Keep local form state and show unsaved warning | Retry before leaving |
-| Address/time-zone lookup fails | Manual entry and confirmation | Revalidate later |
-| Capacity setup conflict | Explain duplicate/overlapping physical capacity | Correct resources/pools |
-| Pricing conflict | Block publication; show matching rules/examples | Edit and rerun quotes |
-| Merchant incomplete | Continue setup; paid booking remains blocked | Finish provider onboarding |
-| Email test fails | Show delivery/provider state | Correct sender/contact and retry |
-| Domain verification delayed | Platform subdomain remains available | Continue DNS verification |
-| Test payment uncertain | Reconcile before rerun | Resolve authoritative test attempt |
-| Launch orchestration fails | Booking remains disabled or rolls back safely | Resume controlled launch run |
+| Failure                        | User experience                                 | Recovery                           |
+| ------------------------------ | ----------------------------------------------- | ---------------------------------- |
+| Tenant provisioning step fails | Setup not ready, no duplicate signup            | Resume same provisioning run       |
+| Autosave fails                 | Keep local form state and show unsaved warning  | Retry before leaving               |
+| Address/time-zone lookup fails | Manual entry and confirmation                   | Revalidate later                   |
+| Capacity setup conflict        | Explain duplicate/overlapping physical capacity | Correct resources/pools            |
+| Pricing conflict               | Block publication; show matching rules/examples | Edit and rerun quotes              |
+| Merchant incomplete            | Continue setup; paid booking remains blocked    | Finish provider onboarding         |
+| Email test fails               | Show delivery/provider state                    | Correct sender/contact and retry   |
+| Domain verification delayed    | Platform subdomain remains available            | Continue DNS verification          |
+| Test payment uncertain         | Reconcile before rerun                          | Resolve authoritative test attempt |
+| Launch orchestration fails     | Booking remains disabled or rolls back safely   | Resume controlled launch run       |
 
 ## Responsive and accessibility requirements
 

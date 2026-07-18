@@ -14,8 +14,8 @@ supabase test db
 
 ## Current migration inventory
 
-| Migration | Ownership class | RLS | Purpose |
-|---|---|---|---|
+| Migration                                       | Ownership class                                                                      | RLS                                       | Purpose                                                                                                                                                        |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `20260717000100_identity_access_foundation.sql` | Platform-global identity/reference plus tenant and relationship-owned access records | Enabled and forced on every exposed table | Identity profiles, businesses, locations, memberships, predefined roles, permissions, location scopes, audit, protected tenant creation, and last-owner safety |
 
 ## Security conventions

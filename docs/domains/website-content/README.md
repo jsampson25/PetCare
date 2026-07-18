@@ -88,29 +88,29 @@ The MVP is a governed template and content system. AI does not generate the cust
 
 ## Authoritative content rules
 
-| Public content | Source of truth | Website behavior |
-|---|---|---|
-| Business name, contact, locations | Business Configuration | Render approved public projection |
-| Hours, closures, arrival instructions | Business Configuration | Render effective location projection |
-| Services and add-ons | Service Catalog | Render active, customer-visible versions |
-| Starting prices or price ranges | Pricing and Policies | Render approved public display projection; never recalculate |
-| Vaccine and document requirements | Business Configuration / Pet Eligibility | Render current customer-facing requirement summary |
-| Availability | Resource and Capacity / Booking | Query only during availability search; do not publish static claims |
-| Tenant-authored About, FAQ, and marketing copy | Website and Content | Store as versioned content |
-| Policy full text and acceptance version | Owning policy/waiver domain | Link or project the active customer-facing version |
+| Public content                                 | Source of truth                          | Website behavior                                                    |
+| ---------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------- |
+| Business name, contact, locations              | Business Configuration                   | Render approved public projection                                   |
+| Hours, closures, arrival instructions          | Business Configuration                   | Render effective location projection                                |
+| Services and add-ons                           | Service Catalog                          | Render active, customer-visible versions                            |
+| Starting prices or price ranges                | Pricing and Policies                     | Render approved public display projection; never recalculate        |
+| Vaccine and document requirements              | Business Configuration / Pet Eligibility | Render current customer-facing requirement summary                  |
+| Availability                                   | Resource and Capacity / Booking          | Query only during availability search; do not publish static claims |
+| Tenant-authored About, FAQ, and marketing copy | Website and Content                      | Store as versioned content                                          |
+| Policy full text and acceptance version        | Owning policy/waiver domain              | Link or project the active customer-facing version                  |
 
 An authorized source projection may be hidden or reordered through website settings, but it is not copied into freely editable text. This prevents public content from drifting away from bookable reality.
 
 ## Personas
 
-| Persona | Need |
-|---|---|
-| Visitor | Understand the business, services, requirements, and next step quickly. |
-| Customer | Move between site, booking, sign-in, and portal without losing context. |
-| Business owner | Launch and brand the website without a developer. |
-| Marketing manager | Edit content, SEO, navigation, and imagery safely. |
-| Location manager | Maintain authorized location-specific public content. |
-| Platform support | Diagnose domain and publishing problems through audited, time-bound access. |
+| Persona           | Need                                                                        |
+| ----------------- | --------------------------------------------------------------------------- |
+| Visitor           | Understand the business, services, requirements, and next step quickly.     |
+| Customer          | Move between site, booking, sign-in, and portal without losing context.     |
+| Business owner    | Launch and brand the website without a developer.                           |
+| Marketing manager | Edit content, SEO, navigation, and imagery safely.                          |
+| Location manager  | Maintain authorized location-specific public content.                       |
+| Platform support  | Diagnose domain and publishing problems through audited, time-bound access. |
 
 ## Site lifecycle
 
@@ -130,17 +130,17 @@ Publishing creates an immutable publication version. Editors continue working in
 
 ### Required system routes
 
-| Route purpose | MVP behavior |
-|---|---|
-| Home | Brand promise, primary services, trust content, locations, and booking CTA |
-| Services | Active customer-visible service collections and details |
-| Pricing | Approved public price display with policy and final-price disclaimers |
-| Requirements | Vaccine, document, eligibility, and arrival preparation summaries |
-| Contact | Location contact details, hours, map link, and protected inquiry form |
-| Book | Stable entry into the tenant-aware booking flow |
-| Sign in / Portal | Stable entry into tenant-aware authentication and customer portal |
-| Privacy / Terms / Accessibility | Platform and tenant legal content as configured |
-| Not found | Branded recovery page with safe navigation and booking link |
+| Route purpose                   | MVP behavior                                                               |
+| ------------------------------- | -------------------------------------------------------------------------- |
+| Home                            | Brand promise, primary services, trust content, locations, and booking CTA |
+| Services                        | Active customer-visible service collections and details                    |
+| Pricing                         | Approved public price display with policy and final-price disclaimers      |
+| Requirements                    | Vaccine, document, eligibility, and arrival preparation summaries          |
+| Contact                         | Location contact details, hours, map link, and protected inquiry form      |
+| Book                            | Stable entry into the tenant-aware booking flow                            |
+| Sign in / Portal                | Stable entry into tenant-aware authentication and customer portal          |
+| Privacy / Terms / Accessibility | Platform and tenant legal content as configured                            |
+| Not found                       | Branded recovery page with safe navigation and booking link                |
 
 About, FAQ, Gallery, and Policies are recommended and can be enabled when valid content exists.
 
@@ -264,68 +264,68 @@ Warnings may allow publishing; blocking failures may not. The result identifies 
 
 ### Site administration
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| WEB-FR-001 | P0 | The system shall provision a draft public site for a configured tenant. | Accepted |
-| WEB-FR-002 | P0 | Authorized users shall select a supported responsive theme and configure allowed brand tokens. | Accepted |
-| WEB-FR-003 | P0 | Authorized users shall create, edit, order, hide, and archive supported pages and sections. | Accepted |
-| WEB-FR-004 | P0 | The editor shall validate section content against its controlled schema before saving. | Accepted |
-| WEB-FR-005 | P0 | Users shall privately preview the draft at desktop, tablet, and mobile widths before publication. | Accepted |
-| WEB-FR-006 | P0 | Publishing shall create an immutable publication version without exposing subsequent draft changes. | Accepted |
-| WEB-FR-007 | P0 | Authorized users shall unpublish a site and roll back to a prior valid publication. | Accepted |
-| WEB-FR-008 | P0 | Publication shall run readiness checks and block critical security, booking, legal, or content failures. | Accepted |
-| WEB-FR-009 | P1 | Multiple authorized editors shall receive conflict protection when editing the same draft. | Proposed |
+| ID         | Priority | Requirement                                                                                              | Status   |
+| ---------- | -------: | -------------------------------------------------------------------------------------------------------- | -------- |
+| WEB-FR-001 |       P0 | The system shall provision a draft public site for a configured tenant.                                  | Accepted |
+| WEB-FR-002 |       P0 | Authorized users shall select a supported responsive theme and configure allowed brand tokens.           | Accepted |
+| WEB-FR-003 |       P0 | Authorized users shall create, edit, order, hide, and archive supported pages and sections.              | Accepted |
+| WEB-FR-004 |       P0 | The editor shall validate section content against its controlled schema before saving.                   | Accepted |
+| WEB-FR-005 |       P0 | Users shall privately preview the draft at desktop, tablet, and mobile widths before publication.        | Accepted |
+| WEB-FR-006 |       P0 | Publishing shall create an immutable publication version without exposing subsequent draft changes.      | Accepted |
+| WEB-FR-007 |       P0 | Authorized users shall unpublish a site and roll back to a prior valid publication.                      | Accepted |
+| WEB-FR-008 |       P0 | Publication shall run readiness checks and block critical security, booking, legal, or content failures. | Accepted |
+| WEB-FR-009 |       P1 | Multiple authorized editors shall receive conflict protection when editing the same draft.               | Proposed |
 
 ### Public experience
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| WEB-FR-010 | P0 | Public pages shall render only the current published site version for the resolved tenant hostname. | Accepted |
-| WEB-FR-011 | P0 | Active services, locations, hours, requirements, and approved price displays shall come from authoritative public projections. | Accepted |
-| WEB-FR-012 | P0 | Book and sign-in links shall preserve valid tenant and optional location or service context. | Accepted |
-| WEB-FR-013 | P0 | The site shall provide usable responsive navigation, footer navigation, focus handling, and keyboard access. | Accepted |
-| WEB-FR-014 | P0 | The site shall provide a protected inquiry form with field validation, consent disclosure, abuse controls, and delivery confirmation. | Accepted |
-| WEB-FR-015 | P0 | Public sites shall support platform subdomains and verified custom domains over HTTPS. | Accepted |
-| WEB-FR-016 | P0 | The platform shall show a branded safe fallback when a published site or dependent projection is temporarily unavailable. | Accepted |
+| ID         | Priority | Requirement                                                                                                                           | Status   |
+| ---------- | -------: | ------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| WEB-FR-010 |       P0 | Public pages shall render only the current published site version for the resolved tenant hostname.                                   | Accepted |
+| WEB-FR-011 |       P0 | Active services, locations, hours, requirements, and approved price displays shall come from authoritative public projections.        | Accepted |
+| WEB-FR-012 |       P0 | Book and sign-in links shall preserve valid tenant and optional location or service context.                                          | Accepted |
+| WEB-FR-013 |       P0 | The site shall provide usable responsive navigation, footer navigation, focus handling, and keyboard access.                          | Accepted |
+| WEB-FR-014 |       P0 | The site shall provide a protected inquiry form with field validation, consent disclosure, abuse controls, and delivery confirmation. | Accepted |
+| WEB-FR-015 |       P0 | Public sites shall support platform subdomains and verified custom domains over HTTPS.                                                | Accepted |
+| WEB-FR-016 |       P0 | The platform shall show a branded safe fallback when a published site or dependent projection is temporarily unavailable.             | Accepted |
 
 ### SEO and media
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| WEB-FR-017 | P0 | Editors shall configure page title, description, social image, and indexability within platform rules. | Accepted |
-| WEB-FR-018 | P0 | The system shall generate canonical URLs, sitemap entries, robots directives, and structured metadata for eligible published pages. | Accepted |
-| WEB-FR-019 | P0 | Media uploads shall validate type and size, remove unsafe metadata where required, create optimized renditions, and require alternative text unless decorative. | Accepted |
-| WEB-FR-020 | P1 | Slug changes shall create managed redirects and detect redirect loops. | Proposed |
-| WEB-FR-021 | P1 | Editors shall see broken-link, missing-alt-text, and incomplete-metadata warnings before publishing. | Proposed |
+| ID         | Priority | Requirement                                                                                                                                                     | Status   |
+| ---------- | -------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| WEB-FR-017 |       P0 | Editors shall configure page title, description, social image, and indexability within platform rules.                                                          | Accepted |
+| WEB-FR-018 |       P0 | The system shall generate canonical URLs, sitemap entries, robots directives, and structured metadata for eligible published pages.                             | Accepted |
+| WEB-FR-019 |       P0 | Media uploads shall validate type and size, remove unsafe metadata where required, create optimized renditions, and require alternative text unless decorative. | Accepted |
+| WEB-FR-020 |       P1 | Slug changes shall create managed redirects and detect redirect loops.                                                                                          | Proposed |
+| WEB-FR-021 |       P1 | Editors shall see broken-link, missing-alt-text, and incomplete-metadata warnings before publishing.                                                            | Proposed |
 
 ## Business rules
 
-| ID | Priority | Rule |
-|---|---:|---|
-| WEB-BR-001 | P0 | Draft content is never publicly visible without a successful publication event. |
-| WEB-BR-002 | P0 | A public hostname resolves to exactly one tenant before tenant content is loaded. |
-| WEB-BR-003 | P0 | Source-owned operational content cannot be overridden by duplicating it in a website section. |
-| WEB-BR-004 | P0 | Website price content may display only the Pricing domain's approved public projection and cannot imply that a starting price is a final quote. |
-| WEB-BR-005 | P0 | Booking links must target the resolved tenant and be revalidated by Booking. |
-| WEB-BR-006 | P0 | Sanitization occurs when content is stored and output encoding occurs when it is rendered. |
-| WEB-BR-007 | P0 | Uploaded media is unavailable publicly until validation and processing succeed. |
-| WEB-BR-008 | P0 | A site cannot publish when its canonical custom domain is unverified or lacks a valid certificate. |
-| WEB-BR-009 | P0 | Unpublishing a site does not cancel bookings or disable the customer portal. |
-| WEB-BR-010 | P1 | Rollback creates a new publication record referencing the prior content version; it does not erase intervening history. |
-| WEB-BR-011 | P1 | Reviews or testimonials require source, permission, display status, and optional expiration metadata. |
-| WEB-BR-012 | P1 | Site-wide announcement banners require start/end times interpreted in the applicable location time zone. |
+| ID         | Priority | Rule                                                                                                                                            |
+| ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| WEB-BR-001 |       P0 | Draft content is never publicly visible without a successful publication event.                                                                 |
+| WEB-BR-002 |       P0 | A public hostname resolves to exactly one tenant before tenant content is loaded.                                                               |
+| WEB-BR-003 |       P0 | Source-owned operational content cannot be overridden by duplicating it in a website section.                                                   |
+| WEB-BR-004 |       P0 | Website price content may display only the Pricing domain's approved public projection and cannot imply that a starting price is a final quote. |
+| WEB-BR-005 |       P0 | Booking links must target the resolved tenant and be revalidated by Booking.                                                                    |
+| WEB-BR-006 |       P0 | Sanitization occurs when content is stored and output encoding occurs when it is rendered.                                                      |
+| WEB-BR-007 |       P0 | Uploaded media is unavailable publicly until validation and processing succeed.                                                                 |
+| WEB-BR-008 |       P0 | A site cannot publish when its canonical custom domain is unverified or lacks a valid certificate.                                              |
+| WEB-BR-009 |       P0 | Unpublishing a site does not cancel bookings or disable the customer portal.                                                                    |
+| WEB-BR-010 |       P1 | Rollback creates a new publication record referencing the prior content version; it does not erase intervening history.                         |
+| WEB-BR-011 |       P1 | Reviews or testimonials require source, permission, display status, and optional expiration metadata.                                           |
+| WEB-BR-012 |       P1 | Site-wide announcement banners require start/end times interpreted in the applicable location time zone.                                        |
 
 ## Permissions
 
-| Capability | Owner | Marketing editor | Location manager | Staff | Platform support |
-|---|:---:|:---:|:---:|:---:|:---:|
-| Configure theme and brand | Yes | Configurable | No | No | Time-bound support |
-| Edit tenant pages | Yes | Yes | Configurable | No | Time-bound support |
-| Edit location content | Yes | Yes | Assigned locations | No | Time-bound support |
-| Preview drafts | Yes | Yes | Assigned scope | No | Time-bound support |
-| Publish or rollback | Yes | Configurable | No | No | Disabled by default |
-| Configure custom domain | Yes | Configurable | No | No | Diagnose only |
-| View publication audit | Yes | Yes | Assigned scope | No | Time-bound support |
+| Capability                | Owner | Marketing editor |  Location manager  | Staff |  Platform support   |
+| ------------------------- | :---: | :--------------: | :----------------: | :---: | :-----------------: |
+| Configure theme and brand |  Yes  |   Configurable   |         No         |  No   | Time-bound support  |
+| Edit tenant pages         |  Yes  |       Yes        |    Configurable    |  No   | Time-bound support  |
+| Edit location content     |  Yes  |       Yes        | Assigned locations |  No   | Time-bound support  |
+| Preview drafts            |  Yes  |       Yes        |   Assigned scope   |  No   | Time-bound support  |
+| Publish or rollback       |  Yes  |   Configurable   |         No         |  No   | Disabled by default |
+| Configure custom domain   |  Yes  |   Configurable   |         No         |  No   |    Diagnose only    |
+| View publication audit    |  Yes  |       Yes        |   Assigned scope   |  No   | Time-bound support  |
 
 Publishing, rollback, domain changes, legal-link changes, and support access are audited.
 
@@ -392,14 +392,14 @@ erDiagram
 
 ## Performance and reliability
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| WEB-NFR-001 | P0 | Public pages shall target passing Core Web Vitals at the 75th percentile on representative mobile traffic. |
-| WEB-NFR-002 | P0 | Public content shall be cacheable at the edge without allowing one tenant's content or host mapping to leak to another. |
-| WEB-NFR-003 | P0 | Publication invalidation shall make the new version available within 60 seconds under normal conditions. |
-| WEB-NFR-004 | P0 | A failed publication shall leave the previous published version intact. |
-| WEB-NFR-005 | P0 | Responsive images shall use optimized formats, declared dimensions, and lazy loading when appropriate. |
-| WEB-NFR-006 | P1 | Public-site availability shall be measured separately from business-portal and booking availability. |
+| ID          | Priority | Requirement                                                                                                             |
+| ----------- | -------: | ----------------------------------------------------------------------------------------------------------------------- |
+| WEB-NFR-001 |       P0 | Public pages shall target passing Core Web Vitals at the 75th percentile on representative mobile traffic.              |
+| WEB-NFR-002 |       P0 | Public content shall be cacheable at the edge without allowing one tenant's content or host mapping to leak to another. |
+| WEB-NFR-003 |       P0 | Publication invalidation shall make the new version available within 60 seconds under normal conditions.                |
+| WEB-NFR-004 |       P0 | A failed publication shall leave the previous published version intact.                                                 |
+| WEB-NFR-005 |       P0 | Responsive images shall use optimized formats, declared dimensions, and lazy loading when appropriate.                  |
+| WEB-NFR-006 |       P1 | Public-site availability shall be measured separately from business-portal and booking availability.                    |
 
 The final performance budget will define JavaScript, image, font, layout-shift, and server-response limits per theme.
 

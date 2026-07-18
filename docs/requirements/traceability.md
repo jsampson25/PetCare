@@ -19,23 +19,23 @@ flowchart LR
 
 Each accepted requirement records:
 
-| Field | Description |
-|---|---|
-| ID | Stable requirement identifier |
-| Title | Short human-readable name |
-| Statement | Testable requirement text |
-| Rationale | Why the requirement exists |
-| Priority | P0, P1, P2, or Future |
-| Status | Proposed through Verified |
-| Owner domain | Single authoritative domain |
-| Dependencies | Other requirement IDs or external dependencies |
+| Field               | Description                                    |
+| ------------------- | ---------------------------------------------- |
+| ID                  | Stable requirement identifier                  |
+| Title               | Short human-readable name                      |
+| Statement           | Testable requirement text                      |
+| Rationale           | Why the requirement exists                     |
+| Priority            | P0, P1, P2, or Future                          |
+| Status              | Proposed through Verified                      |
+| Owner domain        | Single authoritative domain                    |
+| Dependencies        | Other requirement IDs or external dependencies |
 | Acceptance evidence | Test IDs, screenshots, logs, or review records |
 
 ## Traceability table template
 
-| Requirement | Design | Data/API | Implementation | Verification | Status |
-|---|---|---|---|---|---|
-| BCFG-FR-001 | Business Setup Wizard | `businesses` | TBD | BCFG-AT-001 | Accepted |
+| Requirement | Design                | Data/API     | Implementation | Verification | Status   |
+| ----------- | --------------------- | ------------ | -------------- | ------------ | -------- |
+| BCFG-FR-001 | Business Setup Wizard | `businesses` | TBD            | BCFG-AT-001  | Accepted |
 
 ## Repository conventions
 
@@ -54,4 +54,3 @@ When a requirement changes:
 3. Review linked workflows, data contracts, permissions, and tests.
 4. Add a decision record if the change alters architecture or a major product rule.
 5. Keep historical booking, pricing, policy, financial, and care records interpretable after the change.
-

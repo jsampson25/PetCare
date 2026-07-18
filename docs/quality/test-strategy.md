@@ -57,12 +57,12 @@ Each feature is evaluated for:
 
 ### 4.2 Test criticality
 
-| Class | Description | Examples | Minimum evidence |
-|---|---|---|---|
-| Q0 Safety/security critical | Failure can harm animals, expose tenants, corrupt money, or bypass authorization | Medication, pet identity, RLS, payment callbacks, ownership transfer | Unit/property, integration, database policy, end-to-end, adversarial/manual, observability, rollback evidence |
-| Q1 Core business critical | Failure prevents or materially corrupts the primary service | Availability, booking, pricing, check-in/out, vaccination eligibility | Unit, integration, browser journey, concurrency/error paths, acceptance evidence |
-| Q2 Important workflow | Failure has workaround but degrades operations or trust | Messaging, reports, website publishing, staff tasks | Unit/integration plus focused browser and manual checks |
-| Q3 Low-risk presentation | Failure is localized and readily reversible | Cosmetic layout, nonessential preference | Component/static checks and proportionate manual review |
+| Class                       | Description                                                                      | Examples                                                              | Minimum evidence                                                                                              |
+| --------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Q0 Safety/security critical | Failure can harm animals, expose tenants, corrupt money, or bypass authorization | Medication, pet identity, RLS, payment callbacks, ownership transfer  | Unit/property, integration, database policy, end-to-end, adversarial/manual, observability, rollback evidence |
+| Q1 Core business critical   | Failure prevents or materially corrupts the primary service                      | Availability, booking, pricing, check-in/out, vaccination eligibility | Unit, integration, browser journey, concurrency/error paths, acceptance evidence                              |
+| Q2 Important workflow       | Failure has workaround but degrades operations or trust                          | Messaging, reports, website publishing, staff tasks                   | Unit/integration plus focused browser and manual checks                                                       |
+| Q3 Low-risk presentation    | Failure is localized and readily reversible                                      | Cosmetic layout, nonessential preference                              | Component/static checks and proportionate manual review                                                       |
 
 Classification applies to requirements and changed paths, not entire modules. A visual component can still be Q0 when used to confirm medication or pet identity.
 
@@ -488,14 +488,14 @@ Visual snapshots do not prove semantics, accessibility, data correctness, or aut
 
 ## 27. Test environments
 
-| Environment | Purpose | Data |
-|---|---|---|
-| Local | Fast development and focused integration | Synthetic fixtures |
-| CI ephemeral | Isolated automated verification per change | Generated, disposable multi-tenant data |
-| Shared integration | Provider sandboxes and cross-service validation | Synthetic stable scenarios |
-| Preview | Product/design review for a branch | Synthetic or approved seed data |
-| Staging | Production-like release validation and migration rehearsal | Synthetic production-shaped data |
-| Production | Smoke, monitoring, canary, and controlled verification | Real data with strict non-destructive controls |
+| Environment        | Purpose                                                    | Data                                           |
+| ------------------ | ---------------------------------------------------------- | ---------------------------------------------- |
+| Local              | Fast development and focused integration                   | Synthetic fixtures                             |
+| CI ephemeral       | Isolated automated verification per change                 | Generated, disposable multi-tenant data        |
+| Shared integration | Provider sandboxes and cross-service validation            | Synthetic stable scenarios                     |
+| Preview            | Product/design review for a branch                         | Synthetic or approved seed data                |
+| Staging            | Production-like release validation and migration rehearsal | Synthetic production-shaped data               |
+| Production         | Smoke, monitoring, canary, and controlled verification     | Real data with strict non-destructive controls |
 
 Environments use separate databases, storage, credentials, domains, provider accounts, and observability boundaries.
 
@@ -591,12 +591,12 @@ Code coverage is a diagnostic, not the quality target. High line coverage with m
 
 ## 33. Defect severity
 
-| Severity | Meaning | Example | Release effect |
-|---|---|---|---|
-| S0 Critical | Active or likely severe safety/security/data incident | Cross-tenant leak, wrong medication record, duplicate charge at scale | Stop/revert, incident process |
-| S1 High | Core flow blocked or materially wrong without safe workaround | Overbooking, unauthorized refund, checkout loses belongings record | Release blocked |
-| S2 Medium | Important degradation with bounded workaround | Report filter wrong, noncritical message delayed | Risk review required |
-| S3 Low | Minor localized issue | Cosmetic alignment, low-impact copy | May defer with owner |
+| Severity    | Meaning                                                       | Example                                                               | Release effect                |
+| ----------- | ------------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------- |
+| S0 Critical | Active or likely severe safety/security/data incident         | Cross-tenant leak, wrong medication record, duplicate charge at scale | Stop/revert, incident process |
+| S1 High     | Core flow blocked or materially wrong without safe workaround | Overbooking, unauthorized refund, checkout loses belongings record    | Release blocked               |
+| S2 Medium   | Important degradation with bounded workaround                 | Report filter wrong, noncritical message delayed                      | Risk review required          |
+| S3 Low      | Minor localized issue                                         | Cosmetic alignment, low-impact copy                                   | May defer with owner          |
 
 Severity reflects impact and exposure; priority also considers urgency and occurrence.
 
@@ -688,16 +688,16 @@ A feature is complete only when:
 
 Proposed tools, subject to an architecture decision when scaffolding begins:
 
-| Need | Initial choice |
-|---|---|
-| Type checking | TypeScript compiler |
-| Unit/property/component tests | Vitest plus appropriate property and DOM testing libraries |
-| Browser journeys | Playwright |
-| Automated accessibility | axe-core integrated with component and Playwright tests |
-| API/contract validation | OpenAPI/schema validation plus adapter-specific contract suites |
-| Database/RLS | Disposable Supabase/PostgreSQL test environment and SQL assertions |
-| Visual regression | Playwright screenshots or approved hosted comparison service |
-| Load and resilience | Selected during implementation based on deployment topology |
+| Need                          | Initial choice                                                     |
+| ----------------------------- | ------------------------------------------------------------------ |
+| Type checking                 | TypeScript compiler                                                |
+| Unit/property/component tests | Vitest plus appropriate property and DOM testing libraries         |
+| Browser journeys              | Playwright                                                         |
+| Automated accessibility       | axe-core integrated with component and Playwright tests            |
+| API/contract validation       | OpenAPI/schema validation plus adapter-specific contract suites    |
+| Database/RLS                  | Disposable Supabase/PostgreSQL test environment and SQL assertions |
+| Visual regression             | Playwright screenshots or approved hosted comparison service       |
+| Load and resilience           | Selected during implementation based on deployment topology        |
 
 Vitest test execution does not replace a separate TypeScript type-check step. Tool versions and configuration are pinned in the repository.
 
@@ -733,4 +733,3 @@ Vitest test execution does not replace a separate TypeScript type-check step. To
 - [Playwright accessibility testing](https://playwright.dev/docs/accessibility-testing)
 - [Vitest documentation](https://vitest.dev/guide/)
 - [W3C evaluating web accessibility](https://www.w3.org/WAI/test-evaluate/)
-

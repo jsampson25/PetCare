@@ -57,11 +57,11 @@ Support does not mean identical presentation. It means equivalent information, f
 
 Designs use content needs rather than named device models. The standard layout ranges are:
 
-| Range | Indicative width | Typical treatment |
-|---|---:|---|
-| Compact | below 640 CSS px | Single-column flow, bottom or compact navigation, task-first cards |
-| Medium | 640–1023 CSS px | Flexible columns, collapsible secondary regions |
-| Wide | 1024–1439 CSS px | Persistent primary navigation and multi-column workspaces |
+| Range      |      Indicative width | Typical treatment                                                                 |
+| ---------- | --------------------: | --------------------------------------------------------------------------------- |
+| Compact    |      below 640 CSS px | Single-column flow, bottom or compact navigation, task-first cards                |
+| Medium     |       640–1023 CSS px | Flexible columns, collapsible secondary regions                                   |
+| Wide       |      1024–1439 CSS px | Persistent primary navigation and multi-column workspaces                         |
 | Extra wide | 1440 CSS px and above | Constrained reading width, optional contextual panels, no uncontrolled stretching |
 
 These values are implementation defaults, not reasons to hide functionality at a particular device width. Components should respond when their own available space becomes insufficient.
@@ -544,4 +544,3 @@ These require explicit decisions before the related implementation:
 - [APG introduction and scope](https://www.w3.org/WAI/ARIA/apg/about/introduction/)
 - [W3C evaluating web accessibility overview](https://www.w3.org/WAI/test-evaluate/)
 - [W3C guidance on involving users in accessibility evaluation](https://www.w3.org/WAI/test-evaluate/involving-users/)
-

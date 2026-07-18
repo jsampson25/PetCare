@@ -25,4 +25,3 @@ This area defines how PetCare proves that product behavior is correct, safe, sec
 - Treat automated checks as necessary evidence, not complete proof.
 - Do not lower a release gate merely to make a build pass.
 - Record deferred defects with owner, risk, workaround, and target release.
-

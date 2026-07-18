@@ -84,15 +84,15 @@ Separate databases or schemas may be introduced for contractual, regulatory, sca
 
 Every table, object, index, event, and file must have one declared ownership class.
 
-| Class | Example | Required isolation |
-|---|---|---|
-| Platform-global public | Breed reference list, public feature metadata | Readable according to public policy; no tenant secrets |
-| Platform-global restricted | Plans, platform operators, system configuration | Platform authorization only |
-| Tenant-owned | Customers, pets, bookings, invoices | Mandatory `business_id` and tenant policies |
-| Tenant-and-location-owned | Kennels, shifts, occupancy, local inventory | Mandatory `business_id` and `location_id` |
-| Relationship-owned | Customer household access, staff membership | Tenant plus authenticated relationship policy |
-| Derived tenant data | Reports, search entries, aggregates, AI embeddings | Same or stricter tenant classification as source |
-| Cross-tenant platform aggregate | De-identified product analytics | Platform-only; minimum aggregation and privacy rules |
+| Class                           | Example                                            | Required isolation                                     |
+| ------------------------------- | -------------------------------------------------- | ------------------------------------------------------ |
+| Platform-global public          | Breed reference list, public feature metadata      | Readable according to public policy; no tenant secrets |
+| Platform-global restricted      | Plans, platform operators, system configuration    | Platform authorization only                            |
+| Tenant-owned                    | Customers, pets, bookings, invoices                | Mandatory `business_id` and tenant policies            |
+| Tenant-and-location-owned       | Kennels, shifts, occupancy, local inventory        | Mandatory `business_id` and `location_id`              |
+| Relationship-owned              | Customer household access, staff membership        | Tenant plus authenticated relationship policy          |
+| Derived tenant data             | Reports, search entries, aggregates, AI embeddings | Same or stricter tenant classification as source       |
+| Cross-tenant platform aggregate | De-identified product analytics                    | Platform-only; minimum aggregation and privacy rules   |
 
 Unclassified persistent data is prohibited.
 
@@ -709,4 +709,3 @@ A tenant-aware feature is complete only when:
 - [Supabase storage access control](https://supabase.com/docs/guides/storage/security/access-control)
 - [Supabase securing data](https://supabase.com/docs/guides/database/secure-data)
 - [OWASP Multi-Tenant Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Multi_Tenant_Security_Cheat_Sheet.html)
-

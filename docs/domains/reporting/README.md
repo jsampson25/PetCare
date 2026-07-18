@@ -53,30 +53,30 @@ This domain owns metric definitions, report composition, filtering, exports, sav
 
 ## Domain boundaries and sources
 
-| Subject | System of record | Reporting responsibility |
-|---|---|---|
-| Bookings and waitlist | Booking and Waitlist | Aggregate lifecycle and conversion measures |
-| Sellable capacity and assignments | Resource and Capacity | Calculate occupancy and utilization at a defined grain |
-| Prices, discounts, fees, and taxes | Pricing and Policies | Explain booked-value composition from immutable snapshots |
-| Invoices, payments, refunds, and settlement | Payments and Invoicing | Present distinct financial measures and reconciliation views |
-| Check-in, care, incidents, and check-out | Operations | Calculate execution and compliance measures |
-| Customers, households, and pets | Customer and Pet domains | Provide authorized counts, segments, and compliance lists |
-| Delivery activity | Communications | Summarize notification delivery and failure performance |
+| Subject                                     | System of record         | Reporting responsibility                                     |
+| ------------------------------------------- | ------------------------ | ------------------------------------------------------------ |
+| Bookings and waitlist                       | Booking and Waitlist     | Aggregate lifecycle and conversion measures                  |
+| Sellable capacity and assignments           | Resource and Capacity    | Calculate occupancy and utilization at a defined grain       |
+| Prices, discounts, fees, and taxes          | Pricing and Policies     | Explain booked-value composition from immutable snapshots    |
+| Invoices, payments, refunds, and settlement | Payments and Invoicing   | Present distinct financial measures and reconciliation views |
+| Check-in, care, incidents, and check-out    | Operations               | Calculate execution and compliance measures                  |
+| Customers, households, and pets             | Customer and Pet domains | Provide authorized counts, segments, and compliance lists    |
+| Delivery activity                           | Communications           | Summarize notification delivery and failure performance      |
 
 Reporting reads authoritative records or purpose-built projections. It never silently reinterprets a source status. Corrections occur in the owning domain and flow back into reports.
 
 ## Users and permissions
 
-| Capability | Owner | Manager | Staff | Accountant | Platform support |
-|---|:---:|:---:|:---:|:---:|:---:|
-| View business performance | Yes | Configurable | No | Configurable | Time-bound support only |
-| View financial detail | Yes | Configurable | No | Yes | Time-bound support only |
-| View operational compliance | Yes | Yes | Assigned location | Optional | Time-bound support only |
-| View customer or pet detail | Yes | Yes | Assigned location | Limited | Time-bound support only |
-| Export reports | Yes | Configurable | Configurable | Yes | Disabled by default |
-| Save personal views | Yes | Yes | Yes | Yes | No |
-| Manage shared report views | Yes | Configurable | No | No | No |
-| Change metric definitions | Platform-controlled | No | No | No | Authorized platform role |
+| Capability                  |        Owner        |   Manager    |       Staff       |  Accountant  |     Platform support     |
+| --------------------------- | :-----------------: | :----------: | :---------------: | :----------: | :----------------------: |
+| View business performance   |         Yes         | Configurable |        No         | Configurable | Time-bound support only  |
+| View financial detail       |         Yes         | Configurable |        No         |     Yes      | Time-bound support only  |
+| View operational compliance |         Yes         |     Yes      | Assigned location |   Optional   | Time-bound support only  |
+| View customer or pet detail |         Yes         |     Yes      | Assigned location |   Limited    | Time-bound support only  |
+| Export reports              |         Yes         | Configurable |   Configurable    |     Yes      |   Disabled by default    |
+| Save personal views         |         Yes         |     Yes      |        Yes        |     Yes      |            No            |
+| Manage shared report views  |         Yes         | Configurable |        No         |      No      |            No            |
+| Change metric definitions   | Platform-controlled |      No      |        No         |      No      | Authorized platform role |
 
 All access is tenant-scoped. Location restrictions, role permissions, field masking, and support-access controls apply before aggregation and export. Aggregate results must not become a path around row-level authorization.
 
@@ -128,106 +128,106 @@ Dashboards should emphasize one to three outcomes, their most useful drivers, an
 
 ### Capacity and operations
 
-| ID | Metric | Canonical definition |
-|---|---|---|
-| RPT-MET-001 | Sellable resource-hours | Sum of resource time available for sale after closures, maintenance, and administrative blocks, at the resource/location time grain. |
-| RPT-MET-002 | Occupied resource-hours | Sum of sellable resource time assigned to eligible active stays. Cancelled, declined, no-show, and tentative holds are excluded unless a separate hold metric is requested. |
-| RPT-MET-003 | Occupancy rate | `occupied resource-hours / sellable resource-hours`. Numerator and denominator must use the same resources, intervals, location time zone, and service eligibility. |
-| RPT-MET-004 | Check-in completion rate | Completed check-ins divided by bookings that reached an eligible arrival state during the period. Cancelled-before-arrival bookings are excluded. |
-| RPT-MET-005 | On-time care-task rate | Eligible care tasks completed within their configured window divided by completed, missed, or overdue eligible tasks. Cancelled tasks and tasks invalidated by an approved care-plan change are excluded. |
-| RPT-MET-006 | Medication on-time rate | Medication administrations recorded within the configured window divided by administrations due and eligible for compliance measurement. Approved holds remain separately visible. |
-| RPT-MET-007 | Incident rate per 100 pet-care days | `qualifying incidents / pet-care days * 100`. Severity and incident type remain available as dimensions. |
+| ID          | Metric                              | Canonical definition                                                                                                                                                                                      |
+| ----------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RPT-MET-001 | Sellable resource-hours             | Sum of resource time available for sale after closures, maintenance, and administrative blocks, at the resource/location time grain.                                                                      |
+| RPT-MET-002 | Occupied resource-hours             | Sum of sellable resource time assigned to eligible active stays. Cancelled, declined, no-show, and tentative holds are excluded unless a separate hold metric is requested.                               |
+| RPT-MET-003 | Occupancy rate                      | `occupied resource-hours / sellable resource-hours`. Numerator and denominator must use the same resources, intervals, location time zone, and service eligibility.                                       |
+| RPT-MET-004 | Check-in completion rate            | Completed check-ins divided by bookings that reached an eligible arrival state during the period. Cancelled-before-arrival bookings are excluded.                                                         |
+| RPT-MET-005 | On-time care-task rate              | Eligible care tasks completed within their configured window divided by completed, missed, or overdue eligible tasks. Cancelled tasks and tasks invalidated by an approved care-plan change are excluded. |
+| RPT-MET-006 | Medication on-time rate             | Medication administrations recorded within the configured window divided by administrations due and eligible for compliance measurement. Approved holds remain separately visible.                        |
+| RPT-MET-007 | Incident rate per 100 pet-care days | `qualifying incidents / pet-care days * 100`. Severity and incident type remain available as dimensions.                                                                                                  |
 
 Occupancy is calculated from summed time, not by averaging percentages across days or locations. A pet staying in a shared resource follows the capacity units defined by the Resource and Capacity domain.
 
 ### Booking and demand
 
-| ID | Metric | Canonical definition |
-|---|---|---|
-| RPT-MET-010 | Booking requests | Distinct booking requests created in the period, excluding test and administratively voided records. |
-| RPT-MET-011 | Confirmed bookings | Distinct requests that first entered a confirmed state in the period. |
-| RPT-MET-012 | Booking conversion rate | Confirmed eligible booking requests divided by eligible completed booking requests for the selected cohort. The cohort basis must be shown as request-created date or decision date. |
-| RPT-MET-013 | Cancellation rate | Bookings cancelled after confirmation divided by confirmed bookings with a scheduled arrival in the selected period. Customer, business, and policy cancellation reasons are separable dimensions. |
-| RPT-MET-014 | No-show rate | Bookings marked no-show divided by bookings expected to arrive, excluding cancellations recorded before the arrival cutoff. |
-| RPT-MET-015 | Waitlist conversion rate | Waitlist entries converted to a confirmed booking divided by eligible closed waitlist entries. Expired, declined, and withdrawn outcomes remain separately visible. |
-| RPT-MET-016 | Average lead time | Average elapsed calendar time between booking creation and scheduled service start for confirmed bookings. Median must also be available to expose skew. |
+| ID          | Metric                   | Canonical definition                                                                                                                                                                               |
+| ----------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RPT-MET-010 | Booking requests         | Distinct booking requests created in the period, excluding test and administratively voided records.                                                                                               |
+| RPT-MET-011 | Confirmed bookings       | Distinct requests that first entered a confirmed state in the period.                                                                                                                              |
+| RPT-MET-012 | Booking conversion rate  | Confirmed eligible booking requests divided by eligible completed booking requests for the selected cohort. The cohort basis must be shown as request-created date or decision date.               |
+| RPT-MET-013 | Cancellation rate        | Bookings cancelled after confirmation divided by confirmed bookings with a scheduled arrival in the selected period. Customer, business, and policy cancellation reasons are separable dimensions. |
+| RPT-MET-014 | No-show rate             | Bookings marked no-show divided by bookings expected to arrive, excluding cancellations recorded before the arrival cutoff.                                                                        |
+| RPT-MET-015 | Waitlist conversion rate | Waitlist entries converted to a confirmed booking divided by eligible closed waitlist entries. Expired, declined, and withdrawn outcomes remain separately visible.                                |
+| RPT-MET-016 | Average lead time        | Average elapsed calendar time between booking creation and scheduled service start for confirmed bookings. Median must also be available to expose skew.                                           |
 
 ### Financial
 
-| ID | Metric | Canonical definition |
-|---|---|---|
-| RPT-MET-020 | Gross booked value | Sum of immutable booking price snapshots before discounts, credits, refunds, and payment activity, excluding voided bookings. This is demand value, not cash or recognized revenue. |
-| RPT-MET-021 | Net invoiced charges | Finalized invoice charges plus fees and taxes, less invoice discounts and credit notes, using invoice issue or service-period basis as visibly selected. |
-| RPT-MET-022 | Collected cash | Sum of successful captured payments in the period, excluding failed, pending, and authorized-only attempts. |
-| RPT-MET-023 | Net collected cash | Successful captured payments less successful refunds in the period. Processor fees and disputes are not deducted unless the report is explicitly a settlement report. |
-| RPT-MET-024 | Outstanding balance | Finalized invoice amount minus applied successful payments, applied credits, and other settled allocations as of the report watermark. Negative balances appear as customer credit, not negative receivables. |
-| RPT-MET-025 | Average booking value | Net invoiced charges allocated to completed eligible bookings divided by those bookings. Scope and allocation basis must be shown. |
-| RPT-MET-026 | Refund rate | Successful refunded amount divided by successfully captured amount for the selected payment cohort. Both transaction-period and original-payment-cohort views may be offered but cannot be mixed. |
-| RPT-MET-027 | Deposit liability | Unapplied, unrefunded successful deposits held as of the report watermark. Applied deposits move out of this measure when the allocation succeeds. |
+| ID          | Metric                | Canonical definition                                                                                                                                                                                          |
+| ----------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RPT-MET-020 | Gross booked value    | Sum of immutable booking price snapshots before discounts, credits, refunds, and payment activity, excluding voided bookings. This is demand value, not cash or recognized revenue.                           |
+| RPT-MET-021 | Net invoiced charges  | Finalized invoice charges plus fees and taxes, less invoice discounts and credit notes, using invoice issue or service-period basis as visibly selected.                                                      |
+| RPT-MET-022 | Collected cash        | Sum of successful captured payments in the period, excluding failed, pending, and authorized-only attempts.                                                                                                   |
+| RPT-MET-023 | Net collected cash    | Successful captured payments less successful refunds in the period. Processor fees and disputes are not deducted unless the report is explicitly a settlement report.                                         |
+| RPT-MET-024 | Outstanding balance   | Finalized invoice amount minus applied successful payments, applied credits, and other settled allocations as of the report watermark. Negative balances appear as customer credit, not negative receivables. |
+| RPT-MET-025 | Average booking value | Net invoiced charges allocated to completed eligible bookings divided by those bookings. Scope and allocation basis must be shown.                                                                            |
+| RPT-MET-026 | Refund rate           | Successful refunded amount divided by successfully captured amount for the selected payment cohort. Both transaction-period and original-payment-cohort views may be offered but cannot be mixed.             |
+| RPT-MET-027 | Deposit liability     | Unapplied, unrefunded successful deposits held as of the report watermark. Applied deposits move out of this measure when the allocation succeeds.                                                            |
 
 `Revenue`, `sales`, `booked value`, `invoice charges`, `cash collected`, and `processor settlement` are never interchangeable labels. Reports must state which measure is displayed.
 
 ### Customers and compliance
 
-| ID | Metric | Canonical definition |
-|---|---|---|
-| RPT-MET-030 | Active customers | Distinct non-merged customer households with qualifying completed or future confirmed activity inside the configured activity window. The window must be displayed. |
-| RPT-MET-031 | Repeat-customer rate | Customers with at least two completed qualifying bookings divided by customers with at least one, for the selected cohort and observation window. |
-| RPT-MET-032 | Returning booking share | Confirmed bookings from customers with a prior completed booking divided by confirmed bookings in the period. |
-| RPT-MET-033 | Vaccine compliance rate | Pets associated with an upcoming eligible service whose required vaccines are verified and valid through the configured service boundary divided by pets evaluated. |
-| RPT-MET-034 | Report-card completion rate | Eligible completed stays with a published required report card divided by eligible completed stays. |
+| ID          | Metric                      | Canonical definition                                                                                                                                                |
+| ----------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RPT-MET-030 | Active customers            | Distinct non-merged customer households with qualifying completed or future confirmed activity inside the configured activity window. The window must be displayed. |
+| RPT-MET-031 | Repeat-customer rate        | Customers with at least two completed qualifying bookings divided by customers with at least one, for the selected cohort and observation window.                   |
+| RPT-MET-032 | Returning booking share     | Confirmed bookings from customers with a prior completed booking divided by confirmed bookings in the period.                                                       |
+| RPT-MET-033 | Vaccine compliance rate     | Pets associated with an upcoming eligible service whose required vaccines are verified and valid through the configured service boundary divided by pets evaluated. |
+| RPT-MET-034 | Report-card completion rate | Eligible completed stays with a published required report card divided by eligible completed stays.                                                                 |
 
 ## MVP report catalog
 
-| Report | Primary question | Key content |
-|---|---|---|
-| Daily operations | What needs attention today? | Arrivals, departures, in-care pets, capacity, overdue tasks, medication exceptions, incidents |
-| Occupancy and utilization | How effectively is capacity used? | Sellable and occupied resource-hours, occupancy by location/service/resource type, closures |
-| Booking performance | How is demand converting? | Requests, confirmations, lead time, modifications, cancellations, no-shows, source |
-| Waitlist performance | Is constrained demand being recovered? | Entries, offers, response time, conversions, expiry, decline reasons |
-| Sales and invoices | What was charged for services? | Booked value, finalized charges, discounts, fees, taxes, credits, outstanding balances |
-| Payments and refunds | What cash moved? | Captures, failures, refunds, deposits, payment method, disputes, unapplied funds |
-| Financial reconciliation | Do system records agree? | Invoice totals, allocations, captured/refunded cash, processor settlement exceptions |
-| Customer activity | Who is using the business? | New, active, returning, inactive, repeat behavior, household and location scope |
-| Pet eligibility | Which pets need action? | Vaccine status, upcoming expirations, missing documents, eligibility blocks |
-| Care compliance | Was scheduled care completed safely? | Feeding, medication, wellness, task and report-card completion and exceptions |
-| Incident overview | What safety patterns need review? | Counts, rate per 100 care-days, severity, type, location, resolution time |
-| Communication delivery | Are required messages reaching customers? | Sent, delivered, failed, suppressed, retried, channel and template |
+| Report                    | Primary question                          | Key content                                                                                   |
+| ------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Daily operations          | What needs attention today?               | Arrivals, departures, in-care pets, capacity, overdue tasks, medication exceptions, incidents |
+| Occupancy and utilization | How effectively is capacity used?         | Sellable and occupied resource-hours, occupancy by location/service/resource type, closures   |
+| Booking performance       | How is demand converting?                 | Requests, confirmations, lead time, modifications, cancellations, no-shows, source            |
+| Waitlist performance      | Is constrained demand being recovered?    | Entries, offers, response time, conversions, expiry, decline reasons                          |
+| Sales and invoices        | What was charged for services?            | Booked value, finalized charges, discounts, fees, taxes, credits, outstanding balances        |
+| Payments and refunds      | What cash moved?                          | Captures, failures, refunds, deposits, payment method, disputes, unapplied funds              |
+| Financial reconciliation  | Do system records agree?                  | Invoice totals, allocations, captured/refunded cash, processor settlement exceptions          |
+| Customer activity         | Who is using the business?                | New, active, returning, inactive, repeat behavior, household and location scope               |
+| Pet eligibility           | Which pets need action?                   | Vaccine status, upcoming expirations, missing documents, eligibility blocks                   |
+| Care compliance           | Was scheduled care completed safely?      | Feeding, medication, wellness, task and report-card completion and exceptions                 |
+| Incident overview         | What safety patterns need review?         | Counts, rate per 100 care-days, severity, type, location, resolution time                     |
+| Communication delivery    | Are required messages reaching customers? | Sent, delivered, failed, suppressed, retried, channel and template                            |
 
 ## Functional requirements
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| RPT-FR-001 | P0 | The system shall provide only reports authorized for the user's tenant, role, and location scope. |
-| RPT-FR-002 | P0 | The system shall display applied filters, effective time zone, metric definition version, and freshness watermark with every report run. |
-| RPT-FR-003 | P0 | Users shall filter supported reports by date range, location, service, booking status, and other definition-approved dimensions. |
-| RPT-FR-004 | P0 | The system shall calculate canonical metrics from documented inclusion, exclusion, grain, and time-basis rules. |
-| RPT-FR-005 | P0 | Authorized users shall drill from aggregate values to authorized supporting records without expanding their data access. |
-| RPT-FR-006 | P0 | Authorized users shall export the complete filtered result set to CSV using the same definitions and authorization as the visible report. |
-| RPT-FR-007 | P0 | The system shall identify delayed, partial, rebuilding, or unavailable report data and shall not label it current. |
-| RPT-FR-008 | P0 | Financial reporting shall present booked, invoiced, collected, refunded, outstanding, and settled measures separately. |
-| RPT-FR-009 | P0 | Users shall be able to inspect a plain-language definition and calculation notes for every displayed KPI. |
-| RPT-FR-010 | P1 | Users shall save personal report views without modifying the underlying report or metric definition. |
-| RPT-FR-011 | P1 | Authorized administrators shall create shared saved views for their tenant. |
-| RPT-FR-012 | P1 | The system shall provide previous-period comparison only when both periods use compatible definitions and complete data. |
-| RPT-FR-013 | P1 | Financial reconciliation shall expose unmatched, duplicate, delayed, and amount-mismatch exceptions. |
-| RPT-FR-014 | P1 | Exports exceeding synchronous limits shall run asynchronously and notify the requester when ready. |
+| ID         | Priority | Requirement                                                                                                                               |
+| ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| RPT-FR-001 |       P0 | The system shall provide only reports authorized for the user's tenant, role, and location scope.                                         |
+| RPT-FR-002 |       P0 | The system shall display applied filters, effective time zone, metric definition version, and freshness watermark with every report run.  |
+| RPT-FR-003 |       P0 | Users shall filter supported reports by date range, location, service, booking status, and other definition-approved dimensions.          |
+| RPT-FR-004 |       P0 | The system shall calculate canonical metrics from documented inclusion, exclusion, grain, and time-basis rules.                           |
+| RPT-FR-005 |       P0 | Authorized users shall drill from aggregate values to authorized supporting records without expanding their data access.                  |
+| RPT-FR-006 |       P0 | Authorized users shall export the complete filtered result set to CSV using the same definitions and authorization as the visible report. |
+| RPT-FR-007 |       P0 | The system shall identify delayed, partial, rebuilding, or unavailable report data and shall not label it current.                        |
+| RPT-FR-008 |       P0 | Financial reporting shall present booked, invoiced, collected, refunded, outstanding, and settled measures separately.                    |
+| RPT-FR-009 |       P0 | Users shall be able to inspect a plain-language definition and calculation notes for every displayed KPI.                                 |
+| RPT-FR-010 |       P1 | Users shall save personal report views without modifying the underlying report or metric definition.                                      |
+| RPT-FR-011 |       P1 | Authorized administrators shall create shared saved views for their tenant.                                                               |
+| RPT-FR-012 |       P1 | The system shall provide previous-period comparison only when both periods use compatible definitions and complete data.                  |
+| RPT-FR-013 |       P1 | Financial reconciliation shall expose unmatched, duplicate, delayed, and amount-mismatch exceptions.                                      |
+| RPT-FR-014 |       P1 | Exports exceeding synchronous limits shall run asynchronously and notify the requester when ready.                                        |
 
 ## Business rules
 
-| ID | Priority | Rule |
-|---|---:|---|
-| RPT-BR-001 | P0 | A metric name maps to one active canonical definition version at a time. Historical runs retain the version used. |
-| RPT-BR-002 | P0 | Aggregation cannot bypass tenant, location, role, or field-level authorization. |
-| RPT-BR-003 | P0 | Report date boundaries use the selected location's business time zone unless an authorized multi-location report explicitly uses a displayed comparison basis. |
-| RPT-BR-004 | P0 | Money is aggregated from stored minor units and currency. Different currencies are never summed without an explicit conversion policy and rate provenance. |
-| RPT-BR-005 | P0 | Percentages are calculated from summed numerators and denominators, not averaged from child percentages. |
-| RPT-BR-006 | P0 | Soft-deleted, merged, test, voided, and anonymized records follow each metric's explicit inclusion rules. |
-| RPT-BR-007 | P0 | A source correction changes future report runs; completed report-run metadata remains immutable. |
-| RPT-BR-008 | P0 | Financial totals must reconcile to authoritative transaction records within documented timing tolerances before being marked complete. |
-| RPT-BR-009 | P0 | Personally identifiable and health-related fields are excluded from exports unless required by the report and authorized for the requester. |
-| RPT-BR-010 | P1 | Small aggregate groups may be suppressed in cross-location or platform benchmark views to reduce disclosure risk. |
-| RPT-BR-011 | P1 | Comparisons across metric-definition versions require a compatibility declaration or visible discontinuity warning. |
+| ID         | Priority | Rule                                                                                                                                                           |
+| ---------- | -------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RPT-BR-001 |       P0 | A metric name maps to one active canonical definition version at a time. Historical runs retain the version used.                                              |
+| RPT-BR-002 |       P0 | Aggregation cannot bypass tenant, location, role, or field-level authorization.                                                                                |
+| RPT-BR-003 |       P0 | Report date boundaries use the selected location's business time zone unless an authorized multi-location report explicitly uses a displayed comparison basis. |
+| RPT-BR-004 |       P0 | Money is aggregated from stored minor units and currency. Different currencies are never summed without an explicit conversion policy and rate provenance.     |
+| RPT-BR-005 |       P0 | Percentages are calculated from summed numerators and denominators, not averaged from child percentages.                                                       |
+| RPT-BR-006 |       P0 | Soft-deleted, merged, test, voided, and anonymized records follow each metric's explicit inclusion rules.                                                      |
+| RPT-BR-007 |       P0 | A source correction changes future report runs; completed report-run metadata remains immutable.                                                               |
+| RPT-BR-008 |       P0 | Financial totals must reconcile to authoritative transaction records within documented timing tolerances before being marked complete.                         |
+| RPT-BR-009 |       P0 | Personally identifiable and health-related fields are excluded from exports unless required by the report and authorized for the requester.                    |
+| RPT-BR-010 |       P1 | Small aggregate groups may be suppressed in cross-location or platform benchmark views to reduce disclosure risk.                                              |
+| RPT-BR-011 |       P1 | Comparisons across metric-definition versions require a compatibility declaration or visible discontinuity warning.                                            |
 
 ## Data model
 
@@ -321,14 +321,14 @@ Settlement data is optional for the earliest MVP if a provider integration does 
 
 ## Non-functional requirements
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| RPT-NFR-001 | P0 | Standard MVP reports for a typical single location shall return an initial result within 3 seconds at the 95th percentile under normal load. |
-| RPT-NFR-002 | P0 | Long-running reports and exports shall not block transactional booking or operations workloads. |
-| RPT-NFR-003 | P0 | Re-running a report against the same immutable source watermark and definition version shall produce the same result. |
-| RPT-NFR-004 | P0 | Report failures shall expose a safe user message and a traceable operational error without leaking cross-tenant or query details. |
-| RPT-NFR-005 | P0 | Report tables, filters, charts, and definition help shall meet the platform accessibility standard. |
-| RPT-NFR-006 | P1 | Cached results shall include scope and definition version in the cache key and shall never be shared across unauthorized tenants or scopes. |
+| ID          | Priority | Requirement                                                                                                                                  |
+| ----------- | -------: | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| RPT-NFR-001 |       P0 | Standard MVP reports for a typical single location shall return an initial result within 3 seconds at the 95th percentile under normal load. |
+| RPT-NFR-002 |       P0 | Long-running reports and exports shall not block transactional booking or operations workloads.                                              |
+| RPT-NFR-003 |       P0 | Re-running a report against the same immutable source watermark and definition version shall produce the same result.                        |
+| RPT-NFR-004 |       P0 | Report failures shall expose a safe user message and a traceable operational error without leaking cross-tenant or query details.            |
+| RPT-NFR-005 |       P0 | Report tables, filters, charts, and definition help shall meet the platform accessibility standard.                                          |
+| RPT-NFR-006 |       P1 | Cached results shall include scope and definition version in the cache key and shall never be shared across unauthorized tenants or scopes.  |
 
 Performance targets are initial engineering targets and must be validated using realistic tenant sizes and concurrent operational load.
 

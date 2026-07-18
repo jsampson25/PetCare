@@ -28,7 +28,11 @@ export function Tabs({ items, label }: { items: readonly TabItem[]; label: strin
 
   return (
     <div>
-      <div aria-label={label} className="flex gap-1 overflow-x-auto border-b border-[var(--border-default)]" role="tablist">
+      <div
+        aria-label={label}
+        className="flex gap-1 overflow-x-auto border-b border-[var(--border-default)]"
+        role="tablist"
+      >
         {items.map((item, index) => {
           const selected = item.id === activeId;
           return (

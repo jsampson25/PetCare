@@ -35,11 +35,18 @@ export function AppShell({
             </a>
             <p className="mt-1 text-xs font-semibold opacity-75">{shellNames[kind]}</p>
           </div>
-          <p className="max-w-36 truncate text-sm font-bold lg:mt-8 lg:max-w-full">{contextLabel}</p>
+          <p className="max-w-36 truncate text-sm font-bold lg:mt-8 lg:max-w-full">
+            {contextLabel}
+          </p>
         </div>
         <details className="mt-5 rounded-[var(--radius-md)] border border-current/20 lg:hidden">
-          <summary className="min-h-11 cursor-pointer px-3 py-2.5 text-sm font-bold">Open navigation</summary>
-          <nav aria-label={`${shellNames[kind]} mobile navigation`} className="border-t border-current/20 p-2">
+          <summary className="min-h-11 cursor-pointer px-3 py-2.5 text-sm font-bold">
+            Open navigation
+          </summary>
+          <nav
+            aria-label={`${shellNames[kind]} mobile navigation`}
+            className="border-t border-current/20 p-2"
+          >
             {navigation.map((item) => (
               <a
                 className="block min-h-11 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-semibold hover:bg-[var(--shell-hover)]"
@@ -51,7 +58,10 @@ export function AppShell({
             ))}
           </nav>
         </details>
-        <nav aria-label={`${shellNames[kind]} navigation`} className="mt-6 hidden space-y-1 lg:block">
+        <nav
+          aria-label={`${shellNames[kind]} navigation`}
+          className="mt-6 hidden space-y-1 lg:block"
+        >
           {navigation.map((item) => (
             <a
               className="block min-h-11 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-semibold hover:bg-[var(--shell-hover)]"

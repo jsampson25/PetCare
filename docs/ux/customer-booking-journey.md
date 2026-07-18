@@ -37,16 +37,16 @@ It describes sequencing and interaction. Owning domains remain authoritative for
 
 ## Entry points
 
-| Entry | Context carried | Expected first step |
-|---|---|---|
-| Public `Book Now` | Tenant | Location or service |
-| Service page | Tenant, service/category, optional location | Confirm location and service |
-| Location page | Tenant, location | Select service |
-| Customer Portal | Tenant, authenticated customer | Select pets/service or book-again option |
-| Pet profile | Tenant, authenticated customer, pet | Select service and dates |
-| Past booking `Book again` | Tenant, customer, permitted pet/service hints | Review current selections under current rules |
-| Waitlist offer | Tenant, customer, signed offer token | Review offered capacity and authenticate |
-| Transactional reminder | Tenant, draft or action reference, purpose-bound token | Authenticate and resume allowed step |
+| Entry                     | Context carried                                        | Expected first step                           |
+| ------------------------- | ------------------------------------------------------ | --------------------------------------------- |
+| Public `Book Now`         | Tenant                                                 | Location or service                           |
+| Service page              | Tenant, service/category, optional location            | Confirm location and service                  |
+| Location page             | Tenant, location                                       | Select service                                |
+| Customer Portal           | Tenant, authenticated customer                         | Select pets/service or book-again option      |
+| Pet profile               | Tenant, authenticated customer, pet                    | Select service and dates                      |
+| Past booking `Book again` | Tenant, customer, permitted pet/service hints          | Review current selections under current rules |
+| Waitlist offer            | Tenant, customer, signed offer token                   | Review offered capacity and authenticate      |
+| Transactional reminder    | Tenant, draft or action reference, purpose-bound token | Authenticate and resume allowed step          |
 
 Context is a convenience, not authority. Every value is resolved against current tenant configuration and the signed-in user's relationships.
 
@@ -360,14 +360,14 @@ Uploading a file produces `processing` or `pending review`, not instant verified
 
 ### Eligibility result presentation
 
-| Result | Customer experience |
-|---|---|
-| Eligible | Continue without unnecessary success ceremony |
-| Eligible with action | Continue with visible required action and deadline |
-| Pending review | Explain request status and expected next step |
-| Assessment required | Offer assessment booking or contact path |
-| Temporarily ineligible | Explain safe remediation or eligible future timing |
-| Ineligible | Explain customer-safe reason and contact/alternative path |
+| Result                 | Customer experience                                       |
+| ---------------------- | --------------------------------------------------------- |
+| Eligible               | Continue without unnecessary success ceremony             |
+| Eligible with action   | Continue with visible required action and deadline        |
+| Pending review         | Explain request status and expected next step             |
+| Assessment required    | Offer assessment booking or contact path                  |
+| Temporarily ineligible | Explain safe remediation or eligible future timing        |
+| Ineligible             | Explain customer-safe reason and contact/alternative path |
 
 Internal risk scores, staff-only notes, or sensitive decision logic are never exposed.
 
@@ -479,14 +479,14 @@ Before payment or no-payment confirmation, the system revalidates:
 
 ### Revalidation outcomes
 
-| Outcome | Response |
-|---|---|
-| No material change | Continue |
-| Price changed | Show new quote and require acceptance |
-| Capacity lost | Explain and offer alternatives/waitlist; do not charge |
-| Requirement changed | Return to affected requirement with preserved valid data |
-| Approval now required | Submit request rather than claim confirmation |
-| Merchant unavailable | Preserve draft/hold according to policy and provide safe next step |
+| Outcome               | Response                                                           |
+| --------------------- | ------------------------------------------------------------------ |
+| No material change    | Continue                                                           |
+| Price changed         | Show new quote and require acceptance                              |
+| Capacity lost         | Explain and offer alternatives/waitlist; do not charge             |
+| Requirement changed   | Return to affected requirement with preserved valid data           |
+| Approval now required | Submit request rather than claim confirmation                      |
+| Merchant unavailable  | Preserve draft/hold according to policy and provide safe next step |
 
 ## Payment
 
@@ -669,12 +669,12 @@ The customer can confirm eligible occurrences according to policy. The UI never 
 
 ### Draft types
 
-| Draft | Identity | Persistence |
-|---|---|---|
-| Anonymous exploration | Browser/session plus signed opaque reference | Short-lived, minimal non-sensitive data |
-| Authenticated draft | Identity, tenant, and customer relationship | Saved until configured expiration |
-| Payment-in-progress attempt | Identity, booking attempt, payment request | Retained through reconciliation window |
-| Waitlist conversion draft | Identity and signed active offer | Until offer expiry or terminal outcome |
+| Draft                       | Identity                                     | Persistence                             |
+| --------------------------- | -------------------------------------------- | --------------------------------------- |
+| Anonymous exploration       | Browser/session plus signed opaque reference | Short-lived, minimal non-sensitive data |
+| Authenticated draft         | Identity, tenant, and customer relationship  | Saved until configured expiration       |
+| Payment-in-progress attempt | Identity, booking attempt, payment request   | Retained through reconciliation window  |
+| Waitlist conversion draft   | Identity and signed active offer             | Until offer expiry or terminal outcome  |
 
 ### Persistence rules
 
@@ -692,32 +692,32 @@ Authenticated customers may resume from another device after sign-in. Anonymous 
 
 ## Timeout and expiration behavior
 
-| Item | Expiration effect |
-|---|---|
-| Anonymous draft | Personal draft data deleted or minimized according to retention policy |
-| Capacity hold | Availability released; selections retained as uncommitted if safe |
-| Quote | New quote required; material difference shown |
-| Policy acceptance | Reaccept if version or required context changed |
+| Item              | Expiration effect                                                       |
+| ----------------- | ----------------------------------------------------------------------- |
+| Anonymous draft   | Personal draft data deleted or minimized according to retention policy  |
+| Capacity hold     | Availability released; selections retained as uncommitted if safe       |
+| Quote             | New quote required; material difference shown                           |
+| Policy acceptance | Reaccept if version or required context changed                         |
 | Verification link | New link can be requested without losing safe authenticated draft state |
-| Payment action | Reconcile first; do not create duplicate attempt blindly |
-| Waitlist offer | Offer closes and hold releases; waitlist state follows policy |
+| Payment action    | Reconcile first; do not create duplicate attempt blindly                |
+| Waitlist offer    | Offer closes and hold releases; waitlist state follows policy           |
 
 Countdowns are used only where the platform genuinely enforces the deadline and can account for clock differences. They are not artificial urgency.
 
 ## Failure and recovery matrix
 
-| Failure | Customer message | Recovery |
-|---|---|---|
-| Availability service unavailable | Cannot confirm availability right now | Preserve input, retry, contact; no charge |
-| Capacity lost | Selected space is no longer available | Show alternatives/waitlist; no charge |
-| Quote failed | Price cannot be confirmed | Preserve draft; contact or retry; never use zero |
-| Eligibility dependency delayed | Requirement still being checked | Pending review or retry according to rule |
-| Document upload failed | File was not received/accepted | Keep other data and retry that file |
-| Authentication interrupted | Sign-in was not completed | Return to safe draft entry |
-| Payment declined | Payment was not successful | Use safe decline category and retry/change method |
-| Payment uncertain | Payment is being confirmed | Poll/status page; prevent duplicate charge |
-| Confirmation recovery active | Final status is being confirmed | Provide reference and notify on resolution |
-| Notification failed after confirmation | Booking remains confirmed | Show in portal; retry communication separately |
+| Failure                                | Customer message                      | Recovery                                          |
+| -------------------------------------- | ------------------------------------- | ------------------------------------------------- |
+| Availability service unavailable       | Cannot confirm availability right now | Preserve input, retry, contact; no charge         |
+| Capacity lost                          | Selected space is no longer available | Show alternatives/waitlist; no charge             |
+| Quote failed                           | Price cannot be confirmed             | Preserve draft; contact or retry; never use zero  |
+| Eligibility dependency delayed         | Requirement still being checked       | Pending review or retry according to rule         |
+| Document upload failed                 | File was not received/accepted        | Keep other data and retry that file               |
+| Authentication interrupted             | Sign-in was not completed             | Return to safe draft entry                        |
+| Payment declined                       | Payment was not successful            | Use safe decline category and retry/change method |
+| Payment uncertain                      | Payment is being confirmed            | Poll/status page; prevent duplicate charge        |
+| Confirmation recovery active           | Final status is being confirmed       | Provide reference and notify on resolution        |
+| Notification failed after confirmation | Booking remains confirmed             | Show in portal; retry communication separately    |
 
 ## Duplicate prevention
 
@@ -780,16 +780,16 @@ Duplicate warning does not block legitimate repeat or overlapping services autom
 
 ### Status language
 
-| Internal concept | Customer language |
-|---|---|
-| Draft | `Booking in progress` |
-| Capacity hold | `Held while you finish` when shown |
-| Pending approval | `Request submitted — awaiting review` |
-| Action required | `More information needed` |
-| Pending deposit | `Payment needed to confirm` |
-| Confirmed | `Booking confirmed` |
-| Waitlist active | `On the waitlist` |
-| Payment indeterminate | `We're confirming your payment` |
+| Internal concept      | Customer language                     |
+| --------------------- | ------------------------------------- |
+| Draft                 | `Booking in progress`                 |
+| Capacity hold         | `Held while you finish` when shown    |
+| Pending approval      | `Request submitted — awaiting review` |
+| Action required       | `More information needed`             |
+| Pending deposit       | `Payment needed to confirm`           |
+| Confirmed             | `Booking confirmed`                   |
+| Waitlist active       | `On the waitlist`                     |
+| Payment indeterminate | `We're confirming your payment`       |
 
 Avoid `reservation secured`, `you're all set`, or celebratory confirmation language until the booking is actually confirmed and remaining required actions are clearly visible.
 
@@ -1051,4 +1051,3 @@ Implementation slices do not change the domain model; they limit which configure
 - [Pricing and Policies](../domains/pricing-policies/README.md)
 - [Payments and Invoicing](../domains/payments-invoicing/README.md)
 - [Communications](../domains/communications/README.md)
-

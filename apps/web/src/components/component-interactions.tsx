@@ -18,7 +18,9 @@ export function ComponentInteractions() {
           Escape and the close action return control without navigating away.
         </p>
         <div className="mt-4">
-          <Button onClick={() => setDialogOpen(true)} variant="secondary">Open example dialog</Button>
+          <Button onClick={() => setDialogOpen(true)} variant="secondary">
+            Open example dialog
+          </Button>
         </div>
         <Dialog
           description="This example uses the browser’s modal dialog behavior for focus containment and Escape handling."
@@ -27,10 +29,13 @@ export function ComponentInteractions() {
           title="Review reservation change"
         >
           <p className="leading-7 text-[var(--text-secondary)]">
-            Feature dialogs will place the safest default action first and clearly label destructive consequences.
+            Feature dialogs will place the safest default action first and clearly label destructive
+            consequences.
           </p>
           <div className="mt-5 flex justify-end gap-3">
-            <Button onClick={() => setDialogOpen(false)} variant="secondary">Cancel</Button>
+            <Button onClick={() => setDialogOpen(false)} variant="secondary">
+              Cancel
+            </Button>
             <Button onClick={() => setDialogOpen(false)}>Confirm change</Button>
           </div>
         </Dialog>
@@ -42,9 +47,33 @@ export function ComponentInteractions() {
           <Tabs
             label="Pet profile sections"
             items={[
-              { id: 'overview', label: 'Overview', content: <p className="leading-7 text-[var(--text-secondary)]">Identity, care alerts, and the next reservation.</p> },
-              { id: 'vaccines', label: 'Vaccinations', content: <p className="leading-7 text-[var(--text-secondary)]">Required records, verification status, and expiration dates.</p> },
-              { id: 'care', label: 'Care instructions', content: <p className="leading-7 text-[var(--text-secondary)]">Feeding, medication, behavior, and handling needs.</p> },
+              {
+                id: 'overview',
+                label: 'Overview',
+                content: (
+                  <p className="leading-7 text-[var(--text-secondary)]">
+                    Identity, care alerts, and the next reservation.
+                  </p>
+                ),
+              },
+              {
+                id: 'vaccines',
+                label: 'Vaccinations',
+                content: (
+                  <p className="leading-7 text-[var(--text-secondary)]">
+                    Required records, verification status, and expiration dates.
+                  </p>
+                ),
+              },
+              {
+                id: 'care',
+                label: 'Care instructions',
+                content: (
+                  <p className="leading-7 text-[var(--text-secondary)]">
+                    Feeding, medication, behavior, and handling needs.
+                  </p>
+                ),
+              },
             ]}
           />
         </div>
@@ -59,7 +88,8 @@ export function ComponentInteractions() {
         onSelect={(file) => {
           setUploadError(
             file
-              ? validateSelectedFile(file, ['application/pdf', 'image/jpeg', 'image/png']) ?? undefined
+              ? (validateSelectedFile(file, ['application/pdf', 'image/jpeg', 'image/png']) ??
+                  undefined)
               : undefined,
           );
         }}

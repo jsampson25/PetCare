@@ -8,7 +8,11 @@ import { selectBusiness } from './actions';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 
-export default async function SelectBusinessPage({ searchParams }: { searchParams: SearchParameters }) {
+export default async function SelectBusinessPage({
+  searchParams,
+}: {
+  searchParams: SearchParameters;
+}) {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims?.sub) redirect('/auth/sign-in?next=/auth/select-business');
@@ -25,7 +29,8 @@ export default async function SelectBusinessPage({ searchParams }: { searchParam
           <form action={selectBusiness} key={business.businessId}>
             <input name="businessId" type="hidden" value={business.businessId} />
             <Button className="w-full justify-between" type="submit" variant="secondary">
-              {business.businessName}<span aria-hidden="true">→</span>
+              {business.businessName}
+              <span aria-hidden="true">→</span>
             </Button>
           </form>
         ))}

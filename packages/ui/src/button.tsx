@@ -10,7 +10,8 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantStyles: Record<ButtonVariant, string> = {
   danger: 'bg-[var(--danger-strong)] text-white hover:bg-[var(--danger-foreground)]',
-  primary: 'bg-[var(--action-primary)] text-[var(--action-primary-text)] hover:bg-[var(--action-primary-hover)]',
+  primary:
+    'bg-[var(--action-primary)] text-[var(--action-primary-text)] hover:bg-[var(--action-primary-hover)]',
   quiet: 'bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-subtle)]',
   secondary:
     'border border-[var(--border-default)] bg-[var(--surface-default)] text-[var(--text-primary)] hover:bg-[var(--surface-subtle)]',
@@ -32,7 +33,12 @@ export function Button({
       type={type}
       {...props}
     >
-      {loading ? <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-current border-r-transparent" /> : null}
+      {loading ? (
+        <span
+          aria-hidden="true"
+          className="size-4 animate-spin rounded-full border-2 border-current border-r-transparent"
+        />
+      ) : null}
       <span>{loading ? 'Working…' : children}</span>
     </button>
   );

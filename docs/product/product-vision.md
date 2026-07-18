@@ -50,4 +50,3 @@ These extensions should influence flexibility but must not inflate the MVP.
 ## North-star outcome
 
 A new business can configure its essential services and accept a valid paid booking quickly, while existing staff can safely manage the pet from arrival through departure without using another operational system.
-

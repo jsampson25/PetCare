@@ -21,7 +21,8 @@ export async function inviteStaff(
   formData: FormData,
 ): Promise<InvitationFormState> {
   const context = await resolveBusinessContext();
-  if (!context || !context.permissions.has('staff.invite')) return { error: 'You do not have permission to invite staff.' };
+  if (!context || !context.permissions.has('staff.invite'))
+    return { error: 'You do not have permission to invite staff.' };
 
   const parsed = invitationSchema.safeParse({
     email: formData.get('email'),

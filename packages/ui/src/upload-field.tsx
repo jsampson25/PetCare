@@ -35,8 +35,12 @@ export function UploadField({
 
   return (
     <div>
-      <label className="block text-sm font-bold" htmlFor={id}>{label}</label>
-      <p className="mt-1 text-sm leading-5 text-[var(--text-secondary)]" id={`${id}-hint`}>{hint}</p>
+      <label className="block text-sm font-bold" htmlFor={id}>
+        {label}
+      </label>
+      <p className="mt-1 text-sm leading-5 text-[var(--text-secondary)]" id={`${id}-hint`}>
+        {hint}
+      </p>
       <input
         accept={accept.join(',')}
         aria-describedby={`${id}-hint${error ? ` ${id}-error` : ''}`}
@@ -46,7 +50,14 @@ export function UploadField({
         onChange={handleChange}
         type="file"
       />
-      {error ? <p className="mt-2 text-sm font-semibold text-[var(--danger-foreground)]" id={`${id}-error`}>{error}</p> : null}
+      {error ? (
+        <p
+          className="mt-2 text-sm font-semibold text-[var(--danger-foreground)]"
+          id={`${id}-error`}
+        >
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

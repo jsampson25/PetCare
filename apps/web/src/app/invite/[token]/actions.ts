@@ -12,9 +12,12 @@ export async function acceptInvitation(formData: FormData) {
 
   const supabase = await createSupabaseServerClient();
   const { data: claimsData } = await supabase.auth.getClaims();
-  if (!claimsData?.claims?.sub) redirect(`/auth/sign-in?next=${encodeURIComponent(`/invite/${token}`)}`);
+  if (!claimsData?.claims?.sub)
+    redirect(`/auth/sign-in?next=${encodeURIComponent(`/invite/${token}`)}`);
 
-  const { data, error } = await supabase.rpc('accept_staff_invitation', { invitation_token: token });
+  const { data, error } = await supabase.rpc('accept_staff_invitation', {
+    invitation_token: token,
+  });
   const accepted = data?.[0];
   if (error || !accepted?.business_id) redirect('/invite/unavailable');
 

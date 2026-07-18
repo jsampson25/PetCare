@@ -14,9 +14,12 @@ export type MfaEnrollmentState = {
 };
 
 export async function beginMfaEnrollment(
-  _previousState: MfaEnrollmentState,
-  _formData: FormData,
+  previousState: MfaEnrollmentState,
+  formData: FormData,
 ): Promise<MfaEnrollmentState> {
+  void previousState;
+  void formData;
+
   const supabase = await createSupabaseServerClient();
   const { data: factors } = await supabase.auth.mfa.listFactors();
 
@@ -41,16 +44,27 @@ export async function beginMfaEnrollment(
 
 export async function verifyMfaCode(formData: FormData) {
   const factorId = z.uuid().safeParse(formData.get('factorId'));
-  const code = z.string().regex(/^\d{6}$/).safeParse(formData.get('code'));
-  const next = getSafeRedirect(typeof formData.get('next') === 'string' ? String(formData.get('next')) : undefined);
+  const code = z
+    .string()
+    .regex(/^\d{6}$/)
+    .safeParse(formData.get('code'));
+  const next = getSafeRedirect(
+    typeof formData.get('next') === 'string' ? String(formData.get('next')) : undefined,
+  );
   if (!factorId.success || !code.success) {
-    redirect(`/auth/mfa?error=${encodeURIComponent('Enter the six-digit code from your authenticator app.')}&next=${encodeURIComponent(next)}`);
+    redirect(
+      `/auth/mfa?error=${encodeURIComponent('Enter the six-digit code from your authenticator app.')}&next=${encodeURIComponent(next)}`,
+    );
   }
 
   const supabase = await createSupabaseServerClient();
-  const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: factorId.data });
+  const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+    factorId: factorId.data,
+  });
   if (challengeError) {
-    redirect(`/auth/mfa?error=${encodeURIComponent('The security challenge could not be started. Try again.')}&next=${encodeURIComponent(next)}`);
+    redirect(
+      `/auth/mfa?error=${encodeURIComponent('The security challenge could not be started. Try again.')}&next=${encodeURIComponent(next)}`,
+    );
   }
   const { error } = await supabase.auth.mfa.verify({
     challengeId: challenge.id,
@@ -58,7 +72,9 @@ export async function verifyMfaCode(formData: FormData) {
     factorId: factorId.data,
   });
   if (error) {
-    redirect(`/auth/mfa?error=${encodeURIComponent('That code was not accepted. Wait for a new code and retry.')}&next=${encodeURIComponent(next)}`);
+    redirect(
+      `/auth/mfa?error=${encodeURIComponent('That code was not accepted. Wait for a new code and retry.')}&next=${encodeURIComponent(next)}`,
+    );
   }
   redirect(next);
 }

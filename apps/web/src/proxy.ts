@@ -17,14 +17,17 @@ export async function proxy(request: NextRequest) {
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, options, value }) => response.cookies.set(name, value, options));
+        cookiesToSet.forEach(({ name, options, value }) =>
+          response.cookies.set(name, value, options),
+        );
       },
     },
   });
 
   const { data } = await supabase.auth.getClaims();
   const requiresAuthentication = protectedPrefixes.some(
-    (prefix) => request.nextUrl.pathname === prefix || request.nextUrl.pathname.startsWith(`${prefix}/`),
+    (prefix) =>
+      request.nextUrl.pathname === prefix || request.nextUrl.pathname.startsWith(`${prefix}/`),
   );
 
   if (requiresAuthentication && !data?.claims?.sub) {

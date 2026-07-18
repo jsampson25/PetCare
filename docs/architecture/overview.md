@@ -77,4 +77,3 @@ Every business-owned record must carry a tenant identifier, normally `business_i
 - External integrations are isolated behind adapters.
 - Core workflows continue safely when nonessential AI or marketing services are unavailable.
 - Payment and notification webhooks are verified, persisted, and processed asynchronously.
-

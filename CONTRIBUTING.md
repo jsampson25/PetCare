@@ -30,4 +30,3 @@ A change is complete when:
 - Use **pet** for the animal receiving services.
 
 Refer to the [glossary](docs/product/glossary.md) before introducing new domain terminology.
-

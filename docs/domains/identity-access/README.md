@@ -123,12 +123,12 @@ Each relationship is evaluated independently. A staff role in one business grant
 
 ## Account classifications
 
-| Classification | Meaning | Authorization source |
-|---|---|---|
-| Customer | Person using customer-facing experiences | Customer/household access relationship plus customer permissions |
-| Tenant staff | Person working for a pet-care tenant | Active business membership, roles, and scopes |
-| Tenant owner | Privileged tenant membership responsible for administration | Active owner role and stronger security requirements |
-| Platform operator | Internal PetCare operator | Platform role and support session from Platform Administration |
+| Classification    | Meaning                                                     | Authorization source                                             |
+| ----------------- | ----------------------------------------------------------- | ---------------------------------------------------------------- |
+| Customer          | Person using customer-facing experiences                    | Customer/household access relationship plus customer permissions |
+| Tenant staff      | Person working for a pet-care tenant                        | Active business membership, roles, and scopes                    |
+| Tenant owner      | Privileged tenant membership responsible for administration | Active owner role and stronger security requirements             |
+| Platform operator | Internal PetCare operator                                   | Platform role and support session from Platform Administration   |
 
 Classifications may coexist on one identity, but their sessions and effective context remain explicit. Platform-operator rights are never inferred from a tenant membership.
 
@@ -146,14 +146,14 @@ Pending verification
 
 ### State behavior
 
-| State | Sign-in | Existing sessions | New access grants |
-|---|---|---|---|
-| Pending verification | Limited verification flow | Limited | No privileged grant activation |
-| Active | Allowed | Allowed | Allowed by policy |
-| Locked | Temporarily blocked | Risk policy decides revocation | No |
-| Disabled | Blocked | Revoked | No |
-| Recovery review | Restricted recovery only | Revoked | No |
-| Archived | Blocked | Revoked | No |
+| State                | Sign-in                   | Existing sessions              | New access grants              |
+| -------------------- | ------------------------- | ------------------------------ | ------------------------------ |
+| Pending verification | Limited verification flow | Limited                        | No privileged grant activation |
+| Active               | Allowed                   | Allowed                        | Allowed by policy              |
+| Locked               | Temporarily blocked       | Risk policy decides revocation | No                             |
+| Disabled             | Blocked                   | Revoked                        | No                             |
+| Recovery review      | Restricted recovery only  | Revoked                        | No                             |
+| Archived             | Blocked                   | Revoked                        | No                             |
 
 Disabling an identity does not erase historical authorship. Audit, booking, care, financial, and consent records continue to reference the stable identity ID or an approved de-identified actor reference.
 
@@ -255,14 +255,14 @@ Invited -> Active -> Suspended -> Active
               -> Ended
 ```
 
-| State | Meaning |
-|---|---|
-| Invited | Invitation exists but no active access is granted |
-| Active | Membership may receive effective permissions |
-| Suspended | Temporarily blocked while history remains |
-| Revoked | Access was explicitly removed |
-| Ended | Employment or relationship ended under recorded process |
-| Expired | Invitation was not accepted in time |
+| State     | Meaning                                                 |
+| --------- | ------------------------------------------------------- |
+| Invited   | Invitation exists but no active access is granted       |
+| Active    | Membership may receive effective permissions            |
+| Suspended | Temporarily blocked while history remains               |
+| Revoked   | Access was explicitly removed                           |
+| Ended     | Employment or relationship ended under recorded process |
+| Expired   | Invitation was not accepted in time                     |
 
 ### Membership rules
 
@@ -368,16 +368,16 @@ UI labels may change; permission keys remain stable. A permission grants the abi
 
 ## Predefined tenant roles
 
-| Role | Intended access |
-|---|---|
-| Owner | Tenant administration, security, billing, configuration, and all authorized business data |
-| Manager | Broad assigned-location operations and staff oversight; high-risk financial/security rights configurable |
-| Front desk | Customers, pets, bookings, check-in/out, approved payments, and routine communications |
-| Care staff | Assigned-location pet care, tasks, observations, and permitted incident actions |
-| Groomer | Grooming schedule, assigned pets, grooming workflow, notes, and media |
-| Accountant | Invoices, payments, refunds where granted, reconciliation, and financial reports |
-| Marketing editor | Website, approved public content, and permitted communications |
-| Read-only auditor | Selected records and reports without mutation |
+| Role              | Intended access                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| Owner             | Tenant administration, security, billing, configuration, and all authorized business data                |
+| Manager           | Broad assigned-location operations and staff oversight; high-risk financial/security rights configurable |
+| Front desk        | Customers, pets, bookings, check-in/out, approved payments, and routine communications                   |
+| Care staff        | Assigned-location pet care, tasks, observations, and permitted incident actions                          |
+| Groomer           | Grooming schedule, assigned pets, grooming workflow, notes, and media                                    |
+| Accountant        | Invoices, payments, refunds where granted, reconciliation, and financial reports                         |
+| Marketing editor  | Website, approved public content, and permitted communications                                           |
+| Read-only auditor | Selected records and reports without mutation                                                            |
 
 MVP roles are platform-defined templates. Tenants assign roles and scopes but do not create arbitrary custom permission sets at launch. This keeps security review and support manageable.
 
@@ -474,72 +474,72 @@ Jobs involving current sensitive access, exports, or mutation reauthorize before
 
 ### Identity and authentication
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| IAM-FR-001 | P0 | The platform shall provide email/password registration, verification, sign-in, sign-out, and password recovery through the approved authentication provider. | Accepted |
-| IAM-FR-002 | P0 | Authentication responses shall resist account and tenant-relationship enumeration. | Accepted |
-| IAM-FR-003 | P0 | Every person shall use an individual identity; shared user accounts are prohibited. | Accepted |
-| IAM-FR-004 | P0 | The platform shall preserve one identity across multiple separately authorized business relationships where safely linked. | Accepted |
-| IAM-FR-005 | P0 | Changing authentication email, password, or MFA shall require appropriate recent verification and create security events. | Accepted |
-| IAM-FR-006 | P0 | Authorized users shall view and revoke active sessions. | Accepted |
-| IAM-FR-007 | P0 | High-risk identity or security changes shall revoke affected sessions. | Accepted |
-| IAM-FR-008 | P1 | The platform shall notify users of material account-security changes through a verified channel. | Proposed |
+| ID         | Priority | Requirement                                                                                                                                                  | Status   |
+| ---------- | -------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| IAM-FR-001 |       P0 | The platform shall provide email/password registration, verification, sign-in, sign-out, and password recovery through the approved authentication provider. | Accepted |
+| IAM-FR-002 |       P0 | Authentication responses shall resist account and tenant-relationship enumeration.                                                                           | Accepted |
+| IAM-FR-003 |       P0 | Every person shall use an individual identity; shared user accounts are prohibited.                                                                          | Accepted |
+| IAM-FR-004 |       P0 | The platform shall preserve one identity across multiple separately authorized business relationships where safely linked.                                   | Accepted |
+| IAM-FR-005 |       P0 | Changing authentication email, password, or MFA shall require appropriate recent verification and create security events.                                    | Accepted |
+| IAM-FR-006 |       P0 | Authorized users shall view and revoke active sessions.                                                                                                      | Accepted |
+| IAM-FR-007 |       P0 | High-risk identity or security changes shall revoke affected sessions.                                                                                       | Accepted |
+| IAM-FR-008 |       P1 | The platform shall notify users of material account-security changes through a verified channel.                                                             | Proposed |
 
 ### Memberships, invitations, and roles
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| IAM-FR-009 | P0 | Authorized tenant users shall invite staff with predefined roles and location scope. | Accepted |
-| IAM-FR-010 | P0 | Invitations shall support pending, accepted, expired, revoked, and superseded outcomes. | Accepted |
-| IAM-FR-011 | P0 | Invitation acceptance shall authenticate the recipient and revalidate the current intended grants. | Accepted |
-| IAM-FR-012 | P0 | Authorized users shall suspend, reactivate, end, or revoke a staff membership without deleting historical actions. | Accepted |
-| IAM-FR-013 | P0 | Authorized users shall assign and remove predefined roles and location scopes within their own grant authority. | Accepted |
-| IAM-FR-014 | P0 | The system shall prevent a user from granting a permission or scope they are not authorized to administer. | Accepted |
-| IAM-FR-015 | P0 | Role and scope changes shall affect subsequent authorization decisions and invalidate stale effective-access context. | Accepted |
-| IAM-FR-016 | P0 | Tenant ownership transfer shall require step-up authentication, explicit acceptance, MFA, and last-owner protection. | Accepted |
-| IAM-FR-017 | P1 | Tenant owners shall be able to review effective staff access by user, role, location, and high-risk permission. | Proposed |
+| ID         | Priority | Requirement                                                                                                           | Status   |
+| ---------- | -------: | --------------------------------------------------------------------------------------------------------------------- | -------- |
+| IAM-FR-009 |       P0 | Authorized tenant users shall invite staff with predefined roles and location scope.                                  | Accepted |
+| IAM-FR-010 |       P0 | Invitations shall support pending, accepted, expired, revoked, and superseded outcomes.                               | Accepted |
+| IAM-FR-011 |       P0 | Invitation acceptance shall authenticate the recipient and revalidate the current intended grants.                    | Accepted |
+| IAM-FR-012 |       P0 | Authorized users shall suspend, reactivate, end, or revoke a staff membership without deleting historical actions.    | Accepted |
+| IAM-FR-013 |       P0 | Authorized users shall assign and remove predefined roles and location scopes within their own grant authority.       | Accepted |
+| IAM-FR-014 |       P0 | The system shall prevent a user from granting a permission or scope they are not authorized to administer.            | Accepted |
+| IAM-FR-015 |       P0 | Role and scope changes shall affect subsequent authorization decisions and invalidate stale effective-access context. | Accepted |
+| IAM-FR-016 |       P0 | Tenant ownership transfer shall require step-up authentication, explicit acceptance, MFA, and last-owner protection.  | Accepted |
+| IAM-FR-017 |       P1 | Tenant owners shall be able to review effective staff access by user, role, location, and high-risk permission.       | Proposed |
 
 ### Authorization and enforcement
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| IAM-FR-018 | P0 | Every protected request shall resolve a trusted identity and explicit effective tenant before domain access. | Accepted |
-| IAM-FR-019 | P0 | Authorization shall evaluate permission, role, scope, relationship, session assurance, and explicit restrictions server-side. | Accepted |
-| IAM-FR-020 | P0 | The platform shall maintain a stable permission catalog with documented owning domains and risk classifications. | Accepted |
-| IAM-FR-021 | P0 | The database shall enforce tenant isolation using row-level security in addition to application checks. | Accepted |
-| IAM-FR-022 | P0 | Storage access, exports, search, reporting, and background jobs shall enforce equivalent tenant and authorization scope. | Accepted |
-| IAM-FR-023 | P0 | Authorization denial shall return safe errors and generate security evidence when risk policy requires it. | Accepted |
-| IAM-FR-024 | P0 | Sensitive actions shall require a sufficient authentication assurance level and recent step-up when configured. | Accepted |
-| IAM-FR-025 | P1 | Authorized users shall be able to explain why a staff member has or lacks a permission without exposing internal security details. | Proposed |
+| ID         | Priority | Requirement                                                                                                                        | Status   |
+| ---------- | -------: | ---------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| IAM-FR-018 |       P0 | Every protected request shall resolve a trusted identity and explicit effective tenant before domain access.                       | Accepted |
+| IAM-FR-019 |       P0 | Authorization shall evaluate permission, role, scope, relationship, session assurance, and explicit restrictions server-side.      | Accepted |
+| IAM-FR-020 |       P0 | The platform shall maintain a stable permission catalog with documented owning domains and risk classifications.                   | Accepted |
+| IAM-FR-021 |       P0 | The database shall enforce tenant isolation using row-level security in addition to application checks.                            | Accepted |
+| IAM-FR-022 |       P0 | Storage access, exports, search, reporting, and background jobs shall enforce equivalent tenant and authorization scope.           | Accepted |
+| IAM-FR-023 |       P0 | Authorization denial shall return safe errors and generate security evidence when risk policy requires it.                         | Accepted |
+| IAM-FR-024 |       P0 | Sensitive actions shall require a sufficient authentication assurance level and recent step-up when configured.                    | Accepted |
+| IAM-FR-025 |       P1 | Authorized users shall be able to explain why a staff member has or lacks a permission without exposing internal security details. | Proposed |
 
 ### MFA and recovery
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| IAM-FR-026 | P0 | Tenant owners and privileged staff shall enroll an approved second factor before privileged access activates. | Accepted |
-| IAM-FR-027 | P0 | MFA enrollment, replacement, removal, and reset shall require appropriate verification and audit. | Accepted |
-| IAM-FR-028 | P0 | Recovery codes shall be displayed once and individually invalidated after use. | Accepted |
-| IAM-FR-029 | P0 | Support shall not be able to retrieve passwords, MFA secrets, recovery codes, or active session tokens. | Accepted |
-| IAM-FR-030 | P0 | High-risk recovery shall revoke sessions and may hold privileged access pending review. | Accepted |
+| ID         | Priority | Requirement                                                                                                   | Status   |
+| ---------- | -------: | ------------------------------------------------------------------------------------------------------------- | -------- |
+| IAM-FR-026 |       P0 | Tenant owners and privileged staff shall enroll an approved second factor before privileged access activates. | Accepted |
+| IAM-FR-027 |       P0 | MFA enrollment, replacement, removal, and reset shall require appropriate verification and audit.             | Accepted |
+| IAM-FR-028 |       P0 | Recovery codes shall be displayed once and individually invalidated after use.                                | Accepted |
+| IAM-FR-029 |       P0 | Support shall not be able to retrieve passwords, MFA secrets, recovery codes, or active session tokens.       | Accepted |
+| IAM-FR-030 |       P0 | High-risk recovery shall revoke sessions and may hold privileged access pending review.                       | Accepted |
 
 ## Business rules
 
-| ID | Priority | Rule |
-|---|---:|---|
-| IAM-BR-001 | P0 | Successful authentication does not grant tenant access without an active authorized relationship. |
-| IAM-BR-002 | P0 | Every protected tenant record is accessed under exactly one effective tenant context. |
-| IAM-BR-003 | P0 | A permission grant never overrides domain business rules or object-state requirements. |
-| IAM-BR-004 | P0 | Explicit denies, tenant restrictions, identity disablement, and safety/privacy controls take precedence over role grants. |
-| IAM-BR-005 | P0 | A user cannot grant roles, permissions, locations, or ownership beyond their own administrative authority. |
-| IAM-BR-006 | P0 | Removing future access never changes historical actor attribution. |
-| IAM-BR-007 | P0 | Email address equality alone does not prove two identity records or customer relationships should merge. |
-| IAM-BR-008 | P0 | Household membership, emergency contact, pickup authorization, and portal access are separate relationships. |
-| IAM-BR-009 | P0 | A tenant must retain at least one active MFA-protected owner. |
-| IAM-BR-010 | P0 | Client-provided role, permission, tenant, location, or ownership claims are untrusted until resolved server-side. |
-| IAM-BR-011 | P0 | Platform-operator access is evaluated separately from tenant membership. |
-| IAM-BR-012 | P0 | Cached authorization results include identity, tenant, membership version, role version, scope version, and relevant restriction version. |
-| IAM-BR-013 | P1 | Temporary elevated access expires automatically and cannot become permanent without a normal role change. |
-| IAM-BR-014 | P1 | Custom roles, when introduced, cannot include hidden or retired permissions without explicit migration. |
+| ID         | Priority | Rule                                                                                                                                      |
+| ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| IAM-BR-001 |       P0 | Successful authentication does not grant tenant access without an active authorized relationship.                                         |
+| IAM-BR-002 |       P0 | Every protected tenant record is accessed under exactly one effective tenant context.                                                     |
+| IAM-BR-003 |       P0 | A permission grant never overrides domain business rules or object-state requirements.                                                    |
+| IAM-BR-004 |       P0 | Explicit denies, tenant restrictions, identity disablement, and safety/privacy controls take precedence over role grants.                 |
+| IAM-BR-005 |       P0 | A user cannot grant roles, permissions, locations, or ownership beyond their own administrative authority.                                |
+| IAM-BR-006 |       P0 | Removing future access never changes historical actor attribution.                                                                        |
+| IAM-BR-007 |       P0 | Email address equality alone does not prove two identity records or customer relationships should merge.                                  |
+| IAM-BR-008 |       P0 | Household membership, emergency contact, pickup authorization, and portal access are separate relationships.                              |
+| IAM-BR-009 |       P0 | A tenant must retain at least one active MFA-protected owner.                                                                             |
+| IAM-BR-010 |       P0 | Client-provided role, permission, tenant, location, or ownership claims are untrusted until resolved server-side.                         |
+| IAM-BR-011 |       P0 | Platform-operator access is evaluated separately from tenant membership.                                                                  |
+| IAM-BR-012 |       P0 | Cached authorization results include identity, tenant, membership version, role version, scope version, and relevant restriction version. |
+| IAM-BR-013 |       P1 | Temporary elevated access expires automatically and cannot become permanent without a normal role change.                                 |
+| IAM-BR-014 |       P1 | Custom roles, when introduced, cannot include hidden or retired permissions without explicit migration.                                   |
 
 ## Conceptual data model
 
@@ -585,30 +585,30 @@ Events contain stable actor, tenant, membership, action, target classification, 
 
 ## Security requirements
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| IAM-SEC-001 | P0 | Password handling shall use the authentication provider's current secure storage and breach-protection capabilities. |
-| IAM-SEC-002 | P0 | Authentication, verification, reset, invitation, and MFA endpoints shall be rate-limited and monitored for abuse. |
-| IAM-SEC-003 | P0 | Purpose-bound secrets shall be single-use, short-lived, unpredictable, and never stored or logged in plaintext by the application. |
-| IAM-SEC-004 | P0 | Session cookies shall use Secure, HttpOnly, appropriate SameSite, path, and domain restrictions. |
-| IAM-SEC-005 | P0 | State-changing browser requests shall be protected against cross-site request forgery where cookie authentication applies. |
-| IAM-SEC-006 | P0 | Authentication redirects shall use an allowlist and prevent open redirects and tenant-context injection. |
-| IAM-SEC-007 | P0 | Privilege changes shall require step-up authentication and shall rotate or invalidate affected session context. |
-| IAM-SEC-008 | P0 | RLS policies and authorization helpers shall default to denial when required context is absent or invalid. |
-| IAM-SEC-009 | P0 | Service credentials shall never be exposed to browser or mobile clients. |
-| IAM-SEC-010 | P0 | Identity recovery shall avoid knowledge-based questions and manual disclosure of existing authentication factors. |
+| ID          | Priority | Requirement                                                                                                                        |
+| ----------- | -------: | ---------------------------------------------------------------------------------------------------------------------------------- |
+| IAM-SEC-001 |       P0 | Password handling shall use the authentication provider's current secure storage and breach-protection capabilities.               |
+| IAM-SEC-002 |       P0 | Authentication, verification, reset, invitation, and MFA endpoints shall be rate-limited and monitored for abuse.                  |
+| IAM-SEC-003 |       P0 | Purpose-bound secrets shall be single-use, short-lived, unpredictable, and never stored or logged in plaintext by the application. |
+| IAM-SEC-004 |       P0 | Session cookies shall use Secure, HttpOnly, appropriate SameSite, path, and domain restrictions.                                   |
+| IAM-SEC-005 |       P0 | State-changing browser requests shall be protected against cross-site request forgery where cookie authentication applies.         |
+| IAM-SEC-006 |       P0 | Authentication redirects shall use an allowlist and prevent open redirects and tenant-context injection.                           |
+| IAM-SEC-007 |       P0 | Privilege changes shall require step-up authentication and shall rotate or invalidate affected session context.                    |
+| IAM-SEC-008 |       P0 | RLS policies and authorization helpers shall default to denial when required context is absent or invalid.                         |
+| IAM-SEC-009 |       P0 | Service credentials shall never be exposed to browser or mobile clients.                                                           |
+| IAM-SEC-010 |       P0 | Identity recovery shall avoid knowledge-based questions and manual disclosure of existing authentication factors.                  |
 
 ## Non-functional requirements
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| IAM-NFR-001 | P0 | Authorization checks shall be centralized, deterministic for the same versioned context, and testable independently of UI visibility. |
-| IAM-NFR-002 | P0 | Revocation of a high-risk membership or identity shall prevent new authorized requests within 60 seconds under normal conditions. |
-| IAM-NFR-003 | P0 | Authentication provider outages shall fail safely and shall not grant access from stale unverified client state. |
-| IAM-NFR-004 | P0 | Tenant context shall remain intact across browser navigation, server rendering, APIs, jobs, exports, search, and storage access. |
-| IAM-NFR-005 | P0 | Login, recovery, invitation, MFA, and access-management screens shall meet WCAG 2.2 AA. |
-| IAM-NFR-006 | P0 | Security-event recording shall not expose credentials and shall not materially delay routine authorization. |
-| IAM-NFR-007 | P1 | Common authorization decisions shall complete within the application latency budget at the 95th percentile. |
+| ID          | Priority | Requirement                                                                                                                           |
+| ----------- | -------: | ------------------------------------------------------------------------------------------------------------------------------------- |
+| IAM-NFR-001 |       P0 | Authorization checks shall be centralized, deterministic for the same versioned context, and testable independently of UI visibility. |
+| IAM-NFR-002 |       P0 | Revocation of a high-risk membership or identity shall prevent new authorized requests within 60 seconds under normal conditions.     |
+| IAM-NFR-003 |       P0 | Authentication provider outages shall fail safely and shall not grant access from stale unverified client state.                      |
+| IAM-NFR-004 |       P0 | Tenant context shall remain intact across browser navigation, server rendering, APIs, jobs, exports, search, and storage access.      |
+| IAM-NFR-005 |       P0 | Login, recovery, invitation, MFA, and access-management screens shall meet WCAG 2.2 AA.                                               |
+| IAM-NFR-006 |       P0 | Security-event recording shall not expose credentials and shall not materially delay routine authorization.                           |
+| IAM-NFR-007 |       P1 | Common authorization decisions shall complete within the application latency budget at the 95th percentile.                           |
 
 ## Acceptance scenarios
 

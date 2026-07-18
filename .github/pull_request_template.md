@@ -4,7 +4,7 @@ Describe the user or business outcome.
 
 ## Changes
 
-- 
+-
 
 ## Verification
 
@@ -17,4 +17,3 @@ Describe the user or business outcome.
 ## Screenshots or notes
 
 Add visual evidence or reviewer guidance when useful.
-

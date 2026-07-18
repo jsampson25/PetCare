@@ -34,7 +34,8 @@ export async function signIn(formData: FormData) {
     email: email.data,
     password: password.data,
   });
-  if (error) redirect(messageUrl('/auth/sign-in', 'error', 'Email or password was not recognized.'));
+  if (error)
+    redirect(messageUrl('/auth/sign-in', 'error', 'Email or password was not recognized.'));
   redirect(next);
 }
 
@@ -44,8 +45,19 @@ export async function register(formData: FormData) {
   const confirmation = field(formData, 'passwordConfirmation');
   const displayName = z.string().min(1).max(120).safeParse(field(formData, 'displayName'));
   const next = getSafeRedirect(field(formData, 'next'), '/auth/verified');
-  if (!email.success || !password.success || !displayName.success || password.data !== confirmation) {
-    redirect(messageUrl('/auth/register', 'error', 'Check your details. Passwords must match and contain at least 12 characters.'));
+  if (
+    !email.success ||
+    !password.success ||
+    !displayName.success ||
+    password.data !== confirmation
+  ) {
+    redirect(
+      messageUrl(
+        '/auth/register',
+        'error',
+        'Check your details. Passwords must match and contain at least 12 characters.',
+      ),
+    );
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -59,7 +71,14 @@ export async function register(formData: FormData) {
       emailRedirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
-  if (error) redirect(messageUrl('/auth/register', 'error', 'Registration could not be completed. Please try again.'));
+  if (error)
+    redirect(
+      messageUrl(
+        '/auth/register',
+        'error',
+        'Registration could not be completed. Please try again.',
+      ),
+    );
   redirect(messageUrl('/auth/check-email', 'notice', 'Check your email to verify your account.'));
 }
 
@@ -73,20 +92,41 @@ export async function requestPasswordReset(formData: FormData) {
       redirectTo: `${appUrl}/auth/callback?next=/auth/update-password`,
     });
   }
-  redirect(messageUrl('/auth/check-email', 'notice', 'If an account exists, a password reset link has been sent.'));
+  redirect(
+    messageUrl(
+      '/auth/check-email',
+      'notice',
+      'If an account exists, a password reset link has been sent.',
+    ),
+  );
 }
 
 export async function updatePassword(formData: FormData) {
   const password = passwordSchema.safeParse(field(formData, 'password'));
   const confirmation = field(formData, 'passwordConfirmation');
   if (!password.success || password.data !== confirmation) {
-    redirect(messageUrl('/auth/update-password', 'error', 'Passwords must match and contain at least 12 characters.'));
+    redirect(
+      messageUrl(
+        '/auth/update-password',
+        'error',
+        'Passwords must match and contain at least 12 characters.',
+      ),
+    );
   }
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.updateUser({ password: password.data });
-  if (error) redirect(messageUrl('/auth/update-password', 'error', 'This reset session is invalid or expired. Request a new link.'));
+  if (error)
+    redirect(
+      messageUrl(
+        '/auth/update-password',
+        'error',
+        'This reset session is invalid or expired. Request a new link.',
+      ),
+    );
   await supabase.auth.signOut({ scope: 'global' });
-  redirect(messageUrl('/auth/sign-in', 'notice', 'Password updated. Sign in again on your devices.'));
+  redirect(
+    messageUrl('/auth/sign-in', 'notice', 'Password updated. Sign in again on your devices.'),
+  );
 }
 
 export async function signOut() {

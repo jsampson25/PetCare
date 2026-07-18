@@ -2,27 +2,27 @@
 
 ## Check-in requirements
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| OPS-FR-020 | P0 | Staff shall open a check-in session for an expected booking/pet or authorized walk-in workflow. |
-| OPS-FR-021 | P0 | Check-in shall verify customer/booking identity, pickup authority, emergency contact, required agreements, eligibility, and financial flags. |
-| OPS-FR-022 | P0 | Staff and customer shall review medications, feeding, allergies, health, behavior, grooming instructions, and material profile changes. |
-| OPS-FR-023 | P0 | Staff shall record arrival condition, belongings, supplied food, medications, quantities, and photos when required. |
-| OPS-FR-024 | P0 | Check-in shall create an immutable care-plan snapshot and required tasks. |
-| OPS-FR-025 | P0 | Blocking discrepancies shall enter a manager-review state rather than being ignored. |
-| OPS-FR-026 | P0 | Completing check-in shall record the actual receiving staff member, time, signatures, and operational handoff. |
+| ID         | Priority | Requirement                                                                                                                                  |
+| ---------- | -------: | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| OPS-FR-020 |       P0 | Staff shall open a check-in session for an expected booking/pet or authorized walk-in workflow.                                              |
+| OPS-FR-021 |       P0 | Check-in shall verify customer/booking identity, pickup authority, emergency contact, required agreements, eligibility, and financial flags. |
+| OPS-FR-022 |       P0 | Staff and customer shall review medications, feeding, allergies, health, behavior, grooming instructions, and material profile changes.      |
+| OPS-FR-023 |       P0 | Staff shall record arrival condition, belongings, supplied food, medications, quantities, and photos when required.                          |
+| OPS-FR-024 |       P0 | Check-in shall create an immutable care-plan snapshot and required tasks.                                                                    |
+| OPS-FR-025 |       P0 | Blocking discrepancies shall enter a manager-review state rather than being ignored.                                                         |
+| OPS-FR-026 |       P0 | Completing check-in shall record the actual receiving staff member, time, signatures, and operational handoff.                               |
 
 ## Checkout requirements
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| OPS-FR-027 | P0 | Checkout shall verify the pickup person against effective authorization and record verification method. |
-| OPS-FR-028 | P0 | Staff shall reconcile belongings, remaining food, medications, documents, and required report card. |
-| OPS-FR-029 | P0 | Checkout shall verify service completion and unresolved care, incident, or manager-review items. |
-| OPS-FR-030 | P0 | Checkout shall request final invoice/balance resolution from Payments without editing the amount. |
-| OPS-FR-031 | P0 | Authorized policy shall determine whether departure may proceed with an outstanding balance. |
-| OPS-FR-032 | P0 | Checkout shall record actual pickup person, staff member, time, signatures/acknowledgements, and customer handoff notes. |
-| OPS-FR-033 | P0 | Completed checkout shall release operational assignments and request required cleaning/turnover. |
+| ID         | Priority | Requirement                                                                                                              |
+| ---------- | -------: | ------------------------------------------------------------------------------------------------------------------------ |
+| OPS-FR-027 |       P0 | Checkout shall verify the pickup person against effective authorization and record verification method.                  |
+| OPS-FR-028 |       P0 | Staff shall reconcile belongings, remaining food, medications, documents, and required report card.                      |
+| OPS-FR-029 |       P0 | Checkout shall verify service completion and unresolved care, incident, or manager-review items.                         |
+| OPS-FR-030 |       P0 | Checkout shall request final invoice/balance resolution from Payments without editing the amount.                        |
+| OPS-FR-031 |       P0 | Authorized policy shall determine whether departure may proceed with an outstanding balance.                             |
+| OPS-FR-032 |       P0 | Checkout shall record actual pickup person, staff member, time, signatures/acknowledgements, and customer handoff notes. |
+| OPS-FR-033 |       P0 | Completed checkout shall release operational assignments and request required cleaning/turnover.                         |
 
 ## Flow
 
@@ -55,10 +55,9 @@ flowchart TD
 
 ## Acceptance scenarios
 
-| ID | Scenario |
-|---|---|
-| OPS-AT-020 | Staff resolve a changed medication instruction before check-in and generate the correct new care snapshot. |
+| ID         | Scenario                                                                                                    |
+| ---------- | ----------------------------------------------------------------------------------------------------------- |
+| OPS-AT-020 | Staff resolve a changed medication instruction before check-in and generate the correct new care snapshot.  |
 | OPS-AT-021 | An unauthorized pickup attempt is blocked, escalated, and audited without exposing other authorized people. |
-| OPS-AT-022 | Missing belongings and an unresolved incident prevent checkout until manager review. |
-| OPS-AT-023 | Final payment succeeds once under retry and checkout completes without duplicating the charge. |
-
+| OPS-AT-022 | Missing belongings and an unresolved incident prevent checkout until manager review.                        |
+| OPS-AT-023 | Final payment succeeds once under retry and checkout completes without duplicating the charge.              |

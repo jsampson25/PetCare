@@ -23,4 +23,3 @@ Build the initial platform as a modular monolith with explicit domain boundaries
 - Microservices from the beginning
 - Separate frontend and NestJS backend deployments
 - Serverless functions for every domain operation
-

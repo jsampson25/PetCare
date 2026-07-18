@@ -93,19 +93,19 @@ This domain is separate from a pet-care business's own settings. Business Config
 
 ## Core concepts
 
-| Concept | Definition |
-|---|---|
-| Tenant | A subscribing pet-care business and the primary isolation boundary. |
-| Tenant lifecycle | Platform state controlling whether the tenant may configure, transact, or serve customers. |
-| Plan | A marketable SaaS offering with a versioned set of commercial limits and default entitlements. |
-| Subscription | A tenant's platform billing relationship, trial, period, and lifecycle state. |
-| Entitlement | An effective capability or limit granted by plan, add-on, contract, or approved override. |
-| Restriction | A narrow limitation applied for risk, billing, compliance, or support reasons. |
-| Suspension | A broad controlled state that prevents defined tenant activity while preserving data. |
-| Platform operator | An internal user authorized for one or more administrative capabilities. |
-| Support session | A time-limited audited grant to view or act within a tenant scope for a stated case. |
-| Feature flag | A release-control decision, not a purchased commercial right. |
-| Privacy request | A tracked request concerning personal-data access, correction, portability, restriction, or deletion. |
+| Concept           | Definition                                                                                            |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
+| Tenant            | A subscribing pet-care business and the primary isolation boundary.                                   |
+| Tenant lifecycle  | Platform state controlling whether the tenant may configure, transact, or serve customers.            |
+| Plan              | A marketable SaaS offering with a versioned set of commercial limits and default entitlements.        |
+| Subscription      | A tenant's platform billing relationship, trial, period, and lifecycle state.                         |
+| Entitlement       | An effective capability or limit granted by plan, add-on, contract, or approved override.             |
+| Restriction       | A narrow limitation applied for risk, billing, compliance, or support reasons.                        |
+| Suspension        | A broad controlled state that prevents defined tenant activity while preserving data.                 |
+| Platform operator | An internal user authorized for one or more administrative capabilities.                              |
+| Support session   | A time-limited audited grant to view or act within a tenant scope for a stated case.                  |
+| Feature flag      | A release-control decision, not a purchased commercial right.                                         |
+| Privacy request   | A tracked request concerning personal-data access, correction, portability, restriction, or deletion. |
 
 ## Tenant lifecycle
 
@@ -127,17 +127,17 @@ Not every transition is linear. An eligible restricted or suspended tenant can r
 
 ### Lifecycle meaning
 
-| State | Administrative meaning | Customer-facing effect |
-|---|---|---|
-| Provisioning | Required tenant resources are being created | No public access |
-| Setup | Owner may configure but cannot transact until launch gates pass | Site may be draft only |
-| Trial | Enabled under trial entitlements and limits | Allowed according to readiness |
-| Active | Subscription and risk posture allow normal use | Normal operation |
-| Restricted | One or more capabilities are disabled | Explicitly defined per restriction |
-| Suspended | Broad tenant activity is blocked | Safe maintenance or unavailability experience |
-| Closing | Closure is scheduled; exports and retention are being resolved | New transactions normally disabled |
-| Closed | Interactive tenant use is disabled; retention clock applies | Public site and booking disabled |
-| Purged | Eligible tenant data is irreversibly deleted or anonymized | No tenant experience |
+| State        | Administrative meaning                                          | Customer-facing effect                        |
+| ------------ | --------------------------------------------------------------- | --------------------------------------------- |
+| Provisioning | Required tenant resources are being created                     | No public access                              |
+| Setup        | Owner may configure but cannot transact until launch gates pass | Site may be draft only                        |
+| Trial        | Enabled under trial entitlements and limits                     | Allowed according to readiness                |
+| Active       | Subscription and risk posture allow normal use                  | Normal operation                              |
+| Restricted   | One or more capabilities are disabled                           | Explicitly defined per restriction            |
+| Suspended    | Broad tenant activity is blocked                                | Safe maintenance or unavailability experience |
+| Closing      | Closure is scheduled; exports and retention are being resolved  | New transactions normally disabled            |
+| Closed       | Interactive tenant use is disabled; retention clock applies     | Public site and booking disabled              |
+| Purged       | Eligible tenant data is irreversibly deleted or anonymized      | No tenant experience                          |
 
 ## Tenant provisioning
 
@@ -268,16 +268,16 @@ Emergency containment may be immediate, but it requires after-the-fact review wi
 
 ## Platform operator roles
 
-| Role | Typical scope |
-|---|---|
-| Platform support | Cases, tenant diagnostics, scoped support sessions, safe retries |
-| Billing operations | SaaS subscription state, credits, plan changes, billing reconciliation |
-| Trust and safety | Risk restrictions, evidence, review, and reactivation |
-| Privacy operations | Privacy requests, holds, exports, and deletion coordination |
-| Release manager | Feature definitions, staged rollout, kill switches |
-| Platform administrator | Tenant lifecycle and tightly controlled global configuration |
-| Security administrator | Operator access, break-glass review, and security containment |
-| Read-only auditor | Approved audit evidence without mutation access |
+| Role                   | Typical scope                                                          |
+| ---------------------- | ---------------------------------------------------------------------- |
+| Platform support       | Cases, tenant diagnostics, scoped support sessions, safe retries       |
+| Billing operations     | SaaS subscription state, credits, plan changes, billing reconciliation |
+| Trust and safety       | Risk restrictions, evidence, review, and reactivation                  |
+| Privacy operations     | Privacy requests, holds, exports, and deletion coordination            |
+| Release manager        | Feature definitions, staged rollout, kill switches                     |
+| Platform administrator | Tenant lifecycle and tightly controlled global configuration           |
+| Security administrator | Operator access, break-glass review, and security containment          |
+| Read-only auditor      | Approved audit evidence without mutation access                        |
 
 No role receives all capabilities merely because its display name contains `admin`. Permissions are explicit, environment-aware, and least-privileged. Production access is separate from test and staging access.
 
@@ -388,87 +388,87 @@ Administration coordinates the request; each owning domain performs its approved
 
 ### Tenant administration
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| ADMIN-FR-001 | P0 | Authorized operators shall search tenants by approved identifiers and see lifecycle, subscription, readiness, and health summaries. | Accepted |
-| ADMIN-FR-002 | P0 | The system shall provision a tenant through a resumable, idempotent, audited workflow. | Accepted |
-| ADMIN-FR-003 | P0 | Operators shall see failed provisioning steps and perform only supported remediation or retry actions. | Accepted |
-| ADMIN-FR-004 | P0 | The system shall enforce valid tenant lifecycle transitions and preserve transition history. | Accepted |
-| ADMIN-FR-005 | P0 | Authorized operators shall preview the customer, staff, website, booking, and safety impact before applying a restriction or suspension. | Accepted |
-| ADMIN-FR-006 | P0 | Suspension and reactivation shall require an authorized actor, reason, effective time, and audit event. | Accepted |
-| ADMIN-FR-007 | P0 | Safety-critical access for pets currently in care shall follow the documented continuity policy during billing restrictions. | Accepted |
+| ID           | Priority | Requirement                                                                                                                              | Status   |
+| ------------ | -------: | ---------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| ADMIN-FR-001 |       P0 | Authorized operators shall search tenants by approved identifiers and see lifecycle, subscription, readiness, and health summaries.      | Accepted |
+| ADMIN-FR-002 |       P0 | The system shall provision a tenant through a resumable, idempotent, audited workflow.                                                   | Accepted |
+| ADMIN-FR-003 |       P0 | Operators shall see failed provisioning steps and perform only supported remediation or retry actions.                                   | Accepted |
+| ADMIN-FR-004 |       P0 | The system shall enforce valid tenant lifecycle transitions and preserve transition history.                                             | Accepted |
+| ADMIN-FR-005 |       P0 | Authorized operators shall preview the customer, staff, website, booking, and safety impact before applying a restriction or suspension. | Accepted |
+| ADMIN-FR-006 |       P0 | Suspension and reactivation shall require an authorized actor, reason, effective time, and audit event.                                  | Accepted |
+| ADMIN-FR-007 |       P0 | Safety-critical access for pets currently in care shall follow the documented continuity policy during billing restrictions.             | Accepted |
 
 ### Plans and subscription operations
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| ADMIN-FR-008 | P0 | The platform shall maintain versioned SaaS plans and entitlement definitions independently from tenant service pricing. | Accepted |
-| ADMIN-FR-009 | P0 | A tenant subscription shall record provider references, lifecycle, billing period, trial, cancellation, and effective plan version. | Accepted |
-| ADMIN-FR-010 | P0 | Provider subscription events shall be verified, persisted, deduplicated, ordered safely, and reconciled. | Accepted |
-| ADMIN-FR-011 | P0 | The platform shall calculate effective entitlements with source and precedence traceability. | Accepted |
-| ADMIN-FR-012 | P0 | Plan changes shall preview immediate, scheduled, entitlement, and billing effects before confirmation. | Accepted |
-| ADMIN-FR-013 | P1 | Approved entitlement overrides shall require reason, approver, start, expiration, and automatic reversion. | Proposed |
+| ID           | Priority | Requirement                                                                                                                         | Status   |
+| ------------ | -------: | ----------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| ADMIN-FR-008 |       P0 | The platform shall maintain versioned SaaS plans and entitlement definitions independently from tenant service pricing.             | Accepted |
+| ADMIN-FR-009 |       P0 | A tenant subscription shall record provider references, lifecycle, billing period, trial, cancellation, and effective plan version. | Accepted |
+| ADMIN-FR-010 |       P0 | Provider subscription events shall be verified, persisted, deduplicated, ordered safely, and reconciled.                            | Accepted |
+| ADMIN-FR-011 |       P0 | The platform shall calculate effective entitlements with source and precedence traceability.                                        | Accepted |
+| ADMIN-FR-012 |       P0 | Plan changes shall preview immediate, scheduled, entitlement, and billing effects before confirmation.                              | Accepted |
+| ADMIN-FR-013 |       P1 | Approved entitlement overrides shall require reason, approver, start, expiration, and automatic reversion.                          | Proposed |
 
 ### Support and operator access
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| ADMIN-FR-014 | P0 | Operators shall authenticate with their own platform identity and explicit role assignments. | Accepted |
-| ADMIN-FR-015 | P0 | Tenant-data access shall require a case-linked, scoped, time-bound support session unless an approved break-glass process applies. | Accepted |
-| ADMIN-FR-016 | P0 | Support mode shall remain visibly identifiable and shall not impersonate a tenant user. | Accepted |
-| ADMIN-FR-017 | P0 | The system shall record support-session approval, activation, access, actions, revocation, and expiration. | Accepted |
-| ADMIN-FR-018 | P0 | A tenant owner shall be able to review ordinary support-access history for their tenant. | Accepted |
-| ADMIN-FR-019 | P0 | Write actions in support mode shall require separate permission and use domain-supported commands. | Accepted |
-| ADMIN-FR-020 | P0 | Break-glass use shall alert security reviewers and require documented post-use review. | Accepted |
+| ID           | Priority | Requirement                                                                                                                        | Status   |
+| ------------ | -------: | ---------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| ADMIN-FR-014 |       P0 | Operators shall authenticate with their own platform identity and explicit role assignments.                                       | Accepted |
+| ADMIN-FR-015 |       P0 | Tenant-data access shall require a case-linked, scoped, time-bound support session unless an approved break-glass process applies. | Accepted |
+| ADMIN-FR-016 |       P0 | Support mode shall remain visibly identifiable and shall not impersonate a tenant user.                                            | Accepted |
+| ADMIN-FR-017 |       P0 | The system shall record support-session approval, activation, access, actions, revocation, and expiration.                         | Accepted |
+| ADMIN-FR-018 |       P0 | A tenant owner shall be able to review ordinary support-access history for their tenant.                                           | Accepted |
+| ADMIN-FR-019 |       P0 | Write actions in support mode shall require separate permission and use domain-supported commands.                                 | Accepted |
+| ADMIN-FR-020 |       P0 | Break-glass use shall alert security reviewers and require documented post-use review.                                             | Accepted |
 
 ### Features, jobs, and audit
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| ADMIN-FR-021 | P0 | Authorized release managers shall create, target, activate, and deactivate feature flags by environment. | Accepted |
-| ADMIN-FR-022 | P0 | Feature evaluation shall combine release state with effective tenant entitlement. | Accepted |
-| ADMIN-FR-023 | P0 | High-risk feature changes shall preview affected tenants and require confirmation. | Accepted |
-| ADMIN-FR-024 | P0 | Operators shall inspect administrative jobs and safely retry only jobs declared retryable. | Accepted |
-| ADMIN-FR-025 | P0 | Authorized auditors shall search administrative events by actor, tenant, action, time, case, and risk classification. | Accepted |
-| ADMIN-FR-026 | P0 | Protected audit exports shall require purpose, bounded filters, authorization, expiration, and download auditing. | Accepted |
-| ADMIN-FR-027 | P1 | The platform shall support tenant-targeted operational notices with start, end, severity, and acknowledgement behavior. | Proposed |
+| ID           | Priority | Requirement                                                                                                             | Status   |
+| ------------ | -------: | ----------------------------------------------------------------------------------------------------------------------- | -------- |
+| ADMIN-FR-021 |       P0 | Authorized release managers shall create, target, activate, and deactivate feature flags by environment.                | Accepted |
+| ADMIN-FR-022 |       P0 | Feature evaluation shall combine release state with effective tenant entitlement.                                       | Accepted |
+| ADMIN-FR-023 |       P0 | High-risk feature changes shall preview affected tenants and require confirmation.                                      | Accepted |
+| ADMIN-FR-024 |       P0 | Operators shall inspect administrative jobs and safely retry only jobs declared retryable.                              | Accepted |
+| ADMIN-FR-025 |       P0 | Authorized auditors shall search administrative events by actor, tenant, action, time, case, and risk classification.   | Accepted |
+| ADMIN-FR-026 |       P0 | Protected audit exports shall require purpose, bounded filters, authorization, expiration, and download auditing.       | Accepted |
+| ADMIN-FR-027 |       P1 | The platform shall support tenant-targeted operational notices with start, end, severity, and acknowledgement behavior. | Proposed |
 
 ### Privacy and closure
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| ADMIN-FR-028 | P0 | Privacy requests shall be tracked through verification, domain fulfillment, review, and evidence retention. | Accepted |
-| ADMIN-FR-029 | P0 | Tenant closure shall identify active pets in care, future bookings, balances, exports, contracts, legal holds, and retention obligations before execution. | Accepted |
-| ADMIN-FR-030 | P0 | A tenant shall not become purge eligible until all mandatory retention and legal-hold rules permit it. | Accepted |
-| ADMIN-FR-031 | P0 | Purge shall be irreversible, multi-step, separately authorized, and evidenced without retaining deleted personal content in the evidence record. | Accepted |
+| ID           | Priority | Requirement                                                                                                                                                | Status   |
+| ------------ | -------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| ADMIN-FR-028 |       P0 | Privacy requests shall be tracked through verification, domain fulfillment, review, and evidence retention.                                                | Accepted |
+| ADMIN-FR-029 |       P0 | Tenant closure shall identify active pets in care, future bookings, balances, exports, contracts, legal holds, and retention obligations before execution. | Accepted |
+| ADMIN-FR-030 |       P0 | A tenant shall not become purge eligible until all mandatory retention and legal-hold rules permit it.                                                     | Accepted |
+| ADMIN-FR-031 |       P0 | Purge shall be irreversible, multi-step, separately authorized, and evidenced without retaining deleted personal content in the evidence record.           | Accepted |
 
 ## Business rules
 
-| ID | Priority | Rule |
-|---|---:|---|
-| ADMIN-BR-001 | P0 | Platform operators cannot derive tenant access from ordinary tenant memberships alone. |
-| ADMIN-BR-002 | P0 | Every administrative command is evaluated against actor, environment, tenant scope, capability, risk, and current state. |
-| ADMIN-BR-003 | P0 | A support session never changes the recorded actor to a tenant user. |
-| ADMIN-BR-004 | P0 | High-risk actions require a reason selected or entered before execution; reasons cannot be added retroactively as a substitute for authorization. |
-| ADMIN-BR-005 | P0 | Tenant subscription billing and pet-owner commerce never share invoice or payment identifiers. |
-| ADMIN-BR-006 | P0 | A provider billing event cannot directly delete, purge, or overwrite a tenant. |
-| ADMIN-BR-007 | P0 | Billing restriction preserves minimum access needed for safe care of pets already checked in. |
-| ADMIN-BR-008 | P0 | Feature flags cannot grant a capability denied by tenant isolation, security policy, legal restriction, or missing entitlement. |
-| ADMIN-BR-009 | P0 | Percentage rollouts use stable assignment and do not reshuffle tenants on each evaluation. |
-| ADMIN-BR-010 | P0 | Audit events are append-only and cannot be edited through the Platform Console. |
-| ADMIN-BR-011 | P0 | Internal notes do not replace audit events and cannot contain secrets, payment credentials, or unnecessary sensitive customer data. |
-| ADMIN-BR-012 | P0 | Purge actions cannot be undone and require stronger approval than closure or suspension. |
-| ADMIN-BR-013 | P1 | Temporary grants and overrides expire automatically and revert to the next effective source. |
-| ADMIN-BR-014 | P1 | Cross-tenant health views use approved aggregates and must not expose customer or pet details. |
+| ID           | Priority | Rule                                                                                                                                              |
+| ------------ | -------: | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ADMIN-BR-001 |       P0 | Platform operators cannot derive tenant access from ordinary tenant memberships alone.                                                            |
+| ADMIN-BR-002 |       P0 | Every administrative command is evaluated against actor, environment, tenant scope, capability, risk, and current state.                          |
+| ADMIN-BR-003 |       P0 | A support session never changes the recorded actor to a tenant user.                                                                              |
+| ADMIN-BR-004 |       P0 | High-risk actions require a reason selected or entered before execution; reasons cannot be added retroactively as a substitute for authorization. |
+| ADMIN-BR-005 |       P0 | Tenant subscription billing and pet-owner commerce never share invoice or payment identifiers.                                                    |
+| ADMIN-BR-006 |       P0 | A provider billing event cannot directly delete, purge, or overwrite a tenant.                                                                    |
+| ADMIN-BR-007 |       P0 | Billing restriction preserves minimum access needed for safe care of pets already checked in.                                                     |
+| ADMIN-BR-008 |       P0 | Feature flags cannot grant a capability denied by tenant isolation, security policy, legal restriction, or missing entitlement.                   |
+| ADMIN-BR-009 |       P0 | Percentage rollouts use stable assignment and do not reshuffle tenants on each evaluation.                                                        |
+| ADMIN-BR-010 |       P0 | Audit events are append-only and cannot be edited through the Platform Console.                                                                   |
+| ADMIN-BR-011 |       P0 | Internal notes do not replace audit events and cannot contain secrets, payment credentials, or unnecessary sensitive customer data.               |
+| ADMIN-BR-012 |       P0 | Purge actions cannot be undone and require stronger approval than closure or suspension.                                                          |
+| ADMIN-BR-013 |       P1 | Temporary grants and overrides expire automatically and revert to the next effective source.                                                      |
+| ADMIN-BR-014 |       P1 | Cross-tenant health views use approved aggregates and must not expose customer or pet details.                                                    |
 
 ## Administrative risk levels
 
-| Level | Examples | Minimum control |
-|---|---|---|
-| Low | View non-sensitive tenant metadata, inspect job status | Normal authorization and audit |
-| Moderate | Retry safe job, create support session, send operational notice | Case/reason and confirmation |
-| High | Write in tenant scope, change plan immediately, restrict tenant, bulk export audit | Step-up authentication, reason, impact preview, detailed audit |
-| Critical | Break-glass, purge tenant, change security operator roles, global kill switch | Step-up authentication, dual approval where feasible, immediate alert, post-action review |
+| Level    | Examples                                                                           | Minimum control                                                                           |
+| -------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Low      | View non-sensitive tenant metadata, inspect job status                             | Normal authorization and audit                                                            |
+| Moderate | Retry safe job, create support session, send operational notice                    | Case/reason and confirmation                                                              |
+| High     | Write in tenant scope, change plan immediately, restrict tenant, bulk export audit | Step-up authentication, reason, impact preview, detailed audit                            |
+| Critical | Break-glass, purge tenant, change security operator roles, global kill switch      | Step-up authentication, dual approval where feasible, immediate alert, post-action review |
 
 Risk classification is attached to the command definition, not selected by the operator performing it.
 
@@ -544,30 +544,30 @@ Audit details must not duplicate secrets, authentication tokens, full document c
 
 ## Security requirements
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| ADMIN-SEC-001 | P0 | Platform operator accounts shall require phishing-resistant MFA when supported and shall not be shared. |
-| ADMIN-SEC-002 | P0 | Production administrative access shall be separate from tenant application roles and non-production access. |
-| ADMIN-SEC-003 | P0 | Sensitive commands shall require recent step-up authentication. |
-| ADMIN-SEC-004 | P0 | Operator sessions shall use short inactivity and absolute timeouts appropriate to risk. |
-| ADMIN-SEC-005 | P0 | Authorization shall be enforced server-side for every query, command, export, and support-scoped action. |
-| ADMIN-SEC-006 | P0 | Support grants shall default to read-only and to the narrowest tenant, location, domain, and field scope. |
-| ADMIN-SEC-007 | P0 | Operator access changes, failed access attempts, and break-glass activity shall generate security events. |
-| ADMIN-SEC-008 | P0 | Secrets, provider credentials, raw authentication tokens, and complete payment data shall never be viewable in the console. |
-| ADMIN-SEC-009 | P1 | Critical actions shall support dual authorization when the operator team can sustain it. |
+| ID            | Priority | Requirement                                                                                                                 |
+| ------------- | -------: | --------------------------------------------------------------------------------------------------------------------------- |
+| ADMIN-SEC-001 |       P0 | Platform operator accounts shall require phishing-resistant MFA when supported and shall not be shared.                     |
+| ADMIN-SEC-002 |       P0 | Production administrative access shall be separate from tenant application roles and non-production access.                 |
+| ADMIN-SEC-003 |       P0 | Sensitive commands shall require recent step-up authentication.                                                             |
+| ADMIN-SEC-004 |       P0 | Operator sessions shall use short inactivity and absolute timeouts appropriate to risk.                                     |
+| ADMIN-SEC-005 |       P0 | Authorization shall be enforced server-side for every query, command, export, and support-scoped action.                    |
+| ADMIN-SEC-006 |       P0 | Support grants shall default to read-only and to the narrowest tenant, location, domain, and field scope.                   |
+| ADMIN-SEC-007 |       P0 | Operator access changes, failed access attempts, and break-glass activity shall generate security events.                   |
+| ADMIN-SEC-008 |       P0 | Secrets, provider credentials, raw authentication tokens, and complete payment data shall never be viewable in the console. |
+| ADMIN-SEC-009 |       P1 | Critical actions shall support dual authorization when the operator team can sustain it.                                    |
 
 ## Non-functional requirements
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| ADMIN-NFR-001 | P0 | Failure of the Platform Console shall not prevent tenant staff from operating the pet-care application. |
-| ADMIN-NFR-002 | P0 | Administrative commands shall be idempotent or reject ambiguous retries with a traceable result. |
-| ADMIN-NFR-003 | P0 | Subscription and restriction projections shall converge after provider events while preserving the latest valid state. |
-| ADMIN-NFR-004 | P0 | Operator-facing errors shall be actionable without exposing cross-tenant data or secrets. |
-| ADMIN-NFR-005 | P0 | Critical administrative actions and audit writes shall be durably recorded before success is reported. |
-| ADMIN-NFR-006 | P0 | The console shall meet the platform accessibility standard. |
-| ADMIN-NFR-007 | P1 | Common tenant lookup and summary views shall return within 2 seconds at the 95th percentile under normal load. |
-| ADMIN-NFR-008 | P1 | Feature evaluation shall fail to the documented safe default when its configuration source is unavailable. |
+| ID            | Priority | Requirement                                                                                                            |
+| ------------- | -------: | ---------------------------------------------------------------------------------------------------------------------- |
+| ADMIN-NFR-001 |       P0 | Failure of the Platform Console shall not prevent tenant staff from operating the pet-care application.                |
+| ADMIN-NFR-002 |       P0 | Administrative commands shall be idempotent or reject ambiguous retries with a traceable result.                       |
+| ADMIN-NFR-003 |       P0 | Subscription and restriction projections shall converge after provider events while preserving the latest valid state. |
+| ADMIN-NFR-004 |       P0 | Operator-facing errors shall be actionable without exposing cross-tenant data or secrets.                              |
+| ADMIN-NFR-005 |       P0 | Critical administrative actions and audit writes shall be durably recorded before success is reported.                 |
+| ADMIN-NFR-006 |       P0 | The console shall meet the platform accessibility standard.                                                            |
+| ADMIN-NFR-007 |       P1 | Common tenant lookup and summary views shall return within 2 seconds at the 95th percentile under normal load.         |
+| ADMIN-NFR-008 |       P1 | Feature evaluation shall fail to the documented safe default when its configuration source is unavailable.             |
 
 ## Platform Console screen inventory
 

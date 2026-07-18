@@ -22,17 +22,17 @@ The catalog describes a service's identity and operational shape. Pricing owns m
 
 ## Core concepts
 
-| Concept | Definition |
-|---|---|
-| Category | Stable platform grouping such as boarding, daycare, grooming, assessment, or add-on. |
-| Service | A business-defined offering customers may request or staff may add. |
-| Service version | Immutable effective version of a service definition. |
-| Variant | A purchasable option sharing a service identity, such as half-day/full-day or kennel/suite. |
-| Add-on | A service attachable to another service under compatibility rules. |
-| Requirement declaration | A reference indicating which eligibility or document rules apply. |
-| Resource requirement | A declaration of resource type, quantity, timing, and whether assignment is required. |
-| Staff requirement | Skill/role, duration, quantity, and assignment timing needed to perform the service. |
-| Booking policy | How the service may be requested, approved, modified, or cancelled. |
+| Concept                 | Definition                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------- |
+| Category                | Stable platform grouping such as boarding, daycare, grooming, assessment, or add-on.        |
+| Service                 | A business-defined offering customers may request or staff may add.                         |
+| Service version         | Immutable effective version of a service definition.                                        |
+| Variant                 | A purchasable option sharing a service identity, such as half-day/full-day or kennel/suite. |
+| Add-on                  | A service attachable to another service under compatibility rules.                          |
+| Requirement declaration | A reference indicating which eligibility or document rules apply.                           |
+| Resource requirement    | A declaration of resource type, quantity, timing, and whether assignment is required.       |
+| Staff requirement       | Skill/role, duration, quantity, and assignment timing needed to perform the service.        |
+| Booking policy          | How the service may be requested, approved, modified, or cancelled.                         |
 
 ## Domain boundaries
 
@@ -60,75 +60,75 @@ The catalog describes a service's identity and operational shape. Pricing owns m
 
 ### Catalog administration
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| SERV-FR-001 | P0 | Authorized users shall create a service under a supported category. | Accepted |
-| SERV-FR-002 | P0 | A service shall have an internal name, customer-facing name, short description, full description, status, and display order. | Accepted |
-| SERV-FR-003 | P0 | A service shall be enabled independently by location. | Accepted |
-| SERV-FR-004 | P0 | A service shall support draft, active, paused, retired, and archived states. | Accepted |
-| SERV-FR-005 | P0 | Authorized users shall duplicate an existing service as a new draft without sharing mutable configuration. | Accepted |
-| SERV-FR-006 | P0 | Service changes affecting future behavior shall create an effective version rather than rewriting historical meaning. | Accepted |
-| SERV-FR-007 | P0 | The catalog shall preserve retired services for historical bookings and reporting. | Accepted |
-| SERV-FR-008 | P1 | Businesses shall organize customer-visible services into configurable collections. | Proposed |
+| ID          | Priority | Requirement                                                                                                                  | Status   |
+| ----------- | -------: | ---------------------------------------------------------------------------------------------------------------------------- | -------- |
+| SERV-FR-001 |       P0 | Authorized users shall create a service under a supported category.                                                          | Accepted |
+| SERV-FR-002 |       P0 | A service shall have an internal name, customer-facing name, short description, full description, status, and display order. | Accepted |
+| SERV-FR-003 |       P0 | A service shall be enabled independently by location.                                                                        | Accepted |
+| SERV-FR-004 |       P0 | A service shall support draft, active, paused, retired, and archived states.                                                 | Accepted |
+| SERV-FR-005 |       P0 | Authorized users shall duplicate an existing service as a new draft without sharing mutable configuration.                   | Accepted |
+| SERV-FR-006 |       P0 | Service changes affecting future behavior shall create an effective version rather than rewriting historical meaning.        | Accepted |
+| SERV-FR-007 |       P0 | The catalog shall preserve retired services for historical bookings and reporting.                                           | Accepted |
+| SERV-FR-008 |       P1 | Businesses shall organize customer-visible services into configurable collections.                                           | Proposed |
 
 ### Service shape and scheduling declarations
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| SERV-FR-009 | P0 | A service shall declare a time model: overnight/date range, attendance day, fixed appointment, flexible appointment, or add-on. | Accepted |
-| SERV-FR-010 | P0 | Appointment services shall declare default duration, allowed duration adjustments, and before/after buffers when applicable. | Accepted |
-| SERV-FR-011 | P0 | Date-range services shall declare charge/occupancy boundaries without owning price calculation. | Accepted |
-| SERV-FR-012 | P0 | Attendance services shall declare full-day, partial-day, or configured session behavior. | Accepted |
-| SERV-FR-013 | P0 | A service shall declare applicable booking, arrival, departure, or appointment windows by reference. | Accepted |
-| SERV-FR-014 | P0 | A service shall declare whether recurring requests are allowed and which recurrence patterns Booking may offer. | Accepted |
-| SERV-FR-015 | P1 | A service shall support lead-time, horizon, and same-day booking declarations consumed by Booking. | Proposed |
+| ID          | Priority | Requirement                                                                                                                     | Status   |
+| ----------- | -------: | ------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| SERV-FR-009 |       P0 | A service shall declare a time model: overnight/date range, attendance day, fixed appointment, flexible appointment, or add-on. | Accepted |
+| SERV-FR-010 |       P0 | Appointment services shall declare default duration, allowed duration adjustments, and before/after buffers when applicable.    | Accepted |
+| SERV-FR-011 |       P0 | Date-range services shall declare charge/occupancy boundaries without owning price calculation.                                 | Accepted |
+| SERV-FR-012 |       P0 | Attendance services shall declare full-day, partial-day, or configured session behavior.                                        | Accepted |
+| SERV-FR-013 |       P0 | A service shall declare applicable booking, arrival, departure, or appointment windows by reference.                            | Accepted |
+| SERV-FR-014 |       P0 | A service shall declare whether recurring requests are allowed and which recurrence patterns Booking may offer.                 | Accepted |
+| SERV-FR-015 |       P1 | A service shall support lead-time, horizon, and same-day booking declarations consumed by Booking.                              | Proposed |
 
 ### Variants and add-ons
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| SERV-FR-016 | P0 | A service may define one or more customer-selectable variants. | Accepted |
-| SERV-FR-017 | P0 | Each variant shall have a stable identifier, label, status, and operational differences. | Accepted |
-| SERV-FR-018 | P0 | A service or variant may declare compatible, required, mutually exclusive, and prohibited add-ons. | Accepted |
-| SERV-FR-019 | P0 | Add-ons shall declare whether they apply per booking, per pet, per day, per night, or per occurrence. | Accepted |
-| SERV-FR-020 | P0 | The system shall prevent circular add-on dependencies. | Accepted |
-| SERV-FR-021 | P0 | Add-on availability may depend on location, parent service, timing, pet, resource, or staff constraints evaluated downstream. | Accepted |
-| SERV-FR-022 | P1 | Staff-only add-ons shall be hidden from customers while remaining available to authorized employees. | Proposed |
+| ID          | Priority | Requirement                                                                                                                   | Status   |
+| ----------- | -------: | ----------------------------------------------------------------------------------------------------------------------------- | -------- |
+| SERV-FR-016 |       P0 | A service may define one or more customer-selectable variants.                                                                | Accepted |
+| SERV-FR-017 |       P0 | Each variant shall have a stable identifier, label, status, and operational differences.                                      | Accepted |
+| SERV-FR-018 |       P0 | A service or variant may declare compatible, required, mutually exclusive, and prohibited add-ons.                            | Accepted |
+| SERV-FR-019 |       P0 | Add-ons shall declare whether they apply per booking, per pet, per day, per night, or per occurrence.                         | Accepted |
+| SERV-FR-020 |       P0 | The system shall prevent circular add-on dependencies.                                                                        | Accepted |
+| SERV-FR-021 |       P0 | Add-on availability may depend on location, parent service, timing, pet, resource, or staff constraints evaluated downstream. | Accepted |
+| SERV-FR-022 |       P1 | Staff-only add-ons shall be hidden from customers while remaining available to authorized employees.                          | Proposed |
 
 ### Resource and staffing declarations
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| SERV-FR-023 | P0 | A service shall declare required resource types, quantity, timing, and whether assignment occurs before confirmation or during operations. | Accepted |
-| SERV-FR-024 | P0 | A service shall declare required staff roles or skills and expected effort/duration. | Accepted |
-| SERV-FR-025 | P0 | Boarding variants shall support housing-type requirements. | Accepted |
-| SERV-FR-026 | P0 | Daycare services shall support attendance-capacity and play-area declarations. | Accepted |
-| SERV-FR-027 | P0 | Grooming services shall support groomer and station/equipment declarations. | Accepted |
-| SERV-FR-028 | P0 | Resource declarations shall identify whether customer preference is allowed and whether it is guaranteed. | Accepted |
-| SERV-FR-029 | P1 | Service definitions shall support configurable operational task templates by reference. | Proposed |
+| ID          | Priority | Requirement                                                                                                                                | Status   |
+| ----------- | -------: | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| SERV-FR-023 |       P0 | A service shall declare required resource types, quantity, timing, and whether assignment occurs before confirmation or during operations. | Accepted |
+| SERV-FR-024 |       P0 | A service shall declare required staff roles or skills and expected effort/duration.                                                       | Accepted |
+| SERV-FR-025 |       P0 | Boarding variants shall support housing-type requirements.                                                                                 | Accepted |
+| SERV-FR-026 |       P0 | Daycare services shall support attendance-capacity and play-area declarations.                                                             | Accepted |
+| SERV-FR-027 |       P0 | Grooming services shall support groomer and station/equipment declarations.                                                                | Accepted |
+| SERV-FR-028 |       P0 | Resource declarations shall identify whether customer preference is allowed and whether it is guaranteed.                                  | Accepted |
+| SERV-FR-029 |       P1 | Service definitions shall support configurable operational task templates by reference.                                                    | Proposed |
 
 ### Eligibility, intake, and policy declarations
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| SERV-FR-030 | P0 | A service shall reference applicable vaccination, age, alteration, evaluation, health, behavior, and document requirement policies. | Accepted |
-| SERV-FR-031 | P0 | A service shall declare required intake questions and whether answers apply per customer, pet, or booking. | Accepted |
-| SERV-FR-032 | P0 | Intake questions shall support text, choice, boolean, number, date, acknowledgement, and secure file response types. | Accepted |
-| SERV-FR-033 | P0 | Required waivers, cancellation policies, and deposit policies shall be linked by versioned reference. | Accepted |
-| SERV-FR-034 | P0 | A service shall declare whether eligibility is evaluated before availability, before confirmation, at check-in, or at multiple stages. | Accepted |
-| SERV-FR-035 | P0 | Staff shall see internal preparation and care instructions that are separate from customer-facing content. | Accepted |
+| ID          | Priority | Requirement                                                                                                                            | Status   |
+| ----------- | -------: | -------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| SERV-FR-030 |       P0 | A service shall reference applicable vaccination, age, alteration, evaluation, health, behavior, and document requirement policies.    | Accepted |
+| SERV-FR-031 |       P0 | A service shall declare required intake questions and whether answers apply per customer, pet, or booking.                             | Accepted |
+| SERV-FR-032 |       P0 | Intake questions shall support text, choice, boolean, number, date, acknowledgement, and secure file response types.                   | Accepted |
+| SERV-FR-033 |       P0 | Required waivers, cancellation policies, and deposit policies shall be linked by versioned reference.                                  | Accepted |
+| SERV-FR-034 |       P0 | A service shall declare whether eligibility is evaluated before availability, before confirmation, at check-in, or at multiple stages. | Accepted |
+| SERV-FR-035 |       P0 | Staff shall see internal preparation and care instructions that are separate from customer-facing content.                             | Accepted |
 
 ### Booking and publication behavior
 
-| ID | Priority | Requirement | Status |
-|---|---:|---|---|
-| SERV-FR-036 | P0 | A service shall be enabled independently for public website, customer portal, staff entry, and API channels. | Accepted |
-| SERV-FR-037 | P0 | A service shall declare instant confirmation, staff approval, or request-only behavior. | Accepted |
-| SERV-FR-038 | P0 | A service shall declare whether multiple pets may be included and whether each pet requires a separate service item. | Accepted |
-| SERV-FR-039 | P0 | A service shall declare allowed combinations with other primary services in the same booking. | Accepted |
-| SERV-FR-040 | P0 | Customer-visible catalog output shall include only published, active, location-enabled, channel-enabled services. | Accepted |
-| SERV-FR-041 | P0 | The customer-facing projection shall expose clear duration, arrival/appointment expectations, prerequisites, and cancellation summary. | Accepted |
-| SERV-FR-042 | P1 | Services shall support scheduled publication and retirement. | Proposed |
+| ID          | Priority | Requirement                                                                                                                            | Status   |
+| ----------- | -------: | -------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| SERV-FR-036 |       P0 | A service shall be enabled independently for public website, customer portal, staff entry, and API channels.                           | Accepted |
+| SERV-FR-037 |       P0 | A service shall declare instant confirmation, staff approval, or request-only behavior.                                                | Accepted |
+| SERV-FR-038 |       P0 | A service shall declare whether multiple pets may be included and whether each pet requires a separate service item.                   | Accepted |
+| SERV-FR-039 |       P0 | A service shall declare allowed combinations with other primary services in the same booking.                                          | Accepted |
+| SERV-FR-040 |       P0 | Customer-visible catalog output shall include only published, active, location-enabled, channel-enabled services.                      | Accepted |
+| SERV-FR-041 |       P0 | The customer-facing projection shall expose clear duration, arrival/appointment expectations, prerequisites, and cancellation summary. | Accepted |
+| SERV-FR-042 |       P1 | Services shall support scheduled publication and retirement.                                                                           | Proposed |
 
 ## Category profiles
 
@@ -156,22 +156,22 @@ Assessments include daycare evaluations, meet-and-greets, and grooming consultat
 
 ## Business rules
 
-| ID | Priority | Rule |
-|---|---:|---|
-| SERV-BR-001 | P0 | Every service belongs to one business tenant and at least one supported platform category. |
-| SERV-BR-002 | P0 | A service must have an active effective version before it can be published or booked. |
-| SERV-BR-003 | P0 | A service cannot be customer-visible at a location unless the category and service are enabled there. |
-| SERV-BR-004 | P0 | Historical booking items retain service name, description, duration, requirements, and policy references from their confirmed version. |
-| SERV-BR-005 | P0 | Retiring or archiving a service cannot alter historical bookings or active stays. |
-| SERV-BR-006 | P0 | A service version with confirmed future bookings cannot be destructively edited. |
-| SERV-BR-007 | P0 | Price must never be stored as an authoritative mutable field on the catalog service. |
-| SERV-BR-008 | P0 | Resource and staff declarations describe needs; they do not prove availability. |
-| SERV-BR-009 | P0 | Requirement references describe applicable rules; Pet determines the actual eligibility outcome. |
-| SERV-BR-010 | P0 | A customer cannot select an add-on without a compatible parent service unless the add-on is explicitly standalone. |
-| SERV-BR-011 | P0 | Staff approval cannot bypass non-overrideable safety or eligibility rules. |
-| SERV-BR-012 | P0 | Customer-visible content must not expose internal preparation, risk, margin, or staff notes. |
-| SERV-BR-013 | P0 | At least one permitted channel is required for an active service. |
-| SERV-BR-014 | P1 | Variant use is reserved for choices sharing one customer-recognizable service; substantially different workflows use separate services. |
+| ID          | Priority | Rule                                                                                                                                    |
+| ----------- | -------: | --------------------------------------------------------------------------------------------------------------------------------------- |
+| SERV-BR-001 |       P0 | Every service belongs to one business tenant and at least one supported platform category.                                              |
+| SERV-BR-002 |       P0 | A service must have an active effective version before it can be published or booked.                                                   |
+| SERV-BR-003 |       P0 | A service cannot be customer-visible at a location unless the category and service are enabled there.                                   |
+| SERV-BR-004 |       P0 | Historical booking items retain service name, description, duration, requirements, and policy references from their confirmed version.  |
+| SERV-BR-005 |       P0 | Retiring or archiving a service cannot alter historical bookings or active stays.                                                       |
+| SERV-BR-006 |       P0 | A service version with confirmed future bookings cannot be destructively edited.                                                        |
+| SERV-BR-007 |       P0 | Price must never be stored as an authoritative mutable field on the catalog service.                                                    |
+| SERV-BR-008 |       P0 | Resource and staff declarations describe needs; they do not prove availability.                                                         |
+| SERV-BR-009 |       P0 | Requirement references describe applicable rules; Pet determines the actual eligibility outcome.                                        |
+| SERV-BR-010 |       P0 | A customer cannot select an add-on without a compatible parent service unless the add-on is explicitly standalone.                      |
+| SERV-BR-011 |       P0 | Staff approval cannot bypass non-overrideable safety or eligibility rules.                                                              |
+| SERV-BR-012 |       P0 | Customer-visible content must not expose internal preparation, risk, margin, or staff notes.                                            |
+| SERV-BR-013 |       P0 | At least one permitted channel is required for an active service.                                                                       |
+| SERV-BR-014 |       P1 | Variant use is reserved for choices sharing one customer-recognizable service; substantially different workflows use separate services. |
 
 ## Version lifecycle
 
@@ -221,34 +221,34 @@ The service identity remains stable across versions. Confirmed booking items ref
 
 ## Permissions
 
-| Capability | Owner | Manager | Front desk | Care staff | Customer | Platform support |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| View active catalog | Yes | Yes | Yes | Relevant | Published only | Limited support view |
-| Create/edit drafts | Yes | Yes if granted | No | No | No | No |
-| Publish/pause/retire | Yes | Configurable | No | No | No | No |
-| Edit internal instructions | Yes | Yes | No | Configurable proposals | No | No |
-| Manage requirements/resources | Yes | Yes | No | No | No | No |
-| View version history | Yes | Yes | Permission based | No | No | Limited support view |
+| Capability                    | Owner |    Manager     |    Front desk    |       Care staff       |    Customer    |   Platform support   |
+| ----------------------------- | :---: | :------------: | :--------------: | :--------------------: | :------------: | :------------------: |
+| View active catalog           |  Yes  |      Yes       |       Yes        |        Relevant        | Published only | Limited support view |
+| Create/edit drafts            |  Yes  | Yes if granted |        No        |           No           |       No       |          No          |
+| Publish/pause/retire          |  Yes  |  Configurable  |        No        |           No           |       No       |          No          |
+| Edit internal instructions    |  Yes  |      Yes       |        No        | Configurable proposals |       No       |          No          |
+| Manage requirements/resources |  Yes  |      Yes       |        No        |           No           |       No       |          No          |
+| View version history          |  Yes  |      Yes       | Permission based |           No           |       No       | Limited support view |
 
 ## Core entities
 
-| Entity | Purpose |
-|---|---|
-| ServiceCategory | Stable platform grouping and supported behavior profile |
-| Service | Stable business-owned service identity |
-| ServiceVersion | Immutable effective definition and publication state |
-| ServiceLocation | Location enablement and local overrides |
-| ServiceVariant | Customer/staff selectable operational option |
-| ServiceChannel | Public, portal, staff, or API availability |
-| ServiceCompatibilityRule | Primary-service combination and exclusion rules |
-| ServiceAddOnRule | Parent/add-on compatibility, scope, requirement, and limits |
-| ServiceResourceRequirement | Resource type, quantity, timing, and assignment rule |
-| ServiceStaffRequirement | Role/skill, quantity, effort, and assignment rule |
-| ServiceRequirementReference | Pet/document/evaluation policy reference |
-| ServicePolicyReference | Deposit, cancellation, waiver, or booking policy reference |
-| ServiceIntakeQuestion | Versioned question, response type, audience, and requirement |
-| ServiceContent | Customer-facing and internal content by locale/audience |
-| CatalogCollection | Optional customer-facing service grouping |
+| Entity                      | Purpose                                                      |
+| --------------------------- | ------------------------------------------------------------ |
+| ServiceCategory             | Stable platform grouping and supported behavior profile      |
+| Service                     | Stable business-owned service identity                       |
+| ServiceVersion              | Immutable effective definition and publication state         |
+| ServiceLocation             | Location enablement and local overrides                      |
+| ServiceVariant              | Customer/staff selectable operational option                 |
+| ServiceChannel              | Public, portal, staff, or API availability                   |
+| ServiceCompatibilityRule    | Primary-service combination and exclusion rules              |
+| ServiceAddOnRule            | Parent/add-on compatibility, scope, requirement, and limits  |
+| ServiceResourceRequirement  | Resource type, quantity, timing, and assignment rule         |
+| ServiceStaffRequirement     | Role/skill, quantity, effort, and assignment rule            |
+| ServiceRequirementReference | Pet/document/evaluation policy reference                     |
+| ServicePolicyReference      | Deposit, cancellation, waiver, or booking policy reference   |
+| ServiceIntakeQuestion       | Versioned question, response type, audience, and requirement |
+| ServiceContent              | Customer-facing and internal content by locale/audience      |
+| CatalogCollection           | Optional customer-facing service grouping                    |
 
 Detailed schemas and migrations will be produced immediately before implementation.
 
@@ -271,30 +271,30 @@ Events include `business_id`, affected locations, service and version identifier
 
 ## Non-functional requirements
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| SERV-NFR-001 | P0 | Catalog reads shall enforce tenant and publication/channel scope. |
-| SERV-NFR-002 | P0 | Published service versions and historical references shall be immutable. |
-| SERV-NFR-003 | P0 | Publication validation shall identify every blocking dependency with actionable guidance. |
-| SERV-NFR-004 | P0 | Customer-visible catalog queries shall respond quickly enough for interactive browsing and booking. |
-| SERV-NFR-005 | P0 | Catalog changes affecting bookings or safety requirements shall be audited. |
-| SERV-NFR-006 | P0 | Customer-facing catalog content and administration interfaces shall meet WCAG 2.2 AA targets. |
-| SERV-NFR-007 | P1 | Catalog projections shall support caching without showing stale retired or paused services beyond a short controlled interval. |
+| ID           | Priority | Requirement                                                                                                                    |
+| ------------ | -------: | ------------------------------------------------------------------------------------------------------------------------------ |
+| SERV-NFR-001 |       P0 | Catalog reads shall enforce tenant and publication/channel scope.                                                              |
+| SERV-NFR-002 |       P0 | Published service versions and historical references shall be immutable.                                                       |
+| SERV-NFR-003 |       P0 | Publication validation shall identify every blocking dependency with actionable guidance.                                      |
+| SERV-NFR-004 |       P0 | Customer-visible catalog queries shall respond quickly enough for interactive browsing and booking.                            |
+| SERV-NFR-005 |       P0 | Catalog changes affecting bookings or safety requirements shall be audited.                                                    |
+| SERV-NFR-006 |       P0 | Customer-facing catalog content and administration interfaces shall meet WCAG 2.2 AA targets.                                  |
+| SERV-NFR-007 |       P1 | Catalog projections shall support caching without showing stale retired or paused services beyond a short controlled interval. |
 
 ## Acceptance scenarios
 
-| ID | Covers | Scenario |
-|---|---|---|
-| SERV-AT-001 | SERV-FR-001–008 | A manager creates, previews, publishes, pauses, resumes, and retires a service while history remains intact. |
-| SERV-AT-002 | SERV-FR-009–015 | Boarding, daycare, and grooming each expose correct date/session/appointment behavior. |
-| SERV-AT-003 | SERV-FR-016–022 | A customer selects a compatible per-pet add-on; incompatible and circular combinations are rejected. |
-| SERV-AT-004 | SERV-FR-023–029 | Each service produces correct resource and staff requirement declarations without claiming availability. |
+| ID          | Covers          | Scenario                                                                                                                              |
+| ----------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| SERV-AT-001 | SERV-FR-001–008 | A manager creates, previews, publishes, pauses, resumes, and retires a service while history remains intact.                          |
+| SERV-AT-002 | SERV-FR-009–015 | Boarding, daycare, and grooming each expose correct date/session/appointment behavior.                                                |
+| SERV-AT-003 | SERV-FR-016–022 | A customer selects a compatible per-pet add-on; incompatible and circular combinations are rejected.                                  |
+| SERV-AT-004 | SERV-FR-023–029 | Each service produces correct resource and staff requirement declarations without claiming availability.                              |
 | SERV-AT-005 | SERV-FR-030–035 | Grooming intake, daycare evaluation, vaccines, waivers, and internal instructions reach the correct downstream domains and audiences. |
-| SERV-AT-006 | SERV-FR-036–042 | A staff-only service remains hidden online while a published portal service appears with correct prerequisites. |
-| SERV-AT-007 | SERV-BR-004–006 | Publishing a changed version leaves a confirmed future booking on its original service snapshot. |
-| SERV-AT-008 | SERV-BR-007–009 | Catalog output contains references and requirements but no authoritative price, availability, or eligibility decision. |
-| SERV-AT-009 | SERV-BR-010–013 | Channel, add-on, approval, and customer/internal visibility rules are enforced. |
-| SERV-AT-010 | SERV-NFR-001 | Direct catalog requests cannot expose another tenant's drafts, services, internal content, or versions. |
+| SERV-AT-006 | SERV-FR-036–042 | A staff-only service remains hidden online while a published portal service appears with correct prerequisites.                       |
+| SERV-AT-007 | SERV-BR-004–006 | Publishing a changed version leaves a confirmed future booking on its original service snapshot.                                      |
+| SERV-AT-008 | SERV-BR-007–009 | Catalog output contains references and requirements but no authoritative price, availability, or eligibility decision.                |
+| SERV-AT-009 | SERV-BR-010–013 | Channel, add-on, approval, and customer/internal visibility rules are enforced.                                                       |
+| SERV-AT-010 | SERV-NFR-001    | Direct catalog requests cannot expose another tenant's drafts, services, internal content, or versions.                               |
 
 ## Metrics
 
@@ -328,4 +328,3 @@ Events include `business_id`, affected locations, service and version identifier
 - Operations for task generation and execution
 - Website and Content for customer presentation
 - Reporting for service/version performance
-

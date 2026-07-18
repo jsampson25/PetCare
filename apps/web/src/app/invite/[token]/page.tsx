@@ -20,10 +20,26 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
     <main className="grid min-h-screen place-items-center bg-[var(--surface-subtle)] px-4 py-10">
       <Card className="w-full max-w-lg" title={`Join ${preview.business_name}`}>
         <dl className="space-y-3 text-sm">
-          <div><dt className="font-bold">Invited email</dt><dd>{preview.invited_email}</dd></div>
-          <div><dt className="font-bold">Role</dt><dd>{preview.role_names.join(', ')}</dd></div>
-          <div><dt className="font-bold">Location access</dt><dd>{preview.location_names.join(', ')}</dd></div>
-          <div><dt className="font-bold">Expires</dt><dd>{new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(preview.expires_at))}</dd></div>
+          <div>
+            <dt className="font-bold">Invited email</dt>
+            <dd>{preview.invited_email}</dd>
+          </div>
+          <div>
+            <dt className="font-bold">Role</dt>
+            <dd>{preview.role_names.join(', ')}</dd>
+          </div>
+          <div>
+            <dt className="font-bold">Location access</dt>
+            <dd>{preview.location_names.join(', ')}</dd>
+          </div>
+          <div>
+            <dt className="font-bold">Expires</dt>
+            <dd>
+              {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(
+                new Date(preview.expires_at),
+              )}
+            </dd>
+          </div>
         </dl>
         {signedIn ? (
           <form action={acceptInvitation} className="mt-6">
@@ -32,8 +48,18 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
           </form>
         ) : (
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link className="font-bold underline" href={`/auth/sign-in?next=${encodeURIComponent(`/invite/${token}`)}`}>Sign in to accept</Link>
-            <Link className="font-bold underline" href={`/auth/register?next=${encodeURIComponent(`/invite/${token}`)}`}>Create an account</Link>
+            <Link
+              className="font-bold underline"
+              href={`/auth/sign-in?next=${encodeURIComponent(`/invite/${token}`)}`}
+            >
+              Sign in to accept
+            </Link>
+            <Link
+              className="font-bold underline"
+              href={`/auth/register?next=${encodeURIComponent(`/invite/${token}`)}`}
+            >
+              Create an account
+            </Link>
           </div>
         )}
       </Card>
@@ -45,8 +71,13 @@ function UnavailableInvitation() {
   return (
     <main className="grid min-h-screen place-items-center bg-[var(--surface-subtle)] px-4 py-10">
       <Card className="w-full max-w-lg" title="Invitation unavailable">
-        <p className="text-sm leading-6 text-[var(--text-secondary)]">This invitation is invalid, expired, revoked, or already used. Ask the business owner for a new invitation.</p>
-        <Link className="mt-5 inline-block font-bold underline" href="/auth/sign-in">Go to sign in</Link>
+        <p className="text-sm leading-6 text-[var(--text-secondary)]">
+          This invitation is invalid, expired, revoked, or already used. Ask the business owner for
+          a new invitation.
+        </p>
+        <Link className="mt-5 inline-block font-bold underline" href="/auth/sign-in">
+          Go to sign in
+        </Link>
       </Card>
     </main>
   );

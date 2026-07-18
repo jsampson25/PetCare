@@ -10,10 +10,9 @@ const items: NavigationItem[] = [
 
 describe('visibleNavigation', () => {
   it('keeps public items and items with every required permission', () => {
-    expect(visibleNavigation(items, new Set(['customers.read'])).map(({ label }) => label)).toEqual([
-      'Today',
-      'Customers',
-    ]);
+    expect(visibleNavigation(items, new Set(['customers.read'])).map(({ label }) => label)).toEqual(
+      ['Today', 'Customers'],
+    );
   });
 
   it('does not treat hidden navigation as authorization', () => {

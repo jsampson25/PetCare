@@ -86,13 +86,13 @@ flowchart TD
 
 ### Role-aware defaults
 
-| Role | Default focus |
-|---|---|
-| Care staff | Assigned/area care tasks due now |
-| Daycare attendant | Attendance, play/rest rotations, ratio and safety exceptions |
-| Groomer | Ordered grooming production board |
-| Front desk | Arrivals, departures, customer/payment/document blockers |
-| Manager | Critical alerts, overdue work, staffing/load, incidents, approvals |
+| Role              | Default focus                                                      |
+| ----------------- | ------------------------------------------------------------------ |
+| Care staff        | Assigned/area care tasks due now                                   |
+| Daycare attendant | Attendance, play/rest rotations, ratio and safety exceptions       |
+| Groomer           | Ordered grooming production board                                  |
+| Front desk        | Arrivals, departures, customer/payment/document blockers           |
+| Manager           | Critical alerts, overdue work, staffing/load, incidents, approvals |
 
 Users can change views within authorization. The system remembers safe preferences per location/device but does not let preferences suppress critical work.
 
@@ -360,14 +360,14 @@ Configured by service, stay length, pet risk, and concern:
 
 ### Results
 
-| Result | Next step |
-|---|---|
-| Within expected range | Record and continue |
-| Monitor | Create timed follow-up |
-| Manager review | Escalate with facts |
-| Customer contact | Record approved summary and response |
-| Veterinary contact/referral | Follow policy and record authorization/outcome |
-| Emergency | Immediate safety response, then incident completion |
+| Result                      | Next step                                           |
+| --------------------------- | --------------------------------------------------- |
+| Within expected range       | Record and continue                                 |
+| Monitor                     | Create timed follow-up                              |
+| Manager review              | Escalate with facts                                 |
+| Customer contact            | Record approved summary and response                |
+| Veterinary contact/referral | Follow policy and record authorization/outcome      |
+| Emergency                   | Immediate safety response, then incident completion |
 
 Trend views show observations over time without presenting a medical diagnosis.
 
@@ -878,19 +878,19 @@ Dense boards provide list alternatives and never require drag-and-drop.
 
 ## Permissions presentation
 
-| Capability | Front desk | Care staff | Daycare attendant | Groomer | Manager |
-|---|:---:|:---:|:---:|:---:|:---:|
-| View assigned care plan | Limited | Yes | Yes | Grooming-relevant | Yes |
-| Record feeding | Configurable | Yes | Configurable | No by default | Yes |
-| Record medication | Permission based | Permission based | Permission based | No by default | Permission based |
-| Record activity/wellness | Limited | Yes | Yes | Grooming observations | Yes |
-| Manage playgroup | No | Configurable | Yes | No | Yes |
-| Execute grooming | No | No | No | Yes | Configurable |
-| Create incident | Yes | Yes | Yes | Yes | Yes |
-| Resolve serious incident | No | No | No | No | Restricted |
-| Draft report card | Configurable | Yes | Yes | Yes | Yes |
-| Publish report card | Configurable | No by default | No by default | Configurable | Yes |
-| Reassign/cancel task | Limited | Assigned only | Assigned only | Assigned only | Yes |
+| Capability               |    Front desk    |    Care staff    | Daycare attendant |        Groomer        |     Manager      |
+| ------------------------ | :--------------: | :--------------: | :---------------: | :-------------------: | :--------------: |
+| View assigned care plan  |     Limited      |       Yes        |        Yes        |   Grooming-relevant   |       Yes        |
+| Record feeding           |   Configurable   |       Yes        |   Configurable    |     No by default     |       Yes        |
+| Record medication        | Permission based | Permission based | Permission based  |     No by default     | Permission based |
+| Record activity/wellness |     Limited      |       Yes        |        Yes        | Grooming observations |       Yes        |
+| Manage playgroup         |        No        |   Configurable   |        Yes        |          No           |       Yes        |
+| Execute grooming         |        No        |        No        |        No         |          Yes          |   Configurable   |
+| Create incident          |       Yes        |       Yes        |        Yes        |          Yes          |       Yes        |
+| Resolve serious incident |        No        |        No        |        No         |          No           |    Restricted    |
+| Draft report card        |   Configurable   |       Yes        |        Yes        |          Yes          |       Yes        |
+| Publish report card      |   Configurable   |  No by default   |   No by default   |     Configurable      |       Yes        |
+| Reassign/cancel task     |     Limited      |  Assigned only   |   Assigned only   |     Assigned only     |       Yes        |
 
 Domain state, assignment, area, skill, location, and role remain server-enforced.
 
@@ -1208,4 +1208,3 @@ Metrics never rank employees solely by task volume. Pet mix, service complexity,
 - [Resource and Capacity](../domains/resource-capacity/README.md)
 - [Communications](../domains/communications/README.md)
 - [Reporting](../domains/reporting/README.md)
-

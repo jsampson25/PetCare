@@ -1,19 +1,29 @@
 import { ButtonLink } from '@petcare/ui/button-link';
+import Link from 'next/link';
 
 const capabilities = [
   ['Simple booking', 'Customers can reserve boarding, daycare, and grooming in one clear flow.'],
-  ['Complete pet profiles', 'Vaccines, feeding, medication, behavior, and care instructions stay together.'],
-  ['Daily operations', 'Staff see arrivals, departures, care work, exceptions, and capacity in one place.'],
+  [
+    'Complete pet profiles',
+    'Vaccines, feeding, medication, behavior, and care instructions stay together.',
+  ],
+  [
+    'Daily operations',
+    'Staff see arrivals, departures, care work, exceptions, and capacity in one place.',
+  ],
 ];
 
 export default function HomePage() {
   return (
     <main>
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <a className="text-xl font-bold tracking-tight" href="/" aria-label="PetCare home">
+        <Link className="text-xl font-bold tracking-tight" href="/" aria-label="PetCare home">
           PetCare
-        </a>
-        <nav aria-label="Primary navigation" className="flex items-center gap-5 text-sm font-medium">
+        </Link>
+        <nav
+          aria-label="Primary navigation"
+          className="flex items-center gap-5 text-sm font-medium"
+        >
           <a href="#platform">Platform</a>
           <ButtonLink href="/auth/sign-in" variant="secondary">
             Sign in
@@ -45,14 +55,17 @@ export default function HomePage() {
           <p className="text-sm font-semibold text-[var(--text-secondary)]">Today at a glance</p>
           <p className="mt-2 text-3xl font-bold">Everything that needs care</p>
           <div className="mt-8 grid grid-cols-2 gap-3">
-            {[['Arrivals', '8'], ['In care', '34'], ['Tasks due', '12'], ['Departures', '6']].map(
-              ([label, value]) => (
-                <div className="rounded-2xl bg-[var(--surface-subtle)] p-4" key={label}>
-                  <p className="text-2xl font-bold">{value}</p>
-                  <p className="mt-1 text-sm text-[var(--text-secondary)]">{label}</p>
-                </div>
-              ),
-            )}
+            {[
+              ['Arrivals', '8'],
+              ['In care', '34'],
+              ['Tasks due', '12'],
+              ['Departures', '6'],
+            ].map(([label, value]) => (
+              <div className="rounded-2xl bg-[var(--surface-subtle)] p-4" key={label}>
+                <p className="text-2xl font-bold">{value}</p>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">{label}</p>
+              </div>
+            ))}
           </div>
           <p className="mt-5 text-sm leading-6 text-[var(--text-secondary)]">
             Demonstration content for the initial application shell. Live business data comes in a
@@ -61,7 +74,10 @@ export default function HomePage() {
         </aside>
       </section>
 
-      <section className="border-y border-[var(--border-default)] bg-[var(--surface-default)]" id="platform">
+      <section
+        className="border-y border-[var(--border-default)] bg-[var(--surface-default)]"
+        id="platform"
+      >
         <div className="mx-auto grid max-w-6xl gap-5 px-6 py-16 md:grid-cols-3">
           {capabilities.map(([title, description]) => (
             <article className="rounded-2xl border border-[var(--border-default)] p-6" key={title}>

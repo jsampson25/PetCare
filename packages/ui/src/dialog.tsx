@@ -38,14 +38,18 @@ export function Dialog({
       <div className="p-6">
         <div className="flex items-start justify-between gap-5">
           <div>
-            <h2 className="text-xl font-bold" id="dialog-title">{title}</h2>
+            <h2 className="text-xl font-bold" id="dialog-title">
+              {title}
+            </h2>
             {description ? (
               <p className="mt-2 leading-6 text-[var(--text-secondary)]" id="dialog-description">
                 {description}
               </p>
             ) : null}
           </div>
-          <Button aria-label="Close dialog" onClick={onClose} variant="quiet">Close</Button>
+          <Button aria-label="Close dialog" onClick={onClose} variant="quiet">
+            Close
+          </Button>
         </div>
         <div className="mt-6">{children}</div>
       </div>

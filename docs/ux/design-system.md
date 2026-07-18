@@ -37,14 +37,14 @@ Avoid ornamental dashboards, excessive gradients, glass effects, tiny gray text,
 
 ## Surface strategy
 
-| Surface | Visual strategy | Tenant branding |
-|---|---|---|
-| Public website | Light, editorial, image-forward, responsive | Strong within accessible theme controls |
-| Booking flow | Light, focused, low-distraction | Logo, brand action color, approved typography accents |
-| Customer Portal | Light, calm, card-and-list based | Moderate and continuous with booking |
-| Business Portal | Neutral operational shell with higher information density | Tenant logo/name, limited accent use |
-| Staff Operations | High-clarity task and exception interface | Minimal branding; safety semantics dominate |
-| Platform Console | Distinct privileged operational shell | No tenant visual impersonation |
+| Surface          | Visual strategy                                           | Tenant branding                                       |
+| ---------------- | --------------------------------------------------------- | ----------------------------------------------------- |
+| Public website   | Light, editorial, image-forward, responsive               | Strong within accessible theme controls               |
+| Booking flow     | Light, focused, low-distraction                           | Logo, brand action color, approved typography accents |
+| Customer Portal  | Light, calm, card-and-list based                          | Moderate and continuous with booking                  |
+| Business Portal  | Neutral operational shell with higher information density | Tenant logo/name, limited accent use                  |
+| Staff Operations | High-clarity task and exception interface                 | Minimal branding; safety semantics dominate           |
+| Platform Console | Distinct privileged operational shell                     | No tenant visual impersonation                        |
 
 Dark mode is not an MVP requirement. Components must use semantic tokens rather than hard-coded light values so a future dark or high-contrast theme can be added without rewriting component logic.
 
@@ -70,47 +70,47 @@ Application code uses semantic or component tokens. Raw palette values are confi
 
 ### Neutral roles
 
-| Token | Use |
-|---|---|
-| `--surface-canvas` | Application or page background |
-| `--surface-default` | Primary card, panel, form, and table surface |
-| `--surface-subtle` | Secondary grouped content and quiet emphasis |
-| `--surface-raised` | Menus, popovers, dialogs, and elevated panels |
-| `--surface-inverse` | Rare high-contrast inverse surface |
-| `--text-primary` | Main content and controls |
-| `--text-secondary` | Supporting content |
-| `--text-muted` | Metadata that remains legible |
-| `--text-inverse` | Text on inverse surfaces |
-| `--border-default` | Standard boundaries |
-| `--border-strong` | Emphasized boundaries and table structure |
-| `--border-subtle` | Low-emphasis separators |
+| Token               | Use                                           |
+| ------------------- | --------------------------------------------- |
+| `--surface-canvas`  | Application or page background                |
+| `--surface-default` | Primary card, panel, form, and table surface  |
+| `--surface-subtle`  | Secondary grouped content and quiet emphasis  |
+| `--surface-raised`  | Menus, popovers, dialogs, and elevated panels |
+| `--surface-inverse` | Rare high-contrast inverse surface            |
+| `--text-primary`    | Main content and controls                     |
+| `--text-secondary`  | Supporting content                            |
+| `--text-muted`      | Metadata that remains legible                 |
+| `--text-inverse`    | Text on inverse surfaces                      |
+| `--border-default`  | Standard boundaries                           |
+| `--border-strong`   | Emphasized boundaries and table structure     |
+| `--border-subtle`   | Low-emphasis separators                       |
 
 Muted text still meets required contrast for its size and use. Placeholder text is not used as a substitute for a visible field label.
 
 ### Brand and action roles
 
-| Token | Use |
-|---|---|
-| `--action-primary` | Primary action background or key interactive emphasis |
-| `--action-primary-hover` | Hover state |
-| `--action-primary-active` | Pressed state |
-| `--action-primary-text` | Text/icon on primary action |
-| `--action-secondary` | Secondary action surface |
-| `--focus-ring` | Keyboard focus indicator |
-| `--link-default` | Inline and standalone links |
-| `--selection` | Text or item selection highlight |
+| Token                     | Use                                                   |
+| ------------------------- | ----------------------------------------------------- |
+| `--action-primary`        | Primary action background or key interactive emphasis |
+| `--action-primary-hover`  | Hover state                                           |
+| `--action-primary-active` | Pressed state                                         |
+| `--action-primary-text`   | Text/icon on primary action                           |
+| `--action-secondary`      | Secondary action surface                              |
+| `--focus-ring`            | Keyboard focus indicator                              |
+| `--link-default`          | Inline and standalone links                           |
+| `--selection`             | Text or item selection highlight                      |
 
 Tenant themes may influence approved customer-facing action and link tokens after contrast validation. Safety colors never inherit tenant branding.
 
 ### Semantic status roles
 
-| Meaning | Tokens | Examples |
-|---|---|---|
-| Informational | `--info-*` | Pending review, guidance, neutral update |
-| Success | `--success-*` | Completed, verified, paid, ready |
-| Warning | `--warning-*` | Expiring vaccine, balance due, nearing capacity |
-| Danger | `--danger-*` | Missed medication, failed payment, critical incident |
-| Neutral | `--neutral-*` | Draft, inactive, archived, not applicable |
+| Meaning       | Tokens        | Examples                                             |
+| ------------- | ------------- | ---------------------------------------------------- |
+| Informational | `--info-*`    | Pending review, guidance, neutral update             |
+| Success       | `--success-*` | Completed, verified, paid, ready                     |
+| Warning       | `--warning-*` | Expiring vaccine, balance due, nearing capacity      |
+| Danger        | `--danger-*`  | Missed medication, failed payment, critical incident |
+| Neutral       | `--neutral-*` | Draft, inactive, archived, not applicable            |
 
 Each family defines background, foreground, border, icon, and strong/action values. Status is always reinforced by label and, where useful, icon—not color alone.
 
@@ -118,13 +118,13 @@ Each family defines background, foreground, border, icon, and strong/action valu
 
 Urgency and record status are separate properties.
 
-| Urgency | Meaning | Presentation |
-|---|---|---|
-| None | No time-sensitive action | Standard presentation |
-| Attention | Action should be reviewed | Quiet warning emphasis |
-| Due soon | Deadline approaching | Warning plus due time |
-| Overdue | Required action is late | Danger emphasis plus elapsed time |
-| Critical | Immediate safety or severe business response | Strong danger treatment, persistent until resolved |
+| Urgency   | Meaning                                      | Presentation                                       |
+| --------- | -------------------------------------------- | -------------------------------------------------- |
+| None      | No time-sensitive action                     | Standard presentation                              |
+| Attention | Action should be reviewed                    | Quiet warning emphasis                             |
+| Due soon  | Deadline approaching                         | Warning plus due time                              |
+| Overdue   | Required action is late                      | Danger emphasis plus elapsed time                  |
+| Critical  | Immediate safety or severe business response | Strong danger treatment, persistent until resolved |
 
 A completed task cannot remain visually `critical` solely because it was previously late; its history records lateness while current state shows completion.
 
@@ -139,18 +139,18 @@ A completed task cannot remain visually `critical` solely because it was previou
 
 ### Type scale
 
-| Token | Desktop intent | Mobile intent | Typical use |
-|---|---|---|---|
-| `display-lg` | 48/56 | 36/44 | Public homepage hero only |
-| `display-sm` | 40/48 | 32/40 | Public campaign heading |
-| `heading-1` | 32/40 | 28/36 | Page title |
-| `heading-2` | 24/32 | 22/30 | Major section |
-| `heading-3` | 20/28 | 18/26 | Card or subgroup heading |
-| `body-lg` | 18/28 | 18/28 | Public lead copy, important explanation |
-| `body-md` | 16/24 | 16/24 | Default body and form input |
-| `body-sm` | 14/20 | 14/20 | Tables, metadata, secondary UI |
-| `label-md` | 14/20 | 14/20 | Field and control labels |
-| `label-sm` | 12/16 | 12/16 | Badges and compact labels; never critical prose |
+| Token        | Desktop intent | Mobile intent | Typical use                                     |
+| ------------ | -------------- | ------------- | ----------------------------------------------- |
+| `display-lg` | 48/56          | 36/44         | Public homepage hero only                       |
+| `display-sm` | 40/48          | 32/40         | Public campaign heading                         |
+| `heading-1`  | 32/40          | 28/36         | Page title                                      |
+| `heading-2`  | 24/32          | 22/30         | Major section                                   |
+| `heading-3`  | 20/28          | 18/26         | Card or subgroup heading                        |
+| `body-lg`    | 18/28          | 18/28         | Public lead copy, important explanation         |
+| `body-md`    | 16/24          | 16/24         | Default body and form input                     |
+| `body-sm`    | 14/20          | 14/20         | Tables, metadata, secondary UI                  |
+| `label-md`   | 14/20          | 14/20         | Field and control labels                        |
+| `label-sm`   | 12/16          | 12/16         | Badges and compact labels; never critical prose |
 
 The exact font size may be implemented with rem units. User browser font scaling and zoom remain functional. Heading appearance does not determine HTML heading level; semantic document structure does.
 
@@ -168,32 +168,32 @@ The exact font size may be implemented with rem units. User browser font scaling
 
 The spacing scale uses a 4px base rhythm:
 
-| Token | Value | Common use |
-|---|---:|---|
-| `space-0` | 0 | No spacing |
-| `space-1` | 4px | Icon-to-label micro gap |
-| `space-2` | 8px | Compact control gap |
-| `space-3` | 12px | Related field/content gap |
-| `space-4` | 16px | Default component padding |
-| `space-5` | 20px | Comfortable component padding |
-| `space-6` | 24px | Card and section spacing |
-| `space-8` | 32px | Major application section |
-| `space-10` | 40px | Public content section |
-| `space-12` | 48px | Large section separation |
-| `space-16` | 64px | Public page vertical rhythm |
-| `space-20` | 80px | Large marketing section |
+| Token      | Value | Common use                    |
+| ---------- | ----: | ----------------------------- |
+| `space-0`  |     0 | No spacing                    |
+| `space-1`  |   4px | Icon-to-label micro gap       |
+| `space-2`  |   8px | Compact control gap           |
+| `space-3`  |  12px | Related field/content gap     |
+| `space-4`  |  16px | Default component padding     |
+| `space-5`  |  20px | Comfortable component padding |
+| `space-6`  |  24px | Card and section spacing      |
+| `space-8`  |  32px | Major application section     |
+| `space-10` |  40px | Public content section        |
+| `space-12` |  48px | Large section separation      |
+| `space-16` |  64px | Public page vertical rhythm   |
+| `space-20` |  80px | Large marketing section       |
 
 Use fewer spacing values within one component. Dense operational modes reduce padding through component variants, not ad hoc negative margins.
 
 ## Sizing and touch targets
 
-| Token | Value | Use |
-|---|---:|---|
-| `control-sm` | 32px | Dense desktop-only secondary controls |
-| `control-md` | 40px | Default desktop control |
-| `control-lg` | 48px | Customer/mobile primary control |
-| `touch-min` | 44px | Minimum pointer target in general use |
-| `touch-care` | 48px | Preferred target in staff care workflows |
+| Token        | Value | Use                                      |
+| ------------ | ----: | ---------------------------------------- |
+| `control-sm` |  32px | Dense desktop-only secondary controls    |
+| `control-md` |  40px | Default desktop control                  |
+| `control-lg` |  48px | Customer/mobile primary control          |
+| `touch-min`  |  44px | Minimum pointer target in general use    |
+| `touch-care` |  48px | Preferred target in staff care workflows |
 
 Adjacent touch targets include enough separation to prevent accidental medication, incident, payment, or destructive actions.
 
@@ -201,13 +201,13 @@ Adjacent touch targets include enough separation to prevent accidental medicatio
 
 ### Radius
 
-| Token | Use |
-|---|---|
-| `radius-sm` | Badges, compact controls |
-| `radius-md` | Inputs, buttons, table containers |
-| `radius-lg` | Cards, panels, dialogs |
-| `radius-xl` | Public marketing media and hero panels |
-| `radius-full` | Avatars and true pill controls |
+| Token         | Use                                    |
+| ------------- | -------------------------------------- |
+| `radius-sm`   | Badges, compact controls               |
+| `radius-md`   | Inputs, buttons, table containers      |
+| `radius-lg`   | Cards, panels, dialogs                 |
+| `radius-xl`   | Public marketing media and hero panels |
+| `radius-full` | Avatars and true pill controls         |
 
 Pill shapes are not used for ordinary buttons or every status. Tenant branding may choose among approved radius presets, not arbitrary values.
 
@@ -220,13 +220,13 @@ Pill shapes are not used for ordinary buttons or every status. Tenant branding m
 
 ### Elevation
 
-| Level | Use |
-|---|---|
-| `elevation-0` | Inline page content |
+| Level         | Use                           |
+| ------------- | ----------------------------- |
+| `elevation-0` | Inline page content           |
 | `elevation-1` | Raised card or sticky toolbar |
-| `elevation-2` | Popover, menu, hover card |
-| `elevation-3` | Dialog, command palette |
-| `elevation-4` | Rare critical overlay |
+| `elevation-2` | Popover, menu, hover card     |
+| `elevation-3` | Dialog, command palette       |
+| `elevation-4` | Rare critical overlay         |
 
 Elevation combines shadow, border, and surface token. Shadows are subtle and are never the only boundary.
 
@@ -258,11 +258,11 @@ Motion communicates state and relationship; it is not decoration.
 
 Breakpoints follow content needs rather than device brands:
 
-| Range | Intent |
-|---|---|
-| Compact | Phone and narrow embedded layouts |
-| Medium | Tablet and split-view layouts |
-| Wide | Desktop application and public page layouts |
+| Range      | Intent                                                     |
+| ---------- | ---------------------------------------------------------- |
+| Compact    | Phone and narrow embedded layouts                          |
+| Medium     | Tablet and split-view layouts                              |
+| Wide       | Desktop application and public page layouts                |
 | Extra wide | High-density boards and reports with bounded content width |
 
 Implementation may map these to Tailwind breakpoints after prototype testing.
@@ -288,10 +288,10 @@ Implementation may map these to Tailwind breakpoints after prototype testing.
 
 The design system supports two controlled application densities:
 
-| Density | Use |
-|---|---|
+| Density     | Use                                                    |
+| ----------- | ------------------------------------------------------ |
 | Comfortable | Customer Portal, configuration, standard object detail |
-| Compact | Desktop tables, schedules, worklists, reporting |
+| Compact     | Desktop tables, schedules, worklists, reporting        |
 
 Critical mobile care workflows use comfortable touch sizing even if the desktop equivalent is compact. Density changes spacing and row height, not font legibility or target safety.
 
@@ -425,13 +425,13 @@ Component APIs expose intent, not styling escape hatches. For example, use `tone
 
 ### Variants
 
-| Variant | Use |
-|---|---|
-| Primary | One main action in a region |
-| Secondary | Important alternative or supporting action |
-| Quiet | Low-emphasis action in dense interfaces |
+| Variant     | Use                                                |
+| ----------- | -------------------------------------------------- |
+| Primary     | One main action in a region                        |
+| Secondary   | Important alternative or supporting action         |
+| Quiet       | Low-emphasis action in dense interfaces            |
 | Destructive | Action with harmful or hard-to-reverse consequence |
-| Link | Navigation or low-emphasis inline action |
+| Link        | Navigation or low-emphasis inline action           |
 
 ### Rules
 
@@ -535,12 +535,12 @@ These components are visually and semantically distinct.
 
 ## Alerts, banners, and toasts
 
-| Pattern | Use | Persistence |
-|---|---|---|
-| Inline alert | Contextual problem within a form/object | Until resolved or dismissed when allowed |
-| Page banner | Page-wide status or dependency issue | Persistent while relevant |
-| Global banner | Tenant/platform condition affecting many pages | Persistent and centrally controlled |
-| Toast | Confirmation of a completed low-risk action | Temporary, with history elsewhere if needed |
+| Pattern       | Use                                            | Persistence                                 |
+| ------------- | ---------------------------------------------- | ------------------------------------------- |
+| Inline alert  | Contextual problem within a form/object        | Until resolved or dismissed when allowed    |
+| Page banner   | Page-wide status or dependency issue           | Persistent while relevant                   |
+| Global banner | Tenant/platform condition affecting many pages | Persistent and centrally controlled         |
+| Toast         | Confirmation of a completed low-risk action    | Temporary, with history elsewhere if needed |
 
 Never use a transient toast as the only evidence of a payment failure, medication exception, incident, unsaved conflict, or destructive action.
 
@@ -550,11 +550,11 @@ Dialogs are used for focused decisions or short tasks, not entire complex workfl
 
 ### Confirmation levels
 
-| Risk | Pattern |
-|---|---|
-| Reversible low risk | Direct action plus undo when safe |
-| Moderate consequence | Confirmation with concise impact |
-| High risk | Alert dialog with object, consequence, reason, and step-up if required |
+| Risk                  | Pattern                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------- |
+| Reversible low risk   | Direct action plus undo when safe                                                  |
+| Moderate consequence  | Confirmation with concise impact                                                   |
+| High risk             | Alert dialog with object, consequence, reason, and step-up if required             |
 | Critical/irreversible | Dedicated flow, explicit identifiers, approval, and audit—not a small dialog alone |
 
 Focus moves into the dialog, remains trapped appropriately, and returns to the invoking control after close. Escape and close behavior cannot accidentally abandon completed high-risk changes.
@@ -660,12 +660,12 @@ Timelines display immutable or revisioned events in chronological order.
 
 ## Loading and progress
 
-| Pattern | Use |
-|---|---|
-| Skeleton | Predictable content layout loading |
-| Spinner | Small indeterminate localized action |
-| Progress bar | Measurable upload, import, or workflow |
-| Status page/card | Long-running asynchronous job |
+| Pattern          | Use                                    |
+| ---------------- | -------------------------------------- |
+| Skeleton         | Predictable content layout loading     |
+| Spinner          | Small indeterminate localized action   |
+| Progress bar     | Measurable upload, import, or workflow |
+| Status page/card | Long-running asynchronous job          |
 
 Avoid full-screen blocking for unrelated background work. Optimistic updates are used only when rollback is clear and no financial, safety, or capacity conflict can be hidden.
 
@@ -684,14 +684,14 @@ Types include first-use, completed work, filtered no results, permission-limited
 
 Errors are classified:
 
-| Class | User experience |
-|---|---|
-| Validation | Explain the specific field or rule and retain valid input |
-| Conflict | Show what changed and offer refresh/review/retry choices |
-| Permission | Explain that access is unavailable without revealing protected existence |
-| Dependency | Identify the unavailable capability and safe fallback |
-| Offline/network | Preserve safe draft state and distinguish unsynced work |
-| System | Provide retry/support path and trace reference when useful |
+| Class           | User experience                                                          |
+| --------------- | ------------------------------------------------------------------------ |
+| Validation      | Explain the specific field or rule and retain valid input                |
+| Conflict        | Show what changed and offer refresh/review/retry choices                 |
+| Permission      | Explain that access is unavailable without revealing protected existence |
+| Dependency      | Identify the unavailable capability and safe fallback                    |
+| Offline/network | Preserve safe draft state and distinguish unsynced work                  |
+| System          | Provide retry/support path and trace reference when useful               |
 
 Never report a failed payment, booking, medication record, or check-in as successful because the local UI updated optimistically.
 
@@ -934,16 +934,16 @@ Initially, the solo founder owns product design decisions with AI-assisted imple
 
 ## Foundation requirements
 
-| ID | Priority | Requirement |
-|---|---:|---|
-| DS-FR-001 | P0 | All product surfaces shall use shared semantic tokens and component foundations. |
-| DS-FR-002 | P0 | Customer-facing surfaces shall support validated tenant branding without changing safety semantics or component behavior. |
-| DS-FR-003 | P0 | Shared components shall define loading, disabled, read-only, invalid, error, and responsive states where applicable. |
-| DS-FR-004 | P0 | Protected actions shall display only when contextually useful while remaining server-authorized independently. |
-| DS-FR-005 | P0 | The design system shall provide role-appropriate comfortable and compact density variants. |
-| DS-FR-006 | P0 | Components shall use canonical status and urgency semantics rather than domain-specific color inventions. |
-| DS-FR-007 | P0 | Public, customer, staff, business, and platform shells shall remain visually related while preserving their context distinctions. |
-| DS-FR-008 | P1 | Shared components shall be documented and testable in an isolated component-development environment. |
+| ID        | Priority | Requirement                                                                                                                       |
+| --------- | -------: | --------------------------------------------------------------------------------------------------------------------------------- |
+| DS-FR-001 |       P0 | All product surfaces shall use shared semantic tokens and component foundations.                                                  |
+| DS-FR-002 |       P0 | Customer-facing surfaces shall support validated tenant branding without changing safety semantics or component behavior.         |
+| DS-FR-003 |       P0 | Shared components shall define loading, disabled, read-only, invalid, error, and responsive states where applicable.              |
+| DS-FR-004 |       P0 | Protected actions shall display only when contextually useful while remaining server-authorized independently.                    |
+| DS-FR-005 |       P0 | The design system shall provide role-appropriate comfortable and compact density variants.                                        |
+| DS-FR-006 |       P0 | Components shall use canonical status and urgency semantics rather than domain-specific color inventions.                         |
+| DS-FR-007 |       P0 | Public, customer, staff, business, and platform shells shall remain visually related while preserving their context distinctions. |
+| DS-FR-008 |       P1 | Shared components shall be documented and testable in an isolated component-development environment.                              |
 
 ## Acceptance scenarios
 
@@ -1046,4 +1046,3 @@ Components are implemented when required by a vertical slice; the sequence defin
 - [Reporting](../domains/reporting/README.md)
 - [Website and Content](../domains/website-content/README.md)
 - [Platform Administration](../domains/platform-administration/README.md)
-

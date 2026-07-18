@@ -7,7 +7,9 @@ export default function BusinessHomePage() {
     <div>
       <p className="text-sm font-bold text-[var(--action-primary)]">Friday, July 17</p>
       <h1 className="mt-2 text-3xl font-bold tracking-tight">Today</h1>
-      <p className="mt-2 text-[var(--text-secondary)]">The work and exceptions needing attention now.</p>
+      <p className="mt-2 text-[var(--text-secondary)]">
+        The work and exceptions needing attention now.
+      </p>
       <div className="mt-8">
         <Alert title="2 items need review" tone="warning">
           One vaccination expires before an upcoming stay and one medication task is due soon.

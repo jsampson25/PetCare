@@ -67,11 +67,17 @@ export async function resolveBusinessContext(): Promise<BusinessContext | null> 
 
   const [{ data: business }, { data: roleAssignments }] = await Promise.all([
     supabase.from('businesses').select('id,name').eq('id', businessId).maybeSingle(),
-    supabase.from('membership_roles').select('role_key').eq('business_id', businessId).eq('membership_id', membership.id),
+    supabase
+      .from('membership_roles')
+      .select('role_key')
+      .eq('business_id', businessId)
+      .eq('membership_id', membership.id),
   ]);
   if (!business) return null;
 
   const roles = (roleAssignments ?? []).map((assignment) => assignment.role_key);
+  const sessionAssuranceLevel =
+    typeof claimsData?.claims?.aal === 'string' ? claimsData.claims.aal : 'aal1';
   let permissionAssignments: { permission_key: string }[] = [];
   let roleDefinitions: { requires_mfa: boolean; role_key: string }[] = [];
   if (roles.length) {
@@ -91,6 +97,6 @@ export async function resolveBusinessContext(): Promise<BusinessContext | null> 
     permissions: new Set((permissionAssignments ?? []).map((entry) => entry.permission_key)),
     requiresMfa: (roleDefinitions ?? []).some((role) => role.requires_mfa),
     roles,
-    sessionAssuranceLevel: typeof claimsData.claims.aal === 'string' ? claimsData.claims.aal : 'aal1',
+    sessionAssuranceLevel,
   };
 }

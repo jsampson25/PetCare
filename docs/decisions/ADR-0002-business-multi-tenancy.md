@@ -22,4 +22,3 @@ Treat the subscribing business as the primary tenant. Business-owned records car
 - One database per business
 - Location as the primary tenant
 - Globally shared customer and pet records
-
