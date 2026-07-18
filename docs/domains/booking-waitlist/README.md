@@ -418,3 +418,11 @@ Events include tenant/location, booking or waitlist identifiers, revision, actor
 - Operations for check-in, service, and checkout lifecycle events
 - Communications for confirmations, actions, reminders, and offers
 - Audit and document capabilities for evidence and history
+
+## Implemented foundation
+
+Migration `20260718000500_booking_waitlist_calendar_foundation.sql` and the `/app/bookings` and `/app/calendar` experiences implement the first E07 staff workflow. One idempotent booking request verifies customer-to-pet household authority, evaluates the published service and pet requirements, secures live capacity, calculates a versioned quote, and records the correct action-required, pending-approval, pending-deposit, or confirmed state. Zero-deposit instant bookings convert their capacity hold atomically; deposit-required requests remain visibly unconfirmed for E08 payment orchestration.
+
+Every request receives a business-scoped human booking number, immutable revision, service item, prerequisite results, quote/policy references, and append-only timeline. The staff booking list never presents requests or waitlist demand as reservations. Booking detail explains service schedule, commercial totals, blocking checks, and material history. The seven-day calendar uses the same authoritative service items and provides an accessible agenda/list presentation rather than a separate calendar state.
+
+Eligible unmet demand can be recorded as an explicitly non-guaranteed waitlist entry with preferred interval, quantity, flexibility, expiration, and eligibility snapshot. Confirmed booking cancellation uses the accepted policy version, creates a cancellation revision and outcome, releases committed capacity, and records the customer-visible event. E07 follow-up work still includes intake-answer capture, payment-success confirmation, approvals/actions, waitlist offers and conversion, rescheduling revisions, multi-item bookings, recurring occurrences, and customer self-service.

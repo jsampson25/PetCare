@@ -6,6 +6,7 @@ import { resolveBusinessContext } from '../../lib/auth/tenant-context';
 
 const businessNavigation = [
   { href: '/app', label: 'Today' },
+  { href: '/app/bookings', label: 'Bookings', requiredPermissions: ['bookings.view'] },
   { href: '/app/calendar', label: 'Calendar', requiredPermissions: ['bookings.view'] },
   {
     href: '/app/availability',
