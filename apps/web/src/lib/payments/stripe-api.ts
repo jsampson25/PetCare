@@ -14,6 +14,7 @@ export async function stripeRequest<T>(
     body?: URLSearchParams;
     idempotencyKey?: string;
     fetcher?: typeof fetch;
+    connectedAccount?: string;
   } = {},
 ): Promise<T> {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -25,6 +26,7 @@ export async function stripeRequest<T>(
       Authorization: `Bearer ${key}`,
       ...(options.body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
       ...(options.idempotencyKey ? { 'Idempotency-Key': options.idempotencyKey } : {}),
+      ...(options.connectedAccount ? { 'Stripe-Account': options.connectedAccount } : {}),
     },
     body: options.body?.toString(),
     cache: 'no-store',
@@ -75,4 +77,35 @@ export async function createOnboardingLink(accountId: string, appUrl: string) {
 }
 export async function retrieveConnectedAccount(accountId: string) {
   return stripeRequest<StripeConnectedAccount>(`/accounts/${encodeURIComponent(accountId)}`);
+}
+export async function createInvoiceCheckoutSession(input: {
+  accountId: string;
+  amountMinor: number;
+  currency: string;
+  invoiceId: string;
+  invoiceNumber: string;
+  paymentRequestId: string;
+  appUrl: string;
+}) {
+  const body = new URLSearchParams({
+    mode: 'payment',
+    success_url: `${input.appUrl}/app/invoices/${input.invoiceId}?notice=Payment+submitted.+Confirmation+may+take+a+moment.&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${input.appUrl}/app/invoices/${input.invoiceId}?error=Online+payment+was+cancelled.`,
+    client_reference_id: input.paymentRequestId,
+    'line_items[0][price_data][currency]': input.currency.toLowerCase(),
+    'line_items[0][price_data][product_data][name]': `PetCare invoice ${input.invoiceNumber}`,
+    'line_items[0][price_data][unit_amount]': String(input.amountMinor),
+    'line_items[0][quantity]': '1',
+    'metadata[petcare_payment_request_id]': input.paymentRequestId,
+    'payment_intent_data[metadata][petcare_payment_request_id]': input.paymentRequestId,
+  });
+  return stripeRequest<{ id: string; url: string | null; payment_intent: string | null }>(
+    '/checkout/sessions',
+    {
+      method: 'POST',
+      body,
+      idempotencyKey: `checkout-${input.paymentRequestId}`,
+      connectedAccount: input.accountId,
+    },
+  );
 }

@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   const parsed = eventSchema.safeParse(input);
   if (!parsed.success) return Response.json({ error: 'Invalid event.' }, { status: 400 });
   const supabase = createSupabaseAdminClient();
-  const { error } = await supabase.rpc('ingest_stripe_webhook', {
+  const { data: eventId, error } = await supabase.rpc('ingest_stripe_webhook', {
     account_reference: parsed.data.account ?? '',
     event_identifier: parsed.data.id,
     event_name: parsed.data.type,
@@ -46,5 +46,9 @@ export async function POST(request: Request) {
     version_value: parsed.data.api_version ?? '',
   });
   if (error) return Response.json({ error: 'Event persistence failed.' }, { status: 500 });
+  if (parsed.data.type === 'checkout.session.completed' && typeof eventId === 'string') {
+    // The inbox is durable first; posting failure remains retryable and does not reject delivery.
+    await supabase.rpc('process_stripe_checkout_event', { target_event_id: eventId });
+  }
   return Response.json({ received: true }, { headers: { 'Cache-Control': 'no-store' } });
 }

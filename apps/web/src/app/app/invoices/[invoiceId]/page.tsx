@@ -7,7 +7,7 @@ import { notFound, redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { recordManualPayment } from '../actions';
+import { recordManualPayment, startOnlinePayment } from '../actions';
 
 type PageParameters = Promise<{ invoiceId: string }>;
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
@@ -84,6 +84,11 @@ export default async function InvoiceDetailPage({
     new Intl.NumberFormat('en-US', { style: 'currency', currency: invoice.currency_code }).format(
       minor / 100,
     );
+  const { data: merchant } = await supabase
+    .from('merchant_accounts')
+    .select('status,charges_enabled')
+    .eq('business_id', context.businessId)
+    .maybeSingle();
   return (
     <div className="space-y-6">
       <header>
@@ -134,6 +139,37 @@ export default async function InvoiceDetailPage({
           </div>
         ))}
       </Card>
+      {balance?.balance_due_minor && context.permissions.has('payments.collect') ? (
+        <Card
+          title="Pay securely online"
+          description="Card details are collected only on Stripe's hosted checkout page."
+        >
+          {merchant?.status === 'active' && merchant.charges_enabled ? (
+            <form action={startOnlinePayment} className="flex flex-wrap items-end gap-4">
+              <input name="invoiceId" type="hidden" value={invoice.id} />
+              <Field
+                label="Online payment amount"
+                name="amount"
+                type="number"
+                min="0.01"
+                max={(balance.balance_due_minor / 100).toFixed(2)}
+                step="0.01"
+                defaultValue={(
+                  (balance.deposit_due_minor > 0
+                    ? balance.deposit_due_minor
+                    : balance.balance_due_minor) / 100
+                ).toFixed(2)}
+                required
+              />
+              <Button type="submit">Continue to Stripe</Button>
+            </form>
+          ) : (
+            <Alert title="Online payment unavailable" tone="warning">
+              Finish Stripe merchant onboarding before collecting cards online.
+            </Alert>
+          )}
+        </Card>
+      ) : null}
       {balance?.balance_due_minor && context.permissions.has('payments.collect') ? (
         <Card
           title="Record manual tender"
