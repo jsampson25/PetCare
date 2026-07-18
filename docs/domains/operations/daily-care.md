@@ -67,6 +67,16 @@
 - Alert resolution requires written evidence; critical alerts additionally require an owner or manager.
 - Manager corrections append a correction record and event while preserving the originally recorded feeding or medication outcome.
 
+## Implemented E11 turnover foundation
+
+- Checkout creates one turnover task after the final active assignment releases a resource.
+- The Turnover workspace separates cleaning-required, cleaning, inspection-required, and ready states.
+- Cleaning completion requires debris removal, washing, disinfection, drying, setup reset, and a protocol/product reference.
+- A cleaned resource remains unavailable until an owner or manager records a complete inspection.
+- Passing inspection releases the resource to `ready`; failing inspection returns it to `cleaning_required` and retains the failure reason.
+- Append-only turnover events preserve staff, timestamps, checklists, and transition evidence.
+- Idempotency keys prevent duplicate starts, completions, inspections, or release transitions.
+
 ## Acceptance scenarios
 
 | ID         | Scenario                                                                                                          |

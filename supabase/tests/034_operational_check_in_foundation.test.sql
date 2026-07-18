@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(120);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(134);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -123,4 +123,18 @@ select is((select status from capacity_resources),'cleaning','released resource 
 select is((select count(*) from resource_turnover_tasks),1::bigint,'one turnover task is created');
 select is((select return_status from custody_item_returns),'returned','custody return is preserved');
 select is((select status from booking_items),'completed','booked service item completes at checkout');
+select lives_ok($$select app.start_resource_turnover((select business_id from resource_turnover_tasks),(select id from resource_turnover_tasks),'turnover-start')$$,'resource cleaning starts');
+select is(app.start_resource_turnover((select business_id from resource_turnover_tasks),(select id from resource_turnover_tasks),'turnover-start'),(select id from resource_turnover_events where event_type='cleaning_started'),'cleaning start retry is idempotent');
+select is((select status from resource_turnover_tasks),'cleaning','turnover has explicit cleaning state');
+select throws_ok($$select app.complete_resource_cleaning((select business_id from resource_turnover_tasks),(select id from resource_turnover_tasks),'{"debris_removed":true,"washed":true,"disinfected":false,"dry":true,"setup_reset":true}','Facility protocol A','Attempted incomplete cleaning','turnover-clean-incomplete')$$,'22023','required cleaning checklist incomplete','incomplete sanitation cannot advance');
+select lives_ok($$select app.complete_resource_cleaning((select business_id from resource_turnover_tasks),(select id from resource_turnover_tasks),'{"debris_removed":true,"washed":true,"disinfected":true,"dry":true,"setup_reset":true}','Facility protocol A','All required surfaces completed.','turnover-clean')$$,'cleaning completion is documented');
+select is((select status from resource_turnover_tasks),'inspection_required','cleaning does not directly release resource');
+select lives_ok($$select app.inspect_resource_turnover((select business_id from resource_turnover_tasks),(select id from resource_turnover_tasks),false,'{"visibly_clean":true,"dry":true,"odor_free":false,"safe":true,"setup_correct":true}','Odor remains; repeat cleaning and ventilation.','turnover-inspect-failed')$$,'failed inspection is documented');
+select is((select status from resource_turnover_tasks),'cleaning_required','failed inspection requires recleaning');
+select is((select status from capacity_resources),'cleaning','failed resource remains unavailable');
+select lives_ok($$select app.start_resource_turnover((select business_id from resource_turnover_tasks),(select id from resource_turnover_tasks),'turnover-reclean-start')$$,'recleaning starts');
+select lives_ok($$select app.complete_resource_cleaning((select business_id from resource_turnover_tasks),(select id from resource_turnover_tasks),'{"debris_removed":true,"washed":true,"disinfected":true,"dry":true,"setup_reset":true}','Facility protocol A','Recleaned and ventilated.','turnover-reclean')$$,'recleaning completes');
+select lives_ok($$select app.inspect_resource_turnover((select business_id from resource_turnover_tasks),(select id from resource_turnover_tasks),true,'{"visibly_clean":true,"dry":true,"odor_free":true,"safe":true,"setup_correct":true}','Independent readiness inspection passed.','turnover-inspect-passed')$$,'passed inspection releases resource');
+select is((select status from capacity_resources),'ready','passed inspection restores assignment readiness');
+select is((select count(*) from resource_turnover_events),5::bigint,'complete turnover history is append-only');
 select * from finish();rollback;
