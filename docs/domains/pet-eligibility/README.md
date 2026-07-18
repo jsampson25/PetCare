@@ -311,6 +311,8 @@ The pet-identifier slice adds microchip, license, registration, and other durabl
 
 The pet-photo slice adds a private, tenant-scoped profile image with signed display access and controlled replacement. Only JPG, PNG, and WebP files up to 5 MB are accepted, and the prior object is removed after authoritative metadata changes successfully. The interface deliberately presents the photo alongside structured identity rather than treating appearance as identity. Formal service evaluations, automated compliance, and broader eligibility decisions remain subsequent slices.
 
+The service-evaluation slice implements formal daycare/group-play requests and the pending, approved, conditional, suspended, failed, and expired lifecycle. Conditional approval requires explicit participation restrictions, transitions are state controlled, and every change is retained as a separate history record. Automated vaccine compliance and broader service/date eligibility decisions remain subsequent E05 work.
+
 ## Domain events
 
 - `pet.created`

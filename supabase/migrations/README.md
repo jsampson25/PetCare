@@ -35,3 +35,5 @@ Pet health conditions capture structured category, severity, diagnosis date, car
 Pet identifiers capture microchips, licenses, registrations, and other durable identity values with issuer, issue date, and expiration date. Active values are normalized for tenant-scoped duplicate prevention and are retired with a required reason rather than deleted.
 
 Pet profile photos use a private `pet-profile-photos` bucket with 5 MB JPG, PNG, and WebP limits. Object paths are tenant and pet scoped, access follows pet permissions, replacement updates authoritative metadata atomically, and the superseded object is returned for storage cleanup.
+
+Pet service evaluations implement the daycare/group-play lifecycle from pending through approved, conditional, suspended, failed, or expired. Conditional decisions require explicit participation conditions, transitions follow a controlled state machine, duplicate pending requests are blocked, and immutable transition history supports later eligibility decisions.

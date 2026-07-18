@@ -540,3 +540,68 @@ export async function retirePetIdentifier(formData: FormData) {
   if (error) redirect(`/app/pets/${parsed.data.petId}?error=The+identifier+could+not+be+retired.`);
   redirect(`/app/pets/${parsed.data.petId}?notice=Pet+identifier+retired+with+history+preserved.`);
 }
+
+const createEvaluationSchema = z.object({
+  evaluationType: z.literal('daycare_group_play'),
+  petId: z.uuid(),
+  scheduledFor: z.union([z.literal(''), z.string().date()]),
+});
+
+export async function createPetServiceEvaluation(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = createEvaluationSchema.safeParse(Object.fromEntries(formData));
+  const today = new Date().toISOString().slice(0, 10);
+  if (!parsed.success || (parsed.data.scheduledFor && parsed.data.scheduledFor < today)) {
+    redirect('/app/customers?error=Check+the+evaluation+request.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('create_pet_service_evaluation', {
+    evaluation_kind: parsed.data.evaluationType,
+    scheduled_date: parsed.data.scheduledFor || null,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+  });
+  if (error)
+    redirect(
+      `/app/pets/${parsed.data.petId}?error=The+evaluation+could+not+be+requested.+Check+for+an+existing+pending+evaluation.`,
+    );
+  redirect(`/app/pets/${parsed.data.petId}?notice=Service+evaluation+requested.`);
+}
+
+const transitionEvaluationSchema = z.object({
+  conditions: z.string().trim().max(2000),
+  evaluationId: z.uuid(),
+  expiresOn: z.union([z.literal(''), z.string().date()]),
+  nextStatus: z.enum(['approved', 'conditional', 'suspended', 'failed', 'expired']),
+  petId: z.uuid(),
+  reason: z.string().trim().min(1).max(2000),
+});
+
+export async function transitionPetServiceEvaluation(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = transitionEvaluationSchema.safeParse(Object.fromEntries(formData));
+  const today = new Date().toISOString().slice(0, 10);
+  if (
+    !parsed.success ||
+    (parsed.data.nextStatus === 'conditional' && !parsed.data.conditions) ||
+    (['approved', 'conditional'].includes(parsed.data.nextStatus) &&
+      parsed.data.expiresOn &&
+      parsed.data.expiresOn < today)
+  ) {
+    redirect('/app/customers?error=Check+the+evaluation+decision.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('transition_pet_service_evaluation', {
+    condition_text: parsed.data.conditions,
+    expiration_date: parsed.data.expiresOn || null,
+    next_status: parsed.data.nextStatus,
+    service_evaluation_id: parsed.data.evaluationId,
+    target_business_id: context.businessId,
+    transition_reason: parsed.data.reason,
+  });
+  if (error)
+    redirect(`/app/pets/${parsed.data.petId}?error=That+evaluation+transition+is+not+available.`);
+  redirect(`/app/pets/${parsed.data.petId}?notice=Service+evaluation+updated.`);
+}

@@ -15,6 +15,7 @@ import {
   addPetHealthCondition,
   addPetIdentifier,
   addPetMedicationPlan,
+  createPetServiceEvaluation,
   discontinuePetFeedingPlan,
   discontinuePetMedicationPlan,
   resolvePetBehaviorRecord,
@@ -24,6 +25,7 @@ import {
   retirePetIdentifier,
   reviewPetVaccination,
   submitPetVaccination,
+  transitionPetServiceEvaluation,
 } from './actions';
 
 type PageParameters = Promise<{ petId: string }>;
@@ -100,6 +102,14 @@ export default async function PetVaccinationsPage({
     .from('pet_identifiers')
     .select(
       'id,identifier_type,identifier_value,issuer,issued_on,expires_on,status,retired_reason,created_at',
+    )
+    .eq('business_id', context.businessId)
+    .eq('pet_id', petId)
+    .order('created_at', { ascending: false });
+  const { data: serviceEvaluations } = await supabase
+    .from('pet_service_evaluations')
+    .select(
+      'id,evaluation_type,status,scheduled_for,evaluated_at,expires_on,conditions,decision_notes,created_at',
     )
     .eq('business_id', context.businessId)
     .eq('pet_id', petId)
@@ -192,6 +202,101 @@ export default async function PetVaccinationsPage({
               ) : null}
             </div>
             <Button type="submit">{pet.photo_object_path ? 'Replace photo' : 'Add photo'}</Button>
+          </form>
+        </Card>
+      ) : null}
+      <Card
+        title="Daycare and group-play evaluations"
+        description="Formal evaluations distinguish pending, approved, conditional, suspended, failed, and expired participation decisions."
+      >
+        {serviceEvaluations?.length ? (
+          <ul className="space-y-4">
+            {serviceEvaluations.map((evaluation) => {
+              const availableTransitions = evaluationTransitions(evaluation.status);
+              return (
+                <li
+                  className="rounded-[var(--radius-md)] border border-[var(--border-default)] p-4"
+                  key={evaluation.id}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-lg font-bold capitalize">
+                        {evaluation.evaluation_type.replaceAll('_', ' ')}
+                      </p>
+                      <p className="text-sm text-[var(--text-secondary)]">
+                        Requested {formatDate(evaluation.created_at)}
+                        {evaluation.scheduled_for
+                          ? ` · Scheduled ${formatDate(evaluation.scheduled_for)}`
+                          : ''}
+                        {evaluation.expires_on
+                          ? ` · Expires ${formatDate(evaluation.expires_on)}`
+                          : ''}
+                      </p>
+                    </div>
+                    <Badge tone={evaluationTone(evaluation.status)}>{evaluation.status}</Badge>
+                  </div>
+                  {evaluation.conditions ? (
+                    <p className="mt-3 text-sm">
+                      <strong>Participation conditions:</strong> {evaluation.conditions}
+                    </p>
+                  ) : null}
+                  {evaluation.decision_notes ? (
+                    <p className="mt-2 text-sm">
+                      <strong>Decision notes:</strong> {evaluation.decision_notes}
+                    </p>
+                  ) : null}
+                  {canManage && availableTransitions.length ? (
+                    <form
+                      action={transitionPetServiceEvaluation}
+                      className="mt-4 grid gap-4 sm:grid-cols-2"
+                    >
+                      <input name="evaluationId" type="hidden" value={evaluation.id} />
+                      <input name="petId" type="hidden" value={pet.id} />
+                      <HealthSelect
+                        label="New status"
+                        name="nextStatus"
+                        options={availableTransitions}
+                      />
+                      <Field
+                        label="Valid through (for approvals)"
+                        min={new Date().toISOString().slice(0, 10)}
+                        name="expiresOn"
+                        type="date"
+                      />
+                      <TextArea label="Decision or transition reason" name="reason" required />
+                      <TextArea label="Conditions (required for conditional)" name="conditions" />
+                      <div className="sm:col-span-2">
+                        <Button type="submit">Update evaluation</Button>
+                      </div>
+                    </form>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">
+            No service evaluations have been requested.
+          </p>
+        )}
+      </Card>
+      {canManage ? (
+        <Card
+          title="Request service evaluation"
+          description="Only one pending daycare/group-play evaluation may exist for a pet at a time."
+        >
+          <form action={createPetServiceEvaluation} className="grid gap-5 sm:grid-cols-2">
+            <input name="petId" type="hidden" value={pet.id} />
+            <input name="evaluationType" type="hidden" value="daycare_group_play" />
+            <Field
+              label="Scheduled date (optional)"
+              min={new Date().toISOString().slice(0, 10)}
+              name="scheduledFor"
+              type="date"
+            />
+            <div className="flex items-end">
+              <Button type="submit">Request daycare evaluation</Button>
+            </div>
           </form>
         </Card>
       ) : null}
@@ -1180,5 +1285,19 @@ function HealthSelect({
 function healthTone(severity: string): 'danger' | 'neutral' | 'warning' {
   if (severity === 'critical' || severity === 'severe') return 'danger';
   if (severity === 'moderate') return 'warning';
+  return 'neutral';
+}
+
+function evaluationTransitions(status: string) {
+  if (status === 'pending') return ['approved', 'conditional', 'failed'];
+  if (status === 'approved' || status === 'conditional') return ['suspended', 'expired'];
+  if (status === 'suspended') return ['approved', 'conditional', 'failed', 'expired'];
+  return [];
+}
+
+function evaluationTone(status: string): 'danger' | 'info' | 'neutral' | 'success' | 'warning' {
+  if (status === 'approved') return 'success';
+  if (status === 'conditional' || status === 'pending') return 'warning';
+  if (status === 'suspended' || status === 'failed') return 'danger';
   return 'neutral';
 }
