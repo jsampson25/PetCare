@@ -1,10 +1,12 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
+import { Button } from '@petcare/ui/button';
 import { Card } from '@petcare/ui/card';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
+import { startStripeOnboarding } from './actions';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 export default async function PaymentSettingsPage({
@@ -20,7 +22,7 @@ export default async function PaymentSettingsPage({
     supabase
       .from('merchant_accounts')
       .select(
-        'id,provider_account_id,status,charges_enabled,payouts_enabled,details_submitted,dashboard_access,requirements_collector,fees_payer,losses_payer,last_synced_at',
+        'id,provider_account_id,status,charges_enabled,payouts_enabled,details_submitted,dashboard_access,requirements_collector,fees_payer,losses_payer,last_synced_at,requirements_currently_due,disabled_reason',
       )
       .eq('business_id', context.businessId)
       .maybeSingle(),
@@ -80,6 +82,11 @@ export default async function PaymentSettingsPage({
             onboarding will be added in the next payment slice.
           </Alert>
         )}
+        <form action={startStripeOnboarding} className="mt-5">
+          <Button type="submit">
+            {merchant ? 'Continue Stripe onboarding' : 'Connect with Stripe'}
+          </Button>
+        </form>
       </Card>
       <Card
         title="Verified webhook inbox"

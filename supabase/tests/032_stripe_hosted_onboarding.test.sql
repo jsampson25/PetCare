@@ -1,0 +1,17 @@
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(12);
+insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','80000000-0000-4000-8000-000000000001','authenticated','authenticated','onboarding-owner@example.test','',now(),'{}','{"display_name":"Onboarding Owner"}',now(),now(),'','','','');
+set local role authenticated;select set_config('request.jwt.claims','{"sub":"80000000-0000-4000-8000-000000000001","role":"authenticated","email":"onboarding-owner@example.test","aal":"aal2"}',true);
+select lives_ok($$select * from app.create_business_with_owner('Onboarding Test','onboarding-test','Main','main','America/Chicago')$$,'tenant created');
+select throws_ok($$select app.sync_stripe_merchant_account((select id from businesses where public_slug='onboarding-test'),'acct_Onboard',false,false,false,'{}','[]','')$$,'42501',null,'tenant cannot synchronize merchant state');
+set local role service_role;
+select lives_ok($$select app.sync_stripe_merchant_account((select id from businesses where public_slug='onboarding-test'),'acct_Onboard',false,false,false,'{"card_payments":"pending"}','["business_profile.url"]','requirements_due')$$,'onboarding account synchronized');
+select is((select status from merchant_accounts),'restricted','outstanding requirements restrict account');
+select is((select requirements_currently_due from merchant_accounts),'["business_profile.url"]'::jsonb,'requirements retained');
+select is((select disabled_reason from merchant_accounts),'requirements_due','disabled reason retained');
+select lives_ok($$select app.sync_stripe_merchant_account((select id from businesses where public_slug='onboarding-test'),'acct_Onboard',true,true,true,'{"card_payments":"active","transfers":"active"}','[]','')$$,'completed onboarding synchronized');
+select is((select count(*) from merchant_accounts),1::bigint,'synchronization updates one account');
+select is((select status from merchant_accounts),'active','capabilities activate merchant');
+select is((select charges_enabled from merchant_accounts),true,'charges enabled only from provider truth');
+select is((select payouts_enabled from merchant_accounts),true,'payouts enabled only from provider truth');
+select is((select jsonb_array_length(requirements_currently_due) from merchant_accounts),0,'completed requirements clear');
+select * from finish();rollback;
