@@ -7,7 +7,12 @@ import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
-import { recordCareTaskOutcome, scheduleCareTask } from './actions';
+import {
+  correctCareTaskOutcome,
+  recordCareTaskOutcome,
+  scheduleCareTask,
+  transitionOperationalAlert,
+} from './actions';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 const selectClass =
@@ -52,14 +57,21 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
       .eq('handoff_status', 'accepted'),
     supabase
       .from('operational_alerts')
-      .select('id,severity,summary,created_at,care_tasks(title),pet_visits(pets(name))')
+      .select(
+        'id,severity,status,summary,details,created_at,care_tasks(title),pet_visits(pets(name))',
+      )
       .eq('business_id', context.businessId)
-      .eq('status', 'open')
+      .in('status', ['open', 'acknowledged'])
       .order('created_at', { ascending: false }),
   ]);
   const openTasks = (tasks ?? []).filter((task) => !terminal.includes(task.status));
   const dueTasks = openTasks.filter((task) => new Date(task.due_starts_at) <= now);
   const overdueTasks = openTasks.filter((task) => new Date(task.due_ends_at) < now);
+  const terminalTasks = (tasks ?? [])
+    .filter((task) => terminal.includes(task.status))
+    .slice(-20)
+    .reverse();
+  const canCorrect = context.roles.includes('owner') || context.roles.includes('manager');
   return (
     <div className="space-y-6">
       <header>
@@ -83,6 +95,58 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
         <Alert title={`${alerts.length} open care alert(s)`} tone="danger">
           Exceptions remain visible until the follow-up workflow resolves them.
         </Alert>
+      ) : null}
+      {alerts?.length ? (
+        <Card
+          title="Alert queue"
+          description="Acknowledgement assigns follow-up; resolution requires evidence."
+        >
+          <div className="grid gap-4">
+            {alerts.map((alert) => {
+              const petVisit = alert.pet_visits as unknown as {
+                pets: { name: string } | null;
+              } | null;
+              return (
+                <article className="rounded-lg border p-4" key={alert.id}>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="font-black">
+                      {petVisit?.pets?.name ?? 'Pet'} · {alert.summary}
+                    </p>
+                    <Badge
+                      tone={
+                        alert.severity === 'critical' || alert.severity === 'urgent'
+                          ? 'danger'
+                          : 'warning'
+                      }
+                    >
+                      {alert.status} · {alert.severity}
+                    </Badge>
+                  </div>
+                  <form
+                    action={transitionOperationalAlert}
+                    className="mt-4 grid gap-3 md:grid-cols-[1fr_auto_auto]"
+                  >
+                    <input name="alertId" type="hidden" value={alert.id} />
+                    <Field label="Resolution notes" name="resolutionNotes" />
+                    {alert.status === 'open' ? (
+                      <Button
+                        name="alertStatus"
+                        type="submit"
+                        value="acknowledged"
+                        variant="secondary"
+                      >
+                        Acknowledge
+                      </Button>
+                    ) : null}
+                    <Button name="alertStatus" type="submit" value="resolved">
+                      Resolve
+                    </Button>
+                  </form>
+                </article>
+              );
+            })}
+          </div>
+        </Card>
       ) : null}
       <section className="grid gap-4 sm:grid-cols-3">
         <Card>
@@ -232,6 +296,61 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
           <p className="text-sm text-[var(--text-secondary)]">No open care tasks.</p>
         )}
       </Card>
+      {canCorrect && terminalTasks.length ? (
+        <Card
+          title="Recent outcomes and corrections"
+          description="Corrections append evidence; the original recorded outcome remains in history."
+        >
+          <div className="grid gap-4">
+            {terminalTasks.map((task) => {
+              const pet = task.pets as unknown as { name: string } | null;
+              return (
+                <article className="rounded-lg border p-4" key={`correction-${task.id}`}>
+                  <p className="font-black">
+                    {pet?.name} · {task.title}
+                  </p>
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    Recorded outcome: {task.status}
+                  </p>
+                  <form action={correctCareTaskOutcome} className="mt-4 grid gap-4 md:grid-cols-2">
+                    <input name="taskId" type="hidden" value={task.id} />
+                    <input name="taskType" type="hidden" value={task.task_type} />
+                    <label className="text-sm font-bold">
+                      Corrected outcome
+                      <select className={selectClass} name="correctedStatus">
+                        <option value="completed">Completed</option>
+                        <option value="partial">Partial</option>
+                        <option value="refused">Refused</option>
+                        {task.task_type === 'medication' ? (
+                          <>
+                            <option value="held">Held</option>
+                            <option value="missed">Missed</option>
+                            <option value="adverse">Adverse / uncertain</option>
+                          </>
+                        ) : null}
+                        <option value="unable">Unable</option>
+                      </select>
+                    </label>
+                    <Field label="Corrected observation" name="correctedDetails" required />
+                    <Field label="Correction reason" name="reason" required />
+                    {task.task_type === 'medication' ? (
+                      <label className="flex gap-3 rounded-lg border p-4 text-sm font-bold">
+                        <input name="fiveRightsConfirmed" type="checkbox" value="yes" />
+                        Five rights confirmed for a completed correction.
+                      </label>
+                    ) : null}
+                    <div className="md:col-span-2">
+                      <Button type="submit" variant="secondary">
+                        Append correction
+                      </Button>
+                    </div>
+                  </form>
+                </article>
+              );
+            })}
+          </div>
+        </Card>
+      ) : null}
     </div>
   );
 }

@@ -49,7 +49,7 @@ export default async function BusinessHomePage() {
           .from('operational_alerts')
           .select('id', { count: 'exact', head: true })
           .eq('business_id', context.businessId)
-          .eq('status', 'open')
+          .in('status', ['open', 'acknowledged'])
       : Promise.resolve({ count: 0 }),
   ]);
   const openAlerts = alertResult.count ?? 0;

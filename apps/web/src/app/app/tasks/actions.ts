@@ -81,3 +81,73 @@ export async function recordCareTaskOutcome(formData: FormData) {
     redirect('/app/tasks?error=The+task+changed+or+the+required+safety+verification+is+missing.');
   redirect('/app/tasks?notice=Care+outcome+recorded.');
 }
+
+const alertSchema = z.object({
+  alertId: z.uuid(),
+  alertStatus: z.enum(['acknowledged', 'resolved']),
+  resolutionNotes: z.string().trim().max(2000).optional(),
+});
+
+export async function transitionOperationalAlert(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context) redirect('/denied');
+  const canRecordCare = [
+    'operations.record_feeding',
+    'operations.record_medication',
+    'operations.record_observation',
+  ].some((permission) => context.permissions.has(permission));
+  if (!canRecordCare) redirect('/denied');
+  const parsed = alertSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success || (parsed.data.alertStatus === 'resolved' && !parsed.data.resolutionNotes)) {
+    redirect('/app/tasks?error=Resolution+notes+are+required+to+close+an+alert.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('transition_operational_alert', {
+    new_status: parsed.data.alertStatus,
+    notes_value: parsed.data.resolutionNotes ?? '',
+    target_alert_id: parsed.data.alertId,
+    target_business_id: context.businessId,
+  });
+  if (error) redirect('/app/tasks?error=The+alert+changed+or+requires+manager+resolution.');
+  redirect('/app/tasks?notice=Care+alert+updated.');
+}
+
+const correctionSchema = z.object({
+  taskId: z.uuid(),
+  taskType: z.enum(['feeding', 'medication']),
+  correctedStatus: z.enum([
+    'completed',
+    'partial',
+    'refused',
+    'held',
+    'missed',
+    'unable',
+    'adverse',
+  ]),
+  correctedDetails: z.string().trim().min(2).max(2000),
+  reason: z.string().trim().min(5).max(2000),
+  fiveRightsConfirmed: z.string().optional(),
+});
+
+export async function correctCareTaskOutcome(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || (!context.roles.includes('owner') && !context.roles.includes('manager'))) {
+    redirect('/denied');
+  }
+  const parsed = correctionSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/tasks?error=Complete+the+correction+and+reason.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('correct_care_task_outcome', {
+    corrected_details: {
+      five_rights_confirmed: parsed.data.fiveRightsConfirmed === 'yes',
+      observation: parsed.data.correctedDetails,
+    },
+    corrected_status_value: parsed.data.correctedStatus,
+    reason_value: parsed.data.reason,
+    request_key: `care-correction-${crypto.randomUUID()}`,
+    target_business_id: context.businessId,
+    target_task_id: parsed.data.taskId,
+  });
+  if (error) redirect('/app/tasks?error=The+correction+failed+its+safety+or+permission+checks.');
+  redirect('/app/tasks?notice=Correction+appended+without+rewriting+the+original+outcome.');
+}

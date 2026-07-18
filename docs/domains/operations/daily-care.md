@@ -62,6 +62,10 @@
 - Medication completion requires explicit five-rights verification and is never available as a generic bulk action.
 - `care_task_events` preserves scheduling, start, outcome, escalation, and future correction history under idempotent request keys.
 - Refused, missed, unable, or adverse outcomes create durable operational alerts; medication exceptions escalate as critical.
+- `visit_observations` records activity, elimination, rest, and wellness facts with actual time, author, concern level, and customer-visibility intent.
+- Urgent and critical observations automatically enter the operational alert queue. Acknowledgement records ownership but does not hide an unresolved alert.
+- Alert resolution requires written evidence; critical alerts additionally require an owner or manager.
+- Manager corrections append a correction record and event while preserving the originally recorded feeding or medication outcome.
 
 ## Acceptance scenarios
 

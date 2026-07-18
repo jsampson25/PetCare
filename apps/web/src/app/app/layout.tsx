@@ -10,6 +10,11 @@ const businessNavigation = [
   { href: '/app/calendar', label: 'Calendar', requiredPermissions: ['bookings.view'] },
   { href: '/app/arrivals', label: 'Arrivals', requiredPermissions: ['operations.check_in'] },
   { href: '/app/tasks', label: 'Care work', requiredPermissions: ['operations.record_feeding'] },
+  {
+    href: '/app/observations',
+    label: 'Care log',
+    requiredPermissions: ['operations.record_observation'],
+  },
   { href: '/app/invoices', label: 'Invoices', requiredPermissions: ['payments.view'] },
   {
     href: '/app/availability',
