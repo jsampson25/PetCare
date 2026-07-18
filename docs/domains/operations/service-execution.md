@@ -49,6 +49,9 @@
 - Daycare evaluations are immutable decisions with structured restrictions; only approved or restricted pets may enter a playgroup.
 - Active playgroup capacity is the lower of the physical maximum and the configured pets-per-staff ratio multiplied by staff present.
 - Participant rest, return, completion, and safety removal are distinct events. A removed pet cannot return until an owner or manager records clearance.
+- Grooming intake snapshots requested style, coat and skin condition, matting, sensitivities, risks, and proposed additional work before production begins.
+- Material service or price changes place grooming on hold until an authorized customer decision is recorded; declining cannot silently advance the service.
+- Grooming readiness is database-gated by a passed structured quality review. Rework returns through the production stages while preserving the failed review.
 
 ## Acceptance scenarios
 

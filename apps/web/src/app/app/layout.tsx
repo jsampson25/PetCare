@@ -25,6 +25,11 @@ const businessNavigation = [
     label: 'Playgroups',
     requiredPermissions: ['operations.manage_playgroup'],
   },
+  {
+    href: '/app/grooming',
+    label: 'Grooming QA',
+    requiredPermissions: ['operations.manage_grooming'],
+  },
   { href: '/app/invoices', label: 'Invoices', requiredPermissions: ['payments.view'] },
   {
     href: '/app/availability',
