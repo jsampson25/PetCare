@@ -6,7 +6,11 @@ import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { requeueTransactionalEmail, startStripeOnboarding } from './actions';
+import {
+  requeueTransactionalEmail,
+  resolveReconciliationFinding,
+  startStripeOnboarding,
+} from './actions';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 export default async function PaymentSettingsPage({
@@ -18,7 +22,13 @@ export default async function PaymentSettingsPage({
   if (!context?.permissions.has('payments.manage')) redirect('/denied');
   const parameters = await searchParams;
   const supabase = await createSupabaseServerClient();
-  const [{ data: merchant }, { data: events }, { data: messages }] = await Promise.all([
+  const [
+    { data: merchant },
+    { data: events },
+    { data: messages },
+    { data: disputes },
+    { data: findings },
+  ] = await Promise.all([
     supabase
       .from('merchant_accounts')
       .select(
@@ -38,6 +48,23 @@ export default async function PaymentSettingsPage({
         'id,message_type,status,attempt_count,last_error_category,last_attempt_at,created_at,customers(first_name,last_name,email)',
       )
       .eq('business_id', context.businessId)
+      .order('created_at', { ascending: false })
+      .limit(25),
+    supabase
+      .from('payment_disputes')
+      .select(
+        'id,provider_dispute_id,amount_minor,currency_code,status,reason,evidence_due_at,updated_at,invoices(invoice_number)',
+      )
+      .eq('business_id', context.businessId)
+      .order('updated_at', { ascending: false })
+      .limit(25),
+    supabase
+      .from('reconciliation_findings')
+      .select(
+        'id,finding_type,provider_reference,expected_amount_minor,actual_amount_minor,currency_code,status,created_at',
+      )
+      .eq('business_id', context.businessId)
+      .eq('status', 'open')
       .order('created_at', { ascending: false })
       .limit(25),
   ]);
@@ -95,6 +122,89 @@ export default async function PaymentSettingsPage({
             {merchant ? 'Continue Stripe onboarding' : 'Connect with Stripe'}
           </Button>
         </form>
+      </Card>
+      <Card
+        title="Disputes and reconciliation"
+        description="Provider chargebacks and financial exceptions remain separate from the immutable payment ledger."
+      >
+        {findings?.length ? (
+          <div className="divide-y">
+            {findings.map((finding) => (
+              <div className="py-4" key={finding.id}>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="font-bold">{finding.finding_type.replaceAll('_', ' ')}</p>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      {finding.provider_reference}
+                    </p>
+                    {finding.expected_amount_minor !== null ? (
+                      <p className="text-sm">
+                        Expected {finding.expected_amount_minor} minor units · provider reported{' '}
+                        {finding.actual_amount_minor} {finding.currency_code}
+                      </p>
+                    ) : null}
+                  </div>
+                  <Badge tone="danger">Open</Badge>
+                </div>
+                <form
+                  action={resolveReconciliationFinding}
+                  className="mt-3 flex flex-wrap items-end gap-3"
+                >
+                  <input name="findingId" type="hidden" value={finding.id} />
+                  <label className="text-sm font-bold">
+                    Resolution notes
+                    <input
+                      className="mt-2 min-h-11 w-full rounded-lg border px-3"
+                      minLength={5}
+                      name="notes"
+                      required
+                    />
+                  </label>
+                  <Button type="submit" variant="secondary">
+                    Resolve finding
+                  </Button>
+                </form>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">No open reconciliation findings.</p>
+        )}
+        {disputes?.length ? (
+          <div className="mt-6 border-t pt-4">
+            <h3 className="font-black">Recent Stripe disputes</h3>
+            {disputes.map((dispute) => {
+              const invoice = dispute.invoices as unknown as { invoice_number: string } | null;
+              return (
+                <div
+                  className="flex flex-wrap justify-between gap-3 border-b py-3 last:border-0"
+                  key={dispute.id}
+                >
+                  <div>
+                    <p className="font-bold">
+                      {invoice?.invoice_number} · {dispute.provider_dispute_id}
+                    </p>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      {dispute.reason?.replaceAll('_', ' ') ?? 'Reason pending'}
+                      {dispute.evidence_due_at
+                        ? ` · evidence due ${new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(dispute.evidence_due_at))}`
+                        : ''}
+                    </p>
+                  </div>
+                  <Badge
+                    tone={
+                      dispute.status === 'won' || dispute.status === 'prevented'
+                        ? 'success'
+                        : 'warning'
+                    }
+                  >
+                    {dispute.status.replaceAll('_', ' ')}
+                  </Badge>
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
       </Card>
       <Card
         title="Transactional email delivery"

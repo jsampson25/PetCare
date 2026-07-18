@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(43);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(51);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','81000000-0000-4000-8000-000000000001','authenticated','authenticated','checkout-owner@example.test','',now(),'{}','{"display_name":"Checkout Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"81000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkout-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Checkout Test','checkout-test','Main','main','America/Chicago')$$,'tenant created');
@@ -49,4 +49,14 @@ select is((select count(*) from transactional_message_outbox where status='faile
 set local role authenticated;
 select lives_ok($$select app.requeue_transactional_email((select id from businesses where public_slug='checkout-test'),(select id from transactional_message_outbox where status='failed'))$$,'authorized operator requeues failure');
 select is((select count(*) from transactional_message_outbox where status='pending'),1::bigint,'manual retry returns message to queue');
+set local role service_role;
+select lives_ok($$select app.ingest_stripe_webhook('evt_dispute','charge.dispute.created','acct_Checkout','du_checkout','2026-01-28.clover',false,jsonb_build_object('id','evt_dispute','type','charge.dispute.created','data',jsonb_build_object('object',jsonb_build_object('id','du_checkout','payment_intent','pi_checkout','charge','ch_checkout','amount',10000,'currency','usd','status','warning_needs_response','reason','product_not_received','evidence_details',jsonb_build_object('due_by',1900000000,'has_evidence',false,'submission_count',0)))),'dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',1700000003)$$,'verified dispute ingested');
+select lives_ok($$select app.process_stripe_dispute_event((select id from processor_webhook_events where provider_event_id='evt_dispute'))$$,'dispute correlated');
+select is(app.process_stripe_dispute_event((select id from processor_webhook_events where provider_event_id='evt_dispute')),(select id from payment_disputes),'dispute retry is idempotent');
+select is((select count(*) from payment_disputes),1::bigint,'one dispute recorded');
+select is((select count(*) from reconciliation_findings where status='open'),1::bigint,'open reconciliation finding created');
+select is((select status from processor_webhook_events where provider_event_id='evt_dispute'),'processed','dispute event processed');
+set local role authenticated;
+select lives_ok($$select app.resolve_reconciliation_finding((select id from businesses where public_slug='checkout-test'),(select id from reconciliation_findings),'Reviewed in Stripe and evidence submitted')$$,'manager resolves finding with notes');
+select is((select status from reconciliation_findings),'resolved','finding resolution retained');
 select * from finish();rollback;

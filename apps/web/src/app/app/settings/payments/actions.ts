@@ -54,3 +54,20 @@ export async function requeueTransactionalEmail(formData: FormData) {
   if (error) redirect('/app/settings/payments?error=Message+could+not+be+requeued.');
   redirect('/app/settings/payments?notice=Message+queued+for+another+delivery+attempt.');
 }
+
+export async function resolveReconciliationFinding(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('payments.manage')) redirect('/denied');
+  const findingId = formData.get('findingId');
+  const notes = formData.get('notes');
+  if (typeof findingId !== 'string' || typeof notes !== 'string' || notes.trim().length < 5)
+    redirect('/app/settings/payments?error=Add+resolution+notes.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('resolve_reconciliation_finding', {
+    notes_value: notes,
+    target_business_id: context.businessId,
+    target_finding_id: findingId,
+  });
+  if (error) redirect('/app/settings/payments?error=Finding+could+not+be+resolved.');
+  redirect('/app/settings/payments?notice=Reconciliation+finding+resolved.');
+}
