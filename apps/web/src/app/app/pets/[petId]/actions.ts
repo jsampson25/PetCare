@@ -742,3 +742,55 @@ export async function retirePetVeterinaryContact(formData: FormData) {
     `/app/pets/${parsed.data.petId}?notice=Veterinary+contact+retired+with+history+preserved.`,
   );
 }
+
+const groomingProfileSchema = z.object({
+  changeReason: z.string().trim().max(1000),
+  coatCondition: z.enum(['healthy', 'matted', 'dry', 'oily', 'sensitive', 'unknown']),
+  coatType: z.enum(['short', 'double', 'long', 'curly', 'wire', 'hairless', 'mixed', 'unknown']),
+  earCleaning: z.string().optional(),
+  handlingConstraints: z.string().trim().max(1000),
+  nailService: z.enum(['no_preference', 'trim', 'grind', 'decline']),
+  petId: z.uuid(),
+  preferredGroomer: z.string().trim().max(200),
+  preferredLength: z.string().trim().max(200),
+  sensitivityDetails: z.string().trim().max(1000),
+  sensitivityLevel: z.enum(['none', 'low', 'moderate', 'high']),
+  source: z.enum(['customer_reported', 'staff_confirmed', 'groomer_observed']),
+  styleNotes: z.string().trim().max(1000),
+  teethBrushing: z.string().optional(),
+});
+
+export async function replacePetGroomingProfile(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('pets.manage_care')) redirect('/denied');
+  const parsed = groomingProfileSchema.safeParse(Object.fromEntries(formData));
+  if (
+    !parsed.success ||
+    (parsed.data.sensitivityLevel !== 'none' && !parsed.data.sensitivityDetails)
+  ) {
+    redirect('/app/customers?error=Check+the+grooming+profile+details.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('replace_pet_grooming_profile', {
+    change_reason: parsed.data.changeReason,
+    coat_condition_value: parsed.data.coatCondition,
+    coat_type_value: parsed.data.coatType,
+    handling_constraint_text: parsed.data.handlingConstraints,
+    include_ear_cleaning: Boolean(parsed.data.earCleaning),
+    include_teeth_brushing: Boolean(parsed.data.teethBrushing),
+    nail_service_value: parsed.data.nailService,
+    preferred_groomer_text: parsed.data.preferredGroomer,
+    preferred_length_text: parsed.data.preferredLength,
+    sensitivity_text: parsed.data.sensitivityDetails,
+    sensitivity_value: parsed.data.sensitivityLevel,
+    source_type: parsed.data.source,
+    style_note_text: parsed.data.styleNotes,
+    target_business_id: context.businessId,
+    target_pet_id: parsed.data.petId,
+  });
+  if (error)
+    redirect(
+      `/app/pets/${parsed.data.petId}?error=The+grooming+profile+could+not+be+saved.+Existing+profiles+require+a+change+reason.`,
+    );
+  redirect(`/app/pets/${parsed.data.petId}?notice=Grooming+profile+saved.`);
+}

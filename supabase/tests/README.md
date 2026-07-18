@@ -41,3 +41,5 @@ Service-evaluation tests verify pending-request uniqueness, required conditional
 Pet-identity and weight tests verify estimated-date consistency, structured alteration and markings, positive bounded weights, unit normalization with original-value retention, and denial for an unrelated identity.
 
 Veterinary-contact tests verify required role assignment, normalized email, one-active-contact-per-role enforcement, history-preserving retirement, and denial for an unrelated identity.
+
+Grooming-profile tests verify sensitivity detail requirements, preferred-groomer retention, mandatory replacement context, single-current-version enforcement, retained history, and denial for an unrelated identity.

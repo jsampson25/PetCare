@@ -317,6 +317,8 @@ The identity-completion slice adds preferred name, color/markings, altered statu
 
 The veterinary-contact slice adds structured clinic and provider details with explicit primary and emergency roles. A pet may have one active provider per role, the same clinic may fill both roles, and replacement requires retiring the prior contact with historical context. Automated vaccine compliance and broader service/date eligibility remain subsequent E05 work.
 
+The grooming-profile slice separates coat type and condition, grooming sensitivity, safety-related handling constraints, style preferences, structured nail/ear/teeth options, and preferred groomer. Replacements require a reason and create a new current version while preserving the prior profile. A preferred groomer remains explicitly non-guaranteed. Automated vaccine compliance and broader service/date eligibility remain subsequent E05 work.
+
 ## Domain events
 
 - `pet.created`

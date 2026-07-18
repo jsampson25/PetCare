@@ -24,6 +24,7 @@ import {
   resolvePetHealthCondition,
   resolvePetAllergy,
   replacePetProfilePhoto,
+  replacePetGroomingProfile,
   retirePetIdentifier,
   retirePetVeterinaryContact,
   reviewPetVaccination,
@@ -138,6 +139,15 @@ export default async function PetVaccinationsPage({
     .eq('business_id', context.businessId)
     .eq('pet_id', petId)
     .order('created_at', { ascending: false });
+  const { data: groomingProfiles } = await supabase
+    .from('pet_grooming_profiles')
+    .select(
+      'id,coat_type,coat_condition,sensitivity_level,sensitivity_details,preferred_length,style_notes,handling_constraints,preferred_groomer,nail_service,ear_cleaning,teeth_brushing,information_source,status,superseded_reason,created_at',
+    )
+    .eq('business_id', context.businessId)
+    .eq('pet_id', petId)
+    .order('created_at', { ascending: false });
+  const currentGroomingProfile = groomingProfiles?.find((profile) => profile.status === 'current');
   let petPhotoUrl: string | undefined;
   if (pet.photo_object_path) {
     const { data } = await supabase.storage
@@ -473,6 +483,177 @@ export default async function PetVaccinationsPage({
             </div>
             <div className="sm:col-span-2">
               <Button type="submit">Add veterinary contact</Button>
+            </div>
+          </form>
+        </Card>
+      ) : null}
+      <Card
+        title="Grooming profile"
+        description="Coat needs, sensitivities, handling constraints, and style preferences remain distinct and versioned."
+      >
+        {groomingProfiles?.length ? (
+          <ul className="space-y-4">
+            {groomingProfiles.map((profile) => (
+              <li
+                className="rounded-[var(--radius-md)] border border-[var(--border-default)] p-4"
+                key={profile.id}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-bold capitalize">
+                      {profile.coat_type} coat · {profile.coat_condition}
+                    </p>
+                    <p className="text-sm capitalize text-[var(--text-secondary)]">
+                      {profile.information_source.replaceAll('_', ' ')} ·{' '}
+                      {formatDate(profile.created_at)}
+                    </p>
+                  </div>
+                  <Badge tone={profile.status === 'current' ? 'success' : 'neutral'}>
+                    {profile.status}
+                  </Badge>
+                </div>
+                <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                  <p>
+                    <strong>Sensitivity:</strong> {profile.sensitivity_level}
+                    {profile.sensitivity_details ? ` — ${profile.sensitivity_details}` : ''}
+                  </p>
+                  <p>
+                    <strong>Nails:</strong> {profile.nail_service.replaceAll('_', ' ')}
+                  </p>
+                  <p>
+                    <strong>Preferred length:</strong> {profile.preferred_length || 'No preference'}
+                  </p>
+                  <p>
+                    <strong>Preferred groomer:</strong>{' '}
+                    {profile.preferred_groomer || 'No preference (not guaranteed)'}
+                  </p>
+                  <p>
+                    <strong>Ear cleaning:</strong>{' '}
+                    {profile.ear_cleaning ? 'Requested' : 'Not requested'}
+                  </p>
+                  <p>
+                    <strong>Teeth brushing:</strong>{' '}
+                    {profile.teeth_brushing ? 'Requested' : 'Not requested'}
+                  </p>
+                </div>
+                {profile.handling_constraints ? (
+                  <p className="mt-3 text-sm">
+                    <strong>Handling constraints:</strong> {profile.handling_constraints}
+                  </p>
+                ) : null}
+                {profile.style_notes ? (
+                  <p className="mt-2 text-sm">
+                    <strong>Style notes:</strong> {profile.style_notes}
+                  </p>
+                ) : null}
+                {profile.superseded_reason ? (
+                  <p className="mt-2 text-sm">
+                    <strong>Superseded:</strong> {profile.superseded_reason}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">
+            No grooming profile has been added.
+          </p>
+        )}
+      </Card>
+      {canManage ? (
+        <Card
+          title={currentGroomingProfile ? 'Replace grooming profile' : 'Add grooming profile'}
+          description="Saving a replacement preserves the prior version. A preferred groomer is a request, not a guaranteed assignment."
+        >
+          <form action={replacePetGroomingProfile} className="grid gap-5 sm:grid-cols-2">
+            <input name="petId" type="hidden" value={pet.id} />
+            <HealthSelect
+              defaultValue={currentGroomingProfile?.coat_type}
+              label="Coat type"
+              name="coatType"
+              options={['short', 'double', 'long', 'curly', 'wire', 'hairless', 'mixed', 'unknown']}
+            />
+            <HealthSelect
+              defaultValue={currentGroomingProfile?.coat_condition}
+              label="Coat condition"
+              name="coatCondition"
+              options={['healthy', 'matted', 'dry', 'oily', 'sensitive', 'unknown']}
+            />
+            <HealthSelect
+              defaultValue={currentGroomingProfile?.sensitivity_level}
+              label="Grooming sensitivity"
+              name="sensitivityLevel"
+              options={['none', 'low', 'moderate', 'high']}
+            />
+            <Field
+              defaultValue={currentGroomingProfile?.sensitivity_details ?? ''}
+              label="Sensitivity details"
+              name="sensitivityDetails"
+            />
+            <Field
+              defaultValue={currentGroomingProfile?.preferred_length ?? ''}
+              label="Preferred coat length"
+              name="preferredLength"
+            />
+            <HealthSelect
+              defaultValue={currentGroomingProfile?.nail_service}
+              label="Nail service"
+              name="nailService"
+              options={['no_preference', 'trim', 'grind', 'decline']}
+            />
+            <Field
+              defaultValue={currentGroomingProfile?.preferred_groomer ?? ''}
+              label="Preferred groomer (optional)"
+              name="preferredGroomer"
+            />
+            <HealthSelect
+              defaultValue={currentGroomingProfile?.information_source}
+              label="Information source"
+              name="source"
+              options={['customer_reported', 'staff_confirmed', 'groomer_observed']}
+            />
+            <TextArea
+              defaultValue={currentGroomingProfile?.style_notes ?? ''}
+              label="Style notes"
+              name="styleNotes"
+            />
+            <TextArea
+              defaultValue={currentGroomingProfile?.handling_constraints ?? ''}
+              label="Handling constraints"
+              name="handlingConstraints"
+            />
+            <label className="flex min-h-12 items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border-default)] px-4 text-sm font-bold">
+              <input
+                defaultChecked={currentGroomingProfile?.ear_cleaning}
+                name="earCleaning"
+                type="checkbox"
+                value="true"
+              />{' '}
+              Ear cleaning requested
+            </label>
+            <label className="flex min-h-12 items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border-default)] px-4 text-sm font-bold">
+              <input
+                defaultChecked={currentGroomingProfile?.teeth_brushing}
+                name="teethBrushing"
+                type="checkbox"
+                value="true"
+              />{' '}
+              Teeth brushing requested
+            </label>
+            <div className="sm:col-span-2">
+              <Field
+                hint={
+                  currentGroomingProfile
+                    ? 'Required when replacing the current profile.'
+                    : 'Not required for the first profile.'
+                }
+                label="Change reason"
+                name="changeReason"
+                required={Boolean(currentGroomingProfile)}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Button type="submit">Save grooming profile</Button>
             </div>
           </form>
         </Card>
@@ -1416,7 +1597,17 @@ function AllergySelect({
   );
 }
 
-function TextArea({ label, name, required }: { label: string; name: string; required?: boolean }) {
+function TextArea({
+  defaultValue,
+  label,
+  name,
+  required,
+}: {
+  defaultValue?: string;
+  label: string;
+  name: string;
+  required?: boolean;
+}) {
   return (
     <div>
       <label className="block text-sm font-bold" htmlFor={name}>
@@ -1424,6 +1615,7 @@ function TextArea({ label, name, required }: { label: string; name: string; requ
       </label>
       <textarea
         className="mt-2 min-h-28 w-full rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-[var(--surface-default)] p-3"
+        defaultValue={defaultValue}
         id={name}
         name={name}
         required={required}
