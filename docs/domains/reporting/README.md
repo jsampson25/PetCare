@@ -210,6 +210,8 @@ The capacity-utilization report uses location-local calendar days and actual ela
 
 The financial-reconciliation report is scoped by invoice issue time and shows the current immutable invoice total alongside successful payment allocations, credits, successful refunds, and current balance due. It assigns an explicit `reconciled`, `open_balance`, or `review_required` status without describing any amount as accounting revenue or bank settlement. Mixed-currency detection prevents a combined total from being presented as meaningful.
 
+The care-compliance report measures eligible feeding and medication tasks by their due-window start. Completion inside the configured window contributes to the on-time numerator; partial, refused, held, missed, unable, and adverse outcomes remain visible as exceptions. Incident counts use occurrence time and severity, report-card publishing uses cards created in the selected period, and unresolved alerts are clearly labeled as a current as-of guardrail.
+
 | ID         | Priority | Requirement                                                                                                                               |
 | ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | RPT-FR-001 |       P0 | The system shall provide only reports authorized for the user's tenant, role, and location scope.                                         |

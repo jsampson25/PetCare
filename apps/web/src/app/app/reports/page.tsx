@@ -110,6 +110,12 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
         >
           View occupancy
         </ButtonLink>
+        <ButtonLink
+          href={`/app/reports/care?start=${inputDate(start)}&end=${inputDate(endDay)}`}
+          variant="secondary"
+        >
+          View care compliance
+        </ButtonLink>
         {context.permissions.has('reports.view_financial') ? (
           <ButtonLink
             href={`/app/reports/financial?start=${inputDate(start)}&end=${inputDate(endDay)}`}
