@@ -9,6 +9,14 @@
 
 The Customer and Household Domain is the authoritative source for the people and shared account relationships involved in pet care. It supports individual customers, multi-person households, emergency contacts, authorized pickup people, communication preferences, consent, internal notes, documents, duplicate resolution, and portal access.
 
+## Implemented E12 portal foundation
+
+- Customer portal authority is an explicit business-, customer-, household-, and identity-scoped grant; matching an email or being an emergency/pickup contact never grants access.
+- A security-definer dashboard projection returns only the granted household's active pets, bookings, invoices, published report cards, and transactional messages.
+- Staff-side business membership and customer portal authority remain separate relationships.
+- The light customer portal now provides overview, reservations, pets and vaccination status, billing, published report cards, and communication history.
+- Draft report cards, other households, void invoices, internal operational notes, and unpublished content are excluded from the customer projection.
+
 This domain identifies who may act. The Pet Domain owns the pet, the Booking Domain owns booking authorization snapshots, and the Payments Domain owns money movement.
 
 ## Goals
