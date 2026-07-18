@@ -1,10 +1,19 @@
 import { Badge } from '@petcare/ui/badge';
+import { Button } from '@petcare/ui/button';
 import { Card } from '@petcare/ui/card';
+import { Field } from '@petcare/ui/field';
 import { StatePanel } from '@petcare/ui/state-panel';
 import { resolvePortalDashboard } from '../../../lib/auth/portal-context';
-export default async function ReservationsPage() {
+import { submitBookingRequest } from '../actions';
+type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
+export default async function ReservationsPage({
+  searchParams,
+}: {
+  searchParams: SearchParameters;
+}) {
   const d = await resolvePortalDashboard();
   if (!d) return null;
+  const parameters = await searchParams;
   return (
     <div className="space-y-6">
       <header>
@@ -14,6 +23,11 @@ export default async function ReservationsPage() {
           Confirmed historical and upcoming care for your household.
         </p>
       </header>
+      {typeof parameters.error === 'string' ? (
+        <p className="rounded-lg border border-red-300 bg-red-50 p-4 font-bold text-red-900">
+          {parameters.error}
+        </p>
+      ) : null}
       {d.bookings.length ? (
         <div className="grid gap-5">
           {d.bookings.map((booking) => (
@@ -55,6 +69,38 @@ export default async function ReservationsPage() {
                   </div>
                 ))}
               </div>
+              {!['cancelled', 'completed', 'expired', 'no_show'].includes(booking.status) ? (
+                <form
+                  action={submitBookingRequest}
+                  className="mt-5 grid gap-3 border-t pt-5 md:grid-cols-2"
+                >
+                  <input name="bookingId" type="hidden" value={booking.id} />
+                  <label className="text-sm font-bold">
+                    Request type
+                    <select
+                      className="mt-2 min-h-12 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface-default)] px-3"
+                      name="requestType"
+                    >
+                      <option value="booking_change">Request a change</option>
+                      <option value="booking_cancellation">Request cancellation</option>
+                    </select>
+                  </label>
+                  <Field label="Subject" name="subject" required />
+                  <label className="text-sm font-bold md:col-span-2">
+                    What should the care team review?
+                    <textarea
+                      className="mt-2 min-h-28 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface-default)] p-3"
+                      name="message"
+                      required
+                    />
+                  </label>
+                  <div className="md:col-span-2">
+                    <Button type="submit" variant="secondary">
+                      Send request
+                    </Button>
+                  </div>
+                </form>
+              ) : null}
             </Card>
           ))}
         </div>

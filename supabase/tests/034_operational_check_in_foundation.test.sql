@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(139);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(147);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -142,4 +142,12 @@ select is((app.get_customer_portal_dashboard((select id from businesses where pu
 select is(jsonb_array_length(app.get_customer_portal_dashboard((select id from businesses where public_slug='checkin-test'))->'pets'),1,'portal returns household pets');
 select is(jsonb_array_length(app.get_customer_portal_dashboard((select id from businesses where public_slug='checkin-test'))->'bookings'),1,'portal returns customer bookings');
 select is(jsonb_array_length(app.get_customer_portal_dashboard((select id from businesses where public_slug='checkin-test'))->'report_cards'),1,'portal returns published household report cards');
+select lives_ok($$select app.submit_customer_service_request((select id from businesses where public_slug='checkin-test'),'profile_support',null,'Correct contact details','{"message":"Please review my account contact details."}','portal-request')$$,'portal customer submits a support request');
+select is(app.submit_customer_service_request((select id from businesses where public_slug='checkin-test'),'profile_support',null,'Correct contact details','{"message":"Please review my account contact details."}','portal-request'),(select id from customer_service_requests),'portal request retry is idempotent');
+select is((select count(*) from customer_service_request_events),1::bigint,'request submission creates one immutable event');
+select lives_ok($$select app.update_portal_customer_profile((select id from businesses where public_slug='checkin-test'),'Patti','555-555-0199')$$,'portal customer updates safe profile fields');
+select is((select preferred_name from customers),'Patti','preferred name update is visible');
+select lives_ok($$select app.transition_customer_service_request((select business_id from customer_service_requests),(select id from customer_service_requests),'in_review','Front desk began documented review.','portal-review')$$,'staff starts request review');
+select lives_ok($$select app.transition_customer_service_request((select business_id from customer_service_requests),(select id from customer_service_requests),'approved','Manager approved the requested support work.','portal-approved')$$,'staff approves request');
+select is((select status from customer_service_requests),'approved','request state is explicit and separate from source records');
 select * from finish();rollback;

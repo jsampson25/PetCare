@@ -11,6 +11,8 @@ const customerNavigation = [
   { href: '/portal/billing', label: 'Billing' },
   { href: '/portal/report-cards', label: 'Report cards' },
   { href: '/portal/messages', label: 'Messages' },
+  { href: '/portal/requests', label: 'Requests' },
+  { href: '/portal/account', label: 'Account' },
 ] as const;
 
 export default async function CustomerPortalLayout({ children }: { children: ReactNode }) {

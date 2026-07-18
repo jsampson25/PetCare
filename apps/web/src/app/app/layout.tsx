@@ -54,6 +54,11 @@ const businessNavigation = [
   },
   { href: '/app/quotes', label: 'Quotes', requiredPermissions: ['quotes.create'] },
   { href: '/app/customers', label: 'Customers', requiredPermissions: ['customers.view'] },
+  {
+    href: '/app/customer-requests',
+    label: 'Customer requests',
+    requiredPermissions: ['customers.manage'],
+  },
   { href: '/app/settings/staff', label: 'Staff', requiredPermissions: ['staff.invite'] },
   { href: '/app/settings/services', label: 'Services', requiredPermissions: ['services.view'] },
   { href: '/app/settings/pricing', label: 'Pricing', requiredPermissions: ['pricing.view'] },

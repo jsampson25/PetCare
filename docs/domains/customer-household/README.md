@@ -16,6 +16,9 @@ The Customer and Household Domain is the authoritative source for the people and
 - Staff-side business membership and customer portal authority remain separate relationships.
 - The light customer portal now provides overview, reservations, pets and vaccination status, billing, published report cards, and communication history.
 - Draft report cards, other households, void invoices, internal operational notes, and unpublished content are excluded from the customer projection.
+- Customers may submit booking change and cancellation requests, but those requests never rewrite a confirmed booking directly.
+- Staff process each request through an audited review state machine with notes and append-only events.
+- Portal customers may update only safe profile fields in this slice; legal name and login email changes remain controlled support workflows.
 
 This domain identifies who may act. The Pet Domain owns the pet, the Booking Domain owns booking authorization snapshots, and the Payments Domain owns money movement.
 
