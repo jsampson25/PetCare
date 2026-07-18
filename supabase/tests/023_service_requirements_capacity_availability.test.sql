@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path=public,extensions;
-select plan(17);
+select plan(19);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values
 ('00000000-0000-0000-0000-000000000000','71000000-0000-4000-8000-000000000001','authenticated','authenticated','capacity-owner@example.test','',now(),'{}','{"display_name":"Capacity Owner"}',now(),now(),'','','',''),
 ('00000000-0000-0000-0000-000000000000','71000000-0000-4000-8000-000000000002','authenticated','authenticated','capacity-outsider@example.test','',now(),'{}','{"display_name":"Capacity Outsider"}',now(),now(),'','','','');
@@ -10,13 +10,15 @@ select set_config('request.jwt.claims','{"sub":"71000000-0000-4000-8000-00000000
 select lives_ok($$select * from app.create_business_with_owner('Capacity Test','capacity-test','Main','main','America/Chicago')$$,'owner creates tenant');
 select lives_ok($$select app.create_customer_household_with_pet((select id from businesses where public_slug='capacity-test'),'Alex','Owner','','alex@example.test',null,'Ranger','Labrador','2020-01-01',false,'male')$$,'owner creates eligible pet');
 select lives_ok($$select app.create_service_draft((select id from businesses where public_slug='capacity-test'),'boarding','Standard','Standard boarding','overnight_date_range',null,'instant','Overnight care')$$,'service draft created');
-select lives_ok($$select app.publish_service_version((select id from businesses where public_slug='capacity-test'),(select id from services),(select id from service_versions),(select id from locations),false,true,true,false)$$,'service publishes');
 select lives_ok($$select app.add_service_booking_question((select business_id from services),(select id from service_versions),'pickup_contact','Who may pick up?','short_text',true,'[]')$$,'booking question added');
 select lives_ok($$select app.add_service_requirement((select business_id from services),(select id from service_versions),'minimum_age_months','minimum_age','6','block','Pets must be at least six months old.')$$,'age requirement added');
+select lives_ok($$select app.publish_service_version((select id from businesses where public_slug='capacity-test'),(select id from services),(select id from service_versions),(select id from locations),false,true,true,false)$$,'service publishes');
 select is((select eligible from app.evaluate_pet_service_eligibility((select business_id from pets),(select id from pets),(select id from service_versions),current_date)),true,'age-eligible pet passes');
-select lives_ok($$select app.add_service_requirement((select business_id from services),(select id from service_versions),'vaccination','rabies_current','rabies','block','Current rabies vaccination required.')$$,'vaccine requirement added');
-select is((select eligible from app.evaluate_pet_service_eligibility((select business_id from pets),(select id from pets),(select id from service_versions),current_date)),false,'missing vaccine blocks eligibility');
-select like((select reasons::text from app.evaluate_pet_service_eligibility((select business_id from pets),(select id from pets),(select id from service_versions),current_date)),'%rabies_current%','eligibility explains failed rule');
+select lives_ok($$select app.create_service_revision((select business_id from services),(select id from services))$$,'revision copies published configuration');
+select lives_ok($$select app.add_service_requirement((select business_id from services),(select id from service_versions where status='draft'),'vaccination','rabies_current','rabies','block','Current rabies vaccination required.')$$,'vaccine requirement added to draft');
+select lives_ok($$select app.publish_service_version((select business_id from services),(select id from services),(select id from service_versions where status='draft'),(select id from locations),false,true,true,false)$$,'revised service publishes');
+select is((select eligible from app.evaluate_pet_service_eligibility((select business_id from pets),(select id from pets),(select id from service_versions where status='published'),current_date)),false,'missing vaccine blocks eligibility');
+select like((select reasons::text from app.evaluate_pet_service_eligibility((select business_id from pets),(select id from pets),(select id from service_versions where status='published'),current_date)),'%rabies_current%','eligibility explains failed rule');
 select lives_ok($$select app.configure_capacity_pool((select business_id from services),(select id from locations),(select id from services),'Boarding pets','pet_count',3,2)$$,'capacity pool configured');
 select throws_ok($$select app.save_capacity_override((select business_id from capacity_pools),(select id from capacity_pools),current_date,current_date,4,'Unsafe increase')$$,'23514','capacity exceeds physical maximum','override cannot exceed physical maximum');
 select is((select app.capacity_available((select business_id from capacity_pools),(select id from capacity_pools),now()+interval '1 day',now()+interval '2 days')),2,'configured capacity is available');

@@ -1,0 +1,24 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+set local search_path=public,extensions;
+select plan(15);
+insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token)
+values('00000000-0000-0000-0000-000000000000','72000000-0000-4000-8000-000000000001','authenticated','authenticated','e05-owner@example.test','',now(),'{}','{"display_name":"E05 Owner"}',now(),now(),'','','','');
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"72000000-0000-4000-8000-000000000001","role":"authenticated","email":"e05-owner@example.test","aal":"aal2"}',true);
+select lives_ok($$select * from app.create_business_with_owner('E05 Complete','e05-complete','Main','main','America/Chicago')$$,'tenant created');
+select lives_ok($$select app.create_customer_household_with_pet((select id from businesses where public_slug='e05-complete'),'Jamie','Owner','','jamie@example.test',null,'Scout','Mix','2021-01-01',false,'female')$$,'pet created');
+select lives_ok($$select app.create_service_draft((select id from businesses where public_slug='e05-complete'),'boarding','Boarding','Boarding','overnight_date_range',null,'instant','Stay')$$,'service created');
+select lives_ok($$select app.add_service_booking_question((select business_id from services),(select id from service_versions),'notes','Anything we should know?','long_text',false,'[]')$$,'draft configured');
+select lives_ok($$select app.publish_service_version((select business_id from services),(select id from services),(select id from service_versions),(select id from locations),false,true,true,false)$$,'service published');
+select throws_ok($$select app.add_service_booking_question((select business_id from services),(select id from service_versions where status='published'),'late_change','This must fail','yes_no',false,'[]')$$,'23514','published service configuration is immutable','published child configuration cannot mutate');
+select lives_ok($$select app.configure_capacity_pool((select business_id from services),(select id from locations),(select id from services),'Suites','named_resource',2,2)$$,'named pool created');
+select lives_ok($$select app.add_capacity_resource((select business_id from capacity_pools),(select id from capacity_pools),'S-01','Suite 1','suite',1,'{"size":"large"}')$$,'named resource created');
+select is((select (app.explain_service_availability((select business_id from services),(select id from locations),(select id from services),(select id from pets),now()+interval '1 day',now()+interval '2 days',1)->>'available')::boolean),true,'staff explanation allows eligible available request');
+select lives_ok($$select app.create_capacity_hold((select business_id from capacity_pools),(select id from capacity_pools),now()+interval '1 day',now()+interval '2 days',1,15,'completion-hold-01')$$,'capacity hold created');
+select lives_ok($$select app.release_capacity_hold((select business_id from capacity_holds),(select id from capacity_holds),'Customer stopped')$$,'capacity hold released');
+select lives_ok($$select app.release_capacity_hold((select business_id from capacity_holds),(select id from capacity_holds),'Repeated request')$$,'capacity hold release is idempotent');
+select lives_ok($$select app.set_capacity_resource_status((select business_id from capacity_resources),(select id from capacity_resources),'maintenance')$$,'resource enters maintenance');
+select is((select status from capacity_resources),'maintenance','resource state is retained');
+select is((select app.capacity_available((select business_id from capacity_pools),(select id from capacity_pools),now()+interval '1 day',now()+interval '2 days')),0,'unready named resources remove sellable capacity');
+select * from finish(); rollback;

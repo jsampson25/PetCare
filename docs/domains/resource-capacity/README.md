@@ -285,6 +285,8 @@ Events include tenant, location, resource/pool, interval, actor, source, version
 
 The E05 capacity core is implemented by `20260718000100_service_requirements_capacity_availability.sql`. It provides tenant/location/service-scoped pools, physical and configured limits, optional named resources, dated reductions, closure-aware availability, overlap-aware holds and commitments, idempotent hold creation, advisory transaction locking for last-capacity races, and explicit release/conversion lifecycles. The staff Services settings page configures pools and dated overrides. Booking ownership, resource assignment boards, automated hold cleanup, and staffing-derived grooming limits remain later integration work.
 
+The completion slice adds staff-managed kennel, suite, yard, grooming-station, and staff-slot records with operational status. Named-resource pools derive availability only from ready resources. `/app/availability` combines service publication, location enablement, eligibility results, closures, overrides, active holds, commitments, and named-resource readiness into an explicit staff explanation. Holds may be released repeatedly without error, and scoped timeout cleanup retains expired history.
+
 ## Dependencies
 
 - Business Configuration for locations, areas, hours, and closures

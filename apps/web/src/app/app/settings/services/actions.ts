@@ -235,3 +235,66 @@ export async function saveCapacityOverride(formData: FormData) {
   if (error) redirect('/app/settings/services?error=The+capacity+override+could+not+be+saved.');
   redirect('/app/settings/services?notice=Capacity+override+saved.');
 }
+
+const serviceRevisionSchema = z.object({ serviceId: z.uuid() });
+
+export async function createServiceRevision(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('services.manage')) redirect('/denied');
+  const parsed = serviceRevisionSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/settings/services?error=Invalid+service.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('create_service_revision', {
+    target_business_id: context.businessId,
+    target_service_id: parsed.data.serviceId,
+  });
+  if (error) redirect('/app/settings/services?error=A+draft+revision+could+not+be+created.');
+  redirect('/app/settings/services?notice=Draft+revision+created+with+the+current+configuration.');
+}
+
+const resourceSchema = z.object({
+  label: z.string().trim().min(1).max(120),
+  maxPets: z.coerce.number().int().positive().max(20),
+  poolId: z.uuid(),
+  resourceCode: z.string().trim().min(1).max(60),
+  resourceType: z.enum(['kennel', 'suite', 'yard', 'grooming_station', 'staff_slot', 'other']),
+});
+
+export async function addCapacityResource(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('capacity.manage')) redirect('/denied');
+  const parsed = resourceSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/settings/services?error=Check+the+resource+details.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_capacity_resource', {
+    attributes_value: {},
+    label_value: parsed.data.label,
+    max_pets_value: parsed.data.maxPets,
+    resource_code_value: parsed.data.resourceCode,
+    resource_type_value: parsed.data.resourceType,
+    target_business_id: context.businessId,
+    target_pool_id: parsed.data.poolId,
+  });
+  if (error) redirect('/app/settings/services?error=The+resource+could+not+be+created.');
+  redirect('/app/settings/services?notice=Capacity+resource+created.');
+}
+
+const resourceStatusSchema = z.object({
+  resourceId: z.uuid(),
+  status: z.enum(['ready', 'cleaning', 'maintenance', 'out_of_service', 'retired']),
+});
+
+export async function changeCapacityResourceStatus(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('capacity.manage')) redirect('/denied');
+  const parsed = resourceStatusSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/settings/services?error=Invalid+resource+status.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('set_capacity_resource_status', {
+    new_status: parsed.data.status,
+    target_business_id: context.businessId,
+    target_resource_id: parsed.data.resourceId,
+  });
+  if (error) redirect('/app/settings/services?error=The+resource+status+could+not+be+changed.');
+  redirect('/app/settings/services?notice=Resource+status+updated.');
+}

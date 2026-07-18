@@ -7,11 +7,14 @@ import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
 import {
+  addCapacityResource,
   addServiceQuestion,
   addServiceRequirement,
+  changeCapacityResourceStatus,
   changeServiceStatus,
   createCapacityPool,
   createServiceDraft,
+  createServiceRevision,
   publishService,
   saveCapacityOverride,
 } from './actions';
@@ -30,6 +33,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
     { data: pools },
     { data: requirements },
     { data: questions },
+    { data: resources },
   ] = await Promise.all([
     supabase
       .from('services')
@@ -67,13 +71,18 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
       .select('id,service_version_id,prompt,response_type,required')
       .eq('business_id', context.businessId)
       .eq('active', true),
+    supabase
+      .from('capacity_resources')
+      .select('id,capacity_pool_id,resource_code,label,resource_type,max_pets,status')
+      .eq('business_id', context.businessId)
+      .order('label'),
   ]);
   const latestByService = new Map<string, NonNullable<typeof versions>[number]>();
   for (const version of versions ?? [])
     if (!latestByService.has(version.service_id)) latestByService.set(version.service_id, version);
   const canManage = context.permissions.has('services.manage');
   const canManageCapacity = context.permissions.has('capacity.manage');
-  const publishedVersions = (versions ?? []).filter((version) => version.status === 'published');
+  const draftVersions = (versions ?? []).filter((version) => version.status === 'draft');
 
   return (
     <div className="space-y-6">
@@ -163,7 +172,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
           </form>
         </Card>
       ) : null}
-      {canManage && publishedVersions.length ? (
+      {canManage && draftVersions.length ? (
         <div className="grid gap-6 xl:grid-cols-2">
           <Card
             title="Add an eligibility requirement"
@@ -171,12 +180,12 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
           >
             <form action={addServiceRequirement} className="grid gap-4 md:grid-cols-2">
               <label className="text-sm font-bold">
-                Published service
+                Draft service version
                 <select
                   className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
                   name="versionId"
                 >
-                  {publishedVersions.map((version) => (
+                  {draftVersions.map((version) => (
                     <option key={version.id} value={version.id}>
                       {version.customer_name} · v{version.version_number}
                     </option>
@@ -231,12 +240,12 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
           >
             <form action={addServiceQuestion} className="grid gap-4 md:grid-cols-2">
               <label className="text-sm font-bold">
-                Published service
+                Draft service version
                 <select
                   className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
                   name="versionId"
                 >
-                  {publishedVersions.map((version) => (
+                  {draftVersions.map((version) => (
                     <option key={version.id} value={version.id}>
                       {version.customer_name} · v{version.version_number}
                     </option>
@@ -378,6 +387,99 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
           </Card>
         </div>
       ) : null}
+      {canManageCapacity && pools?.length ? (
+        <Card
+          title="Named resources"
+          description="Track kennels, suites, yards, grooming stations, or staff-linked slots inside a capacity pool."
+        >
+          <form action={addCapacityResource} className="grid gap-4 md:grid-cols-3">
+            <label className="text-sm font-bold">
+              Capacity pool
+              <select
+                className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                name="poolId"
+              >
+                {pools
+                  .filter((pool) => pool.status === 'active')
+                  .map((pool) => (
+                    <option key={pool.id} value={pool.id}>
+                      {pool.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <Field label="Resource code" name="resourceCode" required />
+            <Field label="Display label" name="label" required />
+            <label className="text-sm font-bold">
+              Resource type
+              <select
+                className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                name="resourceType"
+              >
+                <option value="kennel">Kennel</option>
+                <option value="suite">Suite</option>
+                <option value="yard">Yard</option>
+                <option value="grooming_station">Grooming station</option>
+                <option value="staff_slot">Staff slot</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <Field
+              label="Maximum pets"
+              name="maxPets"
+              type="number"
+              min="1"
+              max="20"
+              defaultValue="1"
+              required
+            />
+            <div className="self-end">
+              <Button type="submit">Add resource</Button>
+            </div>
+          </form>
+          {resources?.length ? (
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              {resources.map((resource) => (
+                <div key={resource.id} className="rounded-lg border p-4">
+                  <p className="font-bold">
+                    {resource.label}{' '}
+                    <span className="font-normal text-[var(--text-secondary)]">
+                      ({resource.resource_code})
+                    </span>
+                  </p>
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    {resource.resource_type.replaceAll('_', ' ')} · {resource.status} · up to{' '}
+                    {resource.max_pets} pets
+                  </p>
+                  {resource.status !== 'retired' ? (
+                    <form action={changeCapacityResourceStatus} className="mt-3 flex gap-2">
+                      <input type="hidden" name="resourceId" value={resource.id} />
+                      <select
+                        className="min-h-11 rounded-lg border bg-white px-3 text-sm"
+                        name="status"
+                        defaultValue={resource.status === 'ready' ? 'maintenance' : 'ready'}
+                      >
+                        <option value="ready">Ready</option>
+                        <option value="cleaning">Cleaning</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="out_of_service">Out of service</option>
+                        <option value="retired">Retired</option>
+                      </select>
+                      <Button type="submit" variant="secondary">
+                        Update
+                      </Button>
+                    </form>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-[var(--text-secondary)]">
+              No named resources configured.
+            </p>
+          )}
+        </Card>
+      ) : null}
       <section className="grid gap-4">
         {(services ?? []).length ? (
           (services ?? []).map((service) => {
@@ -454,20 +556,30 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
                   </form>
                 ) : null}
                 {canManage && ['active', 'paused'].includes(service.status) ? (
-                  <form action={changeServiceStatus} className="mt-5 flex gap-3">
-                    <input type="hidden" name="serviceId" value={service.id} />
-                    <Button
-                      name="status"
-                      value={service.status === 'active' ? 'paused' : 'active'}
-                      type="submit"
-                      variant="secondary"
-                    >
-                      {service.status === 'active' ? 'Pause' : 'Resume'}
-                    </Button>
-                    <Button name="status" value="retired" type="submit" variant="danger">
-                      Retire
-                    </Button>
-                  </form>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <form action={changeServiceStatus} className="flex gap-3">
+                      <input type="hidden" name="serviceId" value={service.id} />
+                      <Button
+                        name="status"
+                        value={service.status === 'active' ? 'paused' : 'active'}
+                        type="submit"
+                        variant="secondary"
+                      >
+                        {service.status === 'active' ? 'Pause' : 'Resume'}
+                      </Button>
+                      <Button name="status" value="retired" type="submit" variant="danger">
+                        Retire
+                      </Button>
+                    </form>
+                    {version?.status === 'published' ? (
+                      <form action={createServiceRevision}>
+                        <input type="hidden" name="serviceId" value={service.id} />
+                        <Button type="submit" variant="secondary">
+                          Create draft revision
+                        </Button>
+                      </form>
+                    ) : null}
+                  </div>
                 ) : null}
               </Card>
             );
