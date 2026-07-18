@@ -54,6 +54,15 @@
 - Operational observations are not veterinary diagnoses.
 - Critical alerts remain visible even when a staff member filters the task list.
 
+## Implemented E10 task foundation
+
+- `care_tasks` binds feeding and medication work to the active pet visit and immutable check-in snapshot.
+- Scheduling requires an explicit due window inside the visit. The platform never guesses medication times from free-text profile instructions.
+- Feeding and medication use separate permissions, allowed outcome sets, and pet-specific completion.
+- Medication completion requires explicit five-rights verification and is never available as a generic bulk action.
+- `care_task_events` preserves scheduling, start, outcome, escalation, and future correction history under idempotent request keys.
+- Refused, missed, unable, or adverse outcomes create durable operational alerts; medication exceptions escalate as critical.
+
 ## Acceptance scenarios
 
 | ID         | Scenario                                                                                                          |
