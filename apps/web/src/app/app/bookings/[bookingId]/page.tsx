@@ -1,6 +1,7 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
+import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { Field } from '@petcare/ui/field';
 import { notFound, redirect } from 'next/navigation';
@@ -162,6 +163,14 @@ export default async function BookingDetailPage({
         <Alert title="Staff review required" tone="warning">
           Resolve the blocking eligibility or document requirements before confirmation.
         </Alert>
+      ) : null}
+      {booking.status === 'confirmed' && context.permissions.has('operations.check_in') ? (
+        <Card
+          title="Arrival and custody"
+          description="Record physical arrival separately from the safety review and custody transfer."
+        >
+          <ButtonLink href={`/app/arrivals/${booking.id}`}>Open operational check-in</ButtonLink>
+        </Card>
       ) : null}
       <section className="grid gap-5 lg:grid-cols-2">
         <Card title="Service schedule">

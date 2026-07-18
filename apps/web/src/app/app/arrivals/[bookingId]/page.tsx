@@ -1,0 +1,225 @@
+import { Alert } from '@petcare/ui/alert';
+import { Badge } from '@petcare/ui/badge';
+import { Button } from '@petcare/ui/button';
+import { Card } from '@petcare/ui/card';
+import { Field } from '@petcare/ui/field';
+import { notFound, redirect } from 'next/navigation';
+
+import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
+import { createSupabaseServerClient } from '../../../../lib/supabase/server';
+import { completePetCheckIn, recordArrival } from '../actions';
+
+type PageParameters = Promise<{ bookingId: string }>;
+type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
+const selectClass =
+  'mt-2 min-h-12 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface-default)] px-3';
+export default async function ArrivalDetailPage({
+  params,
+  searchParams,
+}: {
+  params: PageParameters;
+  searchParams: SearchParameters;
+}) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('operations.check_in')) redirect('/denied');
+  const { bookingId } = await params;
+  const parameters = await searchParams;
+  const supabase = await createSupabaseServerClient();
+  const { data: booking } = await supabase
+    .from('bookings')
+    .select('id,booking_number,status,customers(first_name,last_name,email,phone),locations(name)')
+    .eq('business_id', context.businessId)
+    .eq('id', bookingId)
+    .single();
+  if (!booking) notFound();
+  const [{ data: items }, { data: visit }, { data: actions }] = await Promise.all([
+    supabase
+      .from('booking_items')
+      .select('id,pet_id,starts_at,ends_at,pets(name,breed),service_versions(customer_name)')
+      .eq('business_id', context.businessId)
+      .eq('booking_id', bookingId)
+      .eq('status', 'confirmed'),
+    supabase
+      .from('operational_visits')
+      .select('id,status,arrived_at,checked_in_at,pet_visits(id,pet_id,status,checked_in_at)')
+      .eq('business_id', context.businessId)
+      .eq('booking_id', bookingId)
+      .maybeSingle(),
+    supabase
+      .from('booking_action_items')
+      .select('id,title,status,blocking')
+      .eq('business_id', context.businessId)
+      .eq('booking_id', bookingId)
+      .eq('status', 'open'),
+  ]);
+  const customer = booking.customers as unknown as {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+  } | null;
+  const location = booking.locations as unknown as { name: string } | null;
+  const petVisits = (visit?.pet_visits ?? []) as {
+    id: string;
+    pet_id: string;
+    status: string;
+    checked_in_at: string | null;
+  }[];
+  const blockers = (actions ?? []).filter((action) => action.blocking);
+  return (
+    <div className="space-y-6">
+      <header>
+        <p className="text-sm font-bold text-[var(--text-secondary)]">
+          {location?.name} · {booking.booking_number}
+        </p>
+        <h1 className="mt-2 text-3xl font-black tracking-tight">Operational check-in</h1>
+        <p className="mt-2 text-[var(--text-secondary)]">
+          {customer?.first_name} {customer?.last_name} · {customer?.phone}
+        </p>
+      </header>
+      {typeof parameters.notice === 'string' ? (
+        <Alert title="Check-in updated" tone="success">
+          {parameters.notice}
+        </Alert>
+      ) : null}
+      {typeof parameters.error === 'string' ? (
+        <Alert title="Check-in blocked" tone="danger">
+          {parameters.error}
+        </Alert>
+      ) : null}
+      {blockers.length ? (
+        <Alert title="Booking blockers remain" tone="warning">
+          Resolve {blockers.map((b) => b.title).join(', ')} before accepting custody.
+        </Alert>
+      ) : null}
+      <Card
+        title="1. Record arrival"
+        description="Arrival only means the customer and pet are physically present. It does not transfer custody."
+      >
+        <div className="flex items-center justify-between gap-4">
+          <Badge
+            tone={
+              visit?.status === 'in_care'
+                ? 'success'
+                : visit?.status === 'arrived'
+                  ? 'warning'
+                  : 'info'
+            }
+          >
+            {visit?.status?.replaceAll('_', ' ') ?? 'expected'}
+          </Badge>
+          {!visit ? (
+            <form action={recordArrival}>
+              <input name="bookingId" type="hidden" value={bookingId} />
+              <Button type="submit">Record arrival</Button>
+            </form>
+          ) : null}
+        </div>
+      </Card>
+      {visit
+        ? items?.map((item) => {
+            const pet = item.pets as unknown as { name: string; breed: string } | null;
+            const service = item.service_versions as unknown as { customer_name: string } | null;
+            const petVisit = petVisits.find((entry) => entry.pet_id === item.pet_id);
+            const complete = petVisit?.status === 'in_care';
+            return (
+              <Card
+                key={item.id}
+                title={`2. ${pet?.name} safety and custody review`}
+                description={`${service?.customer_name} · verify against the pet in front of you, not only the screen.`}
+              >
+                {complete ? (
+                  <Alert title="Custody accepted" tone="success">
+                    The immutable care snapshot and intake record are secured for this visit.
+                  </Alert>
+                ) : (
+                  <form action={completePetCheckIn} className="grid gap-5">
+                    <input name="bookingId" type="hidden" value={bookingId} />
+                    <input name="petId" type="hidden" value={item.pet_id} />
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Field label="Presenter full name" name="presenterName" required />
+                      <label className="text-sm font-bold">
+                        Relationship
+                        <select className={selectClass} name="relationship" required>
+                          <option value="owner">Owner</option>
+                          <option value="household_member">Household member</option>
+                          <option value="authorized_pickup">Authorized contact</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </label>
+                      <label className="text-sm font-bold">
+                        Presenter verification
+                        <select className={selectClass} name="verificationMethod" required>
+                          <option value="photo_id">Photo ID</option>
+                          <option value="account_questions">Account questions</option>
+                          <option value="known_customer">Known customer</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div className="rounded-lg border p-4">
+                      <p className="font-black">Two-point pet identity check</p>
+                      <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                        Confirm both values against the pet and presenter before continuing.
+                      </p>
+                      <div className="mt-4 grid gap-4 md:grid-cols-2">
+                        <Field
+                          label="Confirmed pet name"
+                          name="petName"
+                          defaultValue={pet?.name}
+                          required
+                        />
+                        <Field
+                          label="Confirmed breed / appearance"
+                          name="petBreed"
+                          defaultValue={pet?.breed}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <Field
+                      label="Arrival condition notes"
+                      name="conditionNotes"
+                      hint="Record injuries, coat condition, mobility, demeanor, or no concerns."
+                    />
+                    <div className="rounded-lg border p-4">
+                      <p className="font-black">Optional item accepted into custody</p>
+                      <div className="mt-4 grid gap-4 md:grid-cols-2">
+                        <label className="text-sm font-bold">
+                          Category
+                          <select className={selectClass} name="itemCategory">
+                            <option value="belonging">Belonging</option>
+                            <option value="food">Food</option>
+                            <option value="medication">Medication</option>
+                          </select>
+                        </label>
+                        <Field label="Item name" name="itemName" />
+                        <Field
+                          label="Quantity"
+                          name="itemQuantity"
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          defaultValue="1"
+                        />
+                        <Field label="Unit" name="itemUnit" defaultValue="item" />
+                        <Field label="Storage location" name="storageLocation" />
+                      </div>
+                    </div>
+                    <label className="flex gap-3 rounded-lg border p-4 text-sm font-bold">
+                      <input name="safetyConfirmed" type="checkbox" value="yes" required />I
+                      reviewed identity, active care information, arrival condition, and all items
+                      being transferred.
+                    </label>
+                    <Button type="submit" disabled={blockers.length > 0}>
+                      Accept custody and check in {pet?.name}
+                    </Button>
+                  </form>
+                )}
+              </Card>
+            );
+          })
+        : null}
+    </div>
+  );
+}

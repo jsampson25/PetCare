@@ -53,6 +53,15 @@ flowchart TD
 - Early departure follows booking/pricing/payment policy but preserves actual operational times.
 - A pet may be checked out separately from sibling pets when the booking and financial allocation permit it.
 
+## Implemented E09 foundation
+
+- `operational_visits` is the booking-level operational aggregate; `pet_visits` supports separate sibling-pet custody states.
+- `record_booking_arrival` records physical presence without implying custody acceptance.
+- `complete_pet_check_in` requires two distinct pet identity signals, current eligibility, and no unresolved blocking booking actions.
+- Completion captures immutable arrival condition, care-plan snapshot, custody inventory, receiving staff identity, and operational timeline evidence.
+- Care snapshots copy active allergy, medication, feeding, behavior, health, and pet identity data. They do not rewrite the master pet profile.
+- Booking-, visit-, pet-, and request-key uniqueness makes arrival and check-in retries safe.
+
 ## Acceptance scenarios
 
 | ID         | Scenario                                                                                                    |
