@@ -310,7 +310,11 @@ Events include tenant/location, currency, price-book/rule versions, quote/bookin
 
 ## Implemented foundation
 
-The first E06 implementation is provided by `20260718000300_pricing_policy_quote_foundation.sql`, `/app/settings/pricing`, and `/app/quotes`. Managers can draft a currency-specific price book with a location policy and agreement, add rates for exact published service versions, and publish the commercial bundle. Staff can calculate immutable itemized quote snapshots with integer-minor-unit subtotal, deterministic tax rounding, deposit due, remaining balance, expiration, and rule trace. Agreement acceptance records actor, policy version, quote scope, time, and structured evidence. Seasonal precedence, discounts/coupons, modifications, cancellation outcome calculation, and policy revision workflows remain subsequent E06 expansion work.
+The E06 implementation is provided by migrations `20260718000300` and `20260718000400`, `/app/settings/pricing`, and `/app/quotes`. Managers can draft a currency-specific price book with a location policy and agreement, add rates for exact published service versions, and publish the commercial bundle. Published bundles are immutable; controlled revision clones rates, adjustments, coupons, and policy terms into a new draft, and publication atomically supersedes the prior versions.
+
+Staff can calculate immutable itemized quote snapshots with integer-minor-unit base charges, peak/seasonal/holiday adjustment support, fixed or percentage discount codes, deterministic post-discount tax rounding, deposit due, remaining balance, expiration, and rule trace. Recalculation can retain an explicit predecessor quote without mutating it. Coupon redemption evidence and agreement acceptance preserve the exact rule or policy version, actor, time, scope, and evidence.
+
+Cancellation and no-show outcomes are calculated from the quote's snapshotted policy rather than the current public policy. Outcome records preserve notice hours, original total and deposit, fee, projected refund, calculation trace, and any manager-authorized override. Overrides require `pricing.manage` and a meaningful reason. Multi-pet discount rules, per-date split itemization, partial-cancellation allocation, and external tax/entitlement integrations remain future expansion work.
 
 ## Dependencies
 

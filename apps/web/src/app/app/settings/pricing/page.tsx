@@ -5,7 +5,14 @@ import { Field } from '@petcare/ui/field';
 import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { addPriceRate, createPricingBundle, publishPricingBundle } from './actions';
+import {
+  addDiscountCode,
+  addPriceAdjustment,
+  addPriceRate,
+  createPricingBundle,
+  createPricingRevision,
+  publishPricingBundle,
+} from './actions';
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 export default async function PricingSettingsPage({
   searchParams,
@@ -59,6 +66,8 @@ export default async function PricingSettingsPage({
   const canManage = context.permissions.has('pricing.manage');
   const drafts = priceVersions?.filter((item) => item.status === 'draft') ?? [];
   const draftPolicies = policies?.filter((item) => item.status === 'draft') ?? [];
+  const publishedPrices = priceVersions?.filter((item) => item.status === 'published') ?? [];
+  const publishedPolicies = policies?.filter((item) => item.status === 'published') ?? [];
   return (
     <div className="space-y-6">
       <header>
@@ -239,6 +248,163 @@ export default async function PricingSettingsPage({
             />
             <div className="md:col-span-3">
               <Button type="submit">Add rate</Button>
+            </div>
+          </form>
+        </Card>
+      ) : null}
+      {canManage && publishedPrices.length && publishedPolicies.length ? (
+        <Card
+          title="Revise published pricing"
+          description="Copies published rates, adjustments, discounts, and policy terms into editable draft versions."
+        >
+          <form action={createPricingRevision} className="flex flex-wrap items-end gap-4">
+            <label className="text-sm font-bold">
+              Published price version
+              <select
+                className="ml-2 min-h-11 rounded-lg border bg-white px-3"
+                name="priceVersionId"
+              >
+                {publishedPrices.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    Version {item.version_number}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-bold">
+              Published policy
+              <select
+                className="ml-2 min-h-11 rounded-lg border bg-white px-3"
+                name="policyVersionId"
+              >
+                {publishedPolicies.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} · v{item.version_number}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button type="submit">Create revision</Button>
+          </form>
+        </Card>
+      ) : null}
+      {canManage && drafts.length && serviceVersions?.length && locations?.length ? (
+        <Card
+          title="Add seasonal or peak adjustment"
+          description="Fixed values use minor units; percentage values use basis points."
+        >
+          <form action={addPriceAdjustment} className="grid gap-4 md:grid-cols-3">
+            <label className="text-sm font-bold">
+              Draft price version
+              <select
+                className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                name="priceVersionId"
+              >
+                {drafts.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    Version {item.version_number}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-bold">
+              Location
+              <select
+                className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                name="locationId"
+              >
+                {locations.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-bold">
+              Service
+              <select
+                className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                name="serviceVersionId"
+              >
+                {serviceVersions.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.customer_name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-bold">
+              Rule type
+              <select
+                className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                name="ruleType"
+              >
+                <option value="seasonal">Seasonal</option>
+                <option value="holiday">Holiday</option>
+                <option value="weekend">Saturday</option>
+                <option value="peak">Peak</option>
+              </select>
+            </label>
+            <label className="text-sm font-bold">
+              Adjustment type
+              <select
+                className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                name="adjustmentType"
+              >
+                <option value="fixed">Fixed minor units</option>
+                <option value="percentage">Percentage basis points</option>
+              </select>
+            </label>
+            <Field label="Adjustment value" name="adjustmentValue" type="number" min="0" required />
+            <Field label="Customer label" name="label" required />
+            <Field
+              label="Priority"
+              name="priority"
+              type="number"
+              min="1"
+              defaultValue="100"
+              required
+            />
+            <div className="self-end">
+              <Button type="submit">Add adjustment</Button>
+            </div>
+          </form>
+        </Card>
+      ) : null}
+      {canManage && drafts.length ? (
+        <Card
+          title="Add a discount code"
+          description="Codes are versioned with the price book and snapshotted into each quote."
+        >
+          <form action={addDiscountCode} className="grid gap-4 md:grid-cols-3">
+            <label className="text-sm font-bold">
+              Draft price version
+              <select
+                className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                name="priceVersionId"
+              >
+                {drafts.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    Version {item.version_number}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Field label="Code" name="code" required />
+            <Field label="Customer label" name="label" required />
+            <label className="text-sm font-bold">
+              Discount type
+              <select
+                className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                name="discountType"
+              >
+                <option value="fixed">Fixed minor units</option>
+                <option value="percentage">Percentage basis points</option>
+              </select>
+            </label>
+            <Field label="Discount value" name="discountValue" type="number" min="0" required />
+            <div className="self-end">
+              <Button type="submit">Add discount</Button>
             </div>
           </form>
         </Card>

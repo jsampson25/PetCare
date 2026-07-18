@@ -97,3 +97,81 @@ export async function publishPricingBundle(formData: FormData) {
   if (error) redirect('/app/settings/pricing?error=The+pricing+bundle+could+not+be+published.');
   redirect('/app/settings/pricing?notice=Pricing+and+policies+published.');
 }
+
+const revisionSchema = z.object({ policyVersionId: z.uuid(), priceVersionId: z.uuid() });
+export async function createPricingRevision(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('pricing.manage')) redirect('/denied');
+  const parsed = revisionSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/settings/pricing?error=Select+a+published+pricing+bundle.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('create_pricing_revision', {
+    target_business_id: context.businessId,
+    target_policy_version_id: parsed.data.policyVersionId,
+    target_price_version_id: parsed.data.priceVersionId,
+  });
+  if (error) redirect('/app/settings/pricing?error=The+pricing+revision+could+not+be+created.');
+  redirect('/app/settings/pricing?notice=Draft+revision+created+from+published+pricing.');
+}
+
+const adjustmentSchema = z.object({
+  adjustmentType: z.enum(['fixed', 'percentage']),
+  adjustmentValue: z.coerce.number().int().nonnegative(),
+  label: z.string().trim().min(1).max(160),
+  locationId: z.uuid(),
+  priceVersionId: z.uuid(),
+  priority: z.coerce.number().int().min(1).max(10000),
+  ruleType: z.enum(['seasonal', 'holiday', 'weekend', 'peak']),
+  serviceVersionId: z.uuid(),
+});
+export async function addPriceAdjustment(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('pricing.manage')) redirect('/denied');
+  const parsed = adjustmentSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/settings/pricing?error=Check+the+adjustment+details.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_price_adjustment', {
+    adjustment_amount: parsed.data.adjustmentValue,
+    adjustment_kind: parsed.data.adjustmentType,
+    dow: parsed.data.ruleType === 'weekend' ? 6 : null,
+    end_date: null,
+    label_value: parsed.data.label,
+    priority_value: parsed.data.priority,
+    rule_kind: parsed.data.ruleType,
+    start_date: null,
+    target_business_id: context.businessId,
+    target_location_id: parsed.data.locationId,
+    target_price_version_id: parsed.data.priceVersionId,
+    target_service_version_id: parsed.data.serviceVersionId,
+  });
+  if (error) redirect('/app/settings/pricing?error=The+adjustment+could+not+be+saved.');
+  redirect('/app/settings/pricing?notice=Pricing+adjustment+saved.');
+}
+
+const discountSchema = z.object({
+  code: z.string().trim().min(3).max(32),
+  discountType: z.enum(['fixed', 'percentage']),
+  discountValue: z.coerce.number().int().nonnegative(),
+  label: z.string().trim().min(1).max(160),
+  priceVersionId: z.uuid(),
+});
+export async function addDiscountCode(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('pricing.manage')) redirect('/denied');
+  const parsed = discountSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/settings/pricing?error=Check+the+discount+details.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_discount_code', {
+    code_value: parsed.data.code,
+    discount_amount: parsed.data.discountValue,
+    discount_kind: parsed.data.discountType,
+    label_value: parsed.data.label,
+    maximum_minor: null,
+    minimum_minor: 0,
+    target_business_id: context.businessId,
+    target_price_version_id: parsed.data.priceVersionId,
+    usage_limit_value: null,
+  });
+  if (error) redirect('/app/settings/pricing?error=The+discount+could+not+be+saved.');
+  redirect('/app/settings/pricing?notice=Discount+code+saved.');
+}

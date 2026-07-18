@@ -10,6 +10,7 @@ import { createSupabaseServerClient } from '../../../lib/supabase/server';
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 const schema = z.object({
   endsAt: z.string().refine((v) => !Number.isNaN(new Date(v).getTime())),
+  coupon: z.string().trim().max(32).optional(),
   locationId: z.uuid(),
   petId: z.uuid(),
   quantity: z.coerce.number().int().positive(),
@@ -44,6 +45,8 @@ export default async function QuotePage({ searchParams }: { searchParams: Search
   let errorMessage: string | null = null;
   let quote: null | {
     currency_code: string;
+    discount_minor: number;
+    fee_minor: number;
     subtotal_minor: number;
     tax_minor: number;
     total_minor: number;
@@ -58,7 +61,8 @@ export default async function QuotePage({ searchParams }: { searchParams: Search
       end = new Date(parsed.data.endsAt);
     if (end <= start) errorMessage = 'The end must be after the start.';
     else {
-      const { data: quoteId, error } = await supabase.rpc('calculate_quote', {
+      const { data: quoteId, error } = await supabase.rpc('calculate_quote_with_adjustments', {
+        coupon_value: parsed.data.coupon || null,
         request_key: `staff-${crypto.randomUUID()}`,
         requested_end: end.toISOString(),
         requested_quantity: parsed.data.quantity,
@@ -68,6 +72,7 @@ export default async function QuotePage({ searchParams }: { searchParams: Search
         target_location_id: parsed.data.locationId,
         target_pet_id: parsed.data.petId,
         target_service_id: parsed.data.serviceId,
+        superseded_quote: null,
       });
       if (error || typeof quoteId !== 'string')
         errorMessage = 'A complete published price and policy configuration was not found.';
@@ -76,7 +81,7 @@ export default async function QuotePage({ searchParams }: { searchParams: Search
           supabase
             .from('quotes')
             .select(
-              'currency_code,subtotal_minor,tax_minor,total_minor,deposit_due_minor,balance_due_minor,expires_at',
+              'currency_code,subtotal_minor,discount_minor,fee_minor,tax_minor,total_minor,deposit_due_minor,balance_due_minor,expires_at',
             )
             .eq('business_id', context.businessId)
             .eq('id', quoteId)
@@ -173,6 +178,11 @@ export default async function QuotePage({ searchParams }: { searchParams: Search
             required
           />
           <Field
+            label="Discount code (optional)"
+            name="coupon"
+            defaultValue={typeof parameters.coupon === 'string' ? parameters.coupon : ''}
+          />
+          <Field
             label="Ends"
             name="endsAt"
             type="datetime-local"
@@ -216,10 +226,18 @@ export default async function QuotePage({ searchParams }: { searchParams: Search
               </div>
             ))}
           </div>
-          <dl className="mt-5 grid gap-3 text-sm md:grid-cols-4">
+          <dl className="mt-5 grid gap-3 text-sm md:grid-cols-6">
             <div>
               <dt className="font-bold">Subtotal</dt>
               <dd>{money(quote.subtotal_minor, quote.currency_code)}</dd>
+            </div>
+            <div>
+              <dt className="font-bold">Adjustments</dt>
+              <dd>{money(quote.fee_minor, quote.currency_code)}</dd>
+            </div>
+            <div>
+              <dt className="font-bold">Discounts</dt>
+              <dd>−{money(quote.discount_minor, quote.currency_code)}</dd>
             </div>
             <div>
               <dt className="font-bold">Tax</dt>

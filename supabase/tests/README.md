@@ -1,5 +1,7 @@
 # Database tests
 
+`026_pricing_adjustments_cancellation.test.sql` verifies deterministic adjustments, coupon ordering, tax reconciliation, itemized quote lines, revision cloning and supersession, redemption evidence, and version-bound no-show outcomes.
+
 SQL tests for constraints, row-level security, functions, and tenant isolation live here. Every tenant-scoped migration must add positive and negative isolation coverage.
 
 Tests run inside transactions and roll back their fixtures. Identity tests use synthetic `example.test` addresses and fixed UUIDs; never copy production identities or customer data into fixtures.
