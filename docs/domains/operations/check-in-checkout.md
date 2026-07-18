@@ -65,6 +65,8 @@ flowchart TD
 - A resource must be ready or validly occupied below `max_pets`; maintenance and out-of-service resources can never be assigned through check-in.
 - `operational_handoffs` records the receiving staff member separately from the staff member who completed intake.
 - Handoff queues one idempotent customer confirmation only after a receiving staff member accepts responsibility.
+- Manager resolutions are immutable records. Eligibility, deposit, and approval blockers cannot be bypassed from check-in; exceptions require an action explicitly marked overrideable by policy.
+- `care_plan_amendments` append visit-only instructions to the immutable intake snapshot. A requested master-profile change remains a separate `proposed` workflow.
 
 ## Acceptance scenarios
 

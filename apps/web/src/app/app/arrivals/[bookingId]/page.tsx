@@ -7,7 +7,13 @@ import { notFound, redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { acceptOperationalHandoff, completePetCheckIn, recordArrival } from '../actions';
+import {
+  acceptOperationalHandoff,
+  addVisitCareAmendment,
+  completePetCheckIn,
+  recordArrival,
+  resolveCheckInBlocker,
+} from '../actions';
 
 type PageParameters = Promise<{ bookingId: string }>;
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
@@ -47,14 +53,14 @@ export default async function ArrivalDetailPage({
       supabase
         .from('operational_visits')
         .select(
-          'id,status,arrived_at,checked_in_at,pet_visits(id,pet_id,status,handoff_status,checked_in_at)',
+          'id,status,arrived_at,checked_in_at,pet_visits(id,pet_id,status,handoff_status,checked_in_at,care_plan_amendments(id,category,reason,amendment,created_at))',
         )
         .eq('business_id', context.businessId)
         .eq('booking_id', bookingId)
         .maybeSingle(),
       supabase
         .from('booking_action_items')
-        .select('id,title,status,blocking')
+        .select('id,title,status,blocking,action_type,metadata')
         .eq('business_id', context.businessId)
         .eq('booking_id', bookingId)
         .eq('status', 'open'),
@@ -81,6 +87,13 @@ export default async function ArrivalDetailPage({
     status: string;
     handoff_status: string;
     checked_in_at: string | null;
+    care_plan_amendments: {
+      id: string;
+      category: string;
+      reason: string;
+      amendment: { instructions?: string };
+      created_at: string;
+    }[];
   }[];
   const blockers = (actions ?? []).filter((action) => action.blocking);
   return (
@@ -108,6 +121,47 @@ export default async function ArrivalDetailPage({
         <Alert title="Booking blockers remain" tone="warning">
           Resolve {blockers.map((b) => b.title).join(', ')} before accepting custody.
         </Alert>
+      ) : null}
+      {blockers.length && context.roles.some((role) => role === 'owner' || role === 'manager') ? (
+        <Card
+          title="Manager resolution"
+          description="Clinical eligibility, deposits, and approvals remain non-overrideable and must use their authoritative workflow."
+        >
+          <div className="grid gap-5">
+            {blockers.map((blocker) => (
+              <form
+                action={resolveCheckInBlocker}
+                className="grid gap-4 rounded-lg border p-4"
+                key={blocker.id}
+              >
+                <input name="actionId" type="hidden" value={blocker.id} />
+                <input name="bookingId" type="hidden" value={bookingId} />
+                <div>
+                  <p className="font-black">{blocker.title}</p>
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    {blocker.action_type.replaceAll('_', ' ')}
+                  </p>
+                </div>
+                <label className="text-sm font-bold">
+                  Resolution
+                  <select className={selectClass} name="resolution">
+                    <option value="requirement_satisfied">Requirement satisfied</option>
+                    <option value="approved_exception">Approved exception</option>
+                  </select>
+                </label>
+                <Field
+                  label="Evidence and reason"
+                  name="reason"
+                  required
+                  hint="Describe what was verified. An exception only works when policy marks this action overrideable."
+                />
+                <Button type="submit" variant="secondary">
+                  Record manager resolution
+                </Button>
+              </form>
+            ))}
+          </div>
+        </Card>
       ) : null}
       <Card
         title="1. Record arrival"
@@ -278,6 +332,50 @@ export default async function ArrivalDetailPage({
                         <Button type="submit">Accept operational handoff</Button>
                       </form>
                     )}
+                  </Card>
+                ) : null}
+                {complete ? (
+                  <Card
+                    title={`Visit-only care changes for ${pet?.name}`}
+                    description="These instructions change this visit's operational truth. They never silently rewrite the master pet profile."
+                  >
+                    {petVisit?.care_plan_amendments?.length ? (
+                      <div className="mb-5 divide-y rounded-lg border px-4">
+                        {petVisit.care_plan_amendments.map((amendment) => (
+                          <div className="py-3" key={amendment.id}>
+                            <p className="font-bold">{amendment.category.replaceAll('_', ' ')}</p>
+                            <p className="text-sm">{amendment.amendment.instructions}</p>
+                            <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                              Reason: {amendment.reason}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                    <form action={addVisitCareAmendment} className="grid gap-4">
+                      <input name="bookingId" type="hidden" value={bookingId} />
+                      <input name="petVisitId" type="hidden" value={petVisit?.id} />
+                      <label className="text-sm font-bold">
+                        Care category
+                        <select className={selectClass} name="category">
+                          <option value="feeding">Feeding</option>
+                          <option value="behavior">Behavior / handling</option>
+                          <option value="general">General</option>
+                          <option value="medication">Medication — manager required</option>
+                          <option value="allergy">Allergy — manager required</option>
+                          <option value="health">Health — manager required</option>
+                        </select>
+                      </label>
+                      <Field label="Instructions for this visit" name="instructions" required />
+                      <Field label="Reason for change" name="reason" required />
+                      <label className="flex gap-3 rounded-lg border p-4 text-sm font-bold">
+                        <input name="proposeMasterUpdate" type="checkbox" value="yes" />
+                        Also flag this for separate master-profile review.
+                      </label>
+                      <Button type="submit" variant="secondary">
+                        Add visit care amendment
+                      </Button>
+                    </form>
                   </Card>
                 ) : null}
               </div>

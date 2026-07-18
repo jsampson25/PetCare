@@ -115,3 +115,65 @@ export async function acceptOperationalHandoff(formData: FormData) {
     );
   redirect(`/app/arrivals/${parsed.data.bookingId}?notice=Operational+handoff+accepted.`);
 }
+
+const blockerResolutionSchema = z.object({
+  actionId: z.uuid(),
+  bookingId: z.uuid(),
+  resolution: z.enum(['requirement_satisfied', 'approved_exception']),
+  reason: z.string().trim().min(12).max(1000),
+});
+
+export async function resolveCheckInBlocker(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.roles.some((role) => role === 'owner' || role === 'manager'))
+    redirect('/denied');
+  const parsed = blockerResolutionSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/arrivals?error=A+documented+manager+resolution+is+required.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('resolve_check_in_blocker', {
+    evidence_value: { source: 'manager_check_in_review' },
+    reason_value: parsed.data.reason,
+    request_key: `check-in-resolution-${parsed.data.actionId}`,
+    resolution_value: parsed.data.resolution,
+    target_action_id: parsed.data.actionId,
+    target_business_id: context.businessId,
+  });
+  if (error)
+    redirect(
+      `/app/arrivals/${parsed.data.bookingId}?error=This+blocker+must+be+resolved+through+its+authoritative+workflow.`,
+    );
+  redirect(`/app/arrivals/${parsed.data.bookingId}?notice=Manager+resolution+recorded.`);
+}
+
+const amendmentSchema = z.object({
+  bookingId: z.uuid(),
+  petVisitId: z.uuid(),
+  category: z.enum(['feeding', 'medication', 'allergy', 'health', 'behavior', 'general']),
+  instructions: z.string().trim().min(3).max(2000),
+  reason: z.string().trim().min(8).max(1000),
+  proposeMasterUpdate: z.string().optional(),
+});
+
+export async function addVisitCareAmendment(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('operations.check_in')) redirect('/denied');
+  const parsed = amendmentSchema.safeParse(Object.fromEntries(formData));
+  const bookingId = String(formData.get('bookingId') ?? '');
+  if (!parsed.success)
+    redirect(`/app/arrivals/${bookingId}?error=Add+structured+visit+instructions+and+a+reason.`);
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_visit_care_amendment', {
+    amendment_value: { instructions: parsed.data.instructions },
+    category_value: parsed.data.category,
+    propose_master_update: parsed.data.proposeMasterUpdate === 'yes',
+    reason_value: parsed.data.reason,
+    request_key: `care-amendment-${crypto.randomUUID()}`,
+    target_business_id: context.businessId,
+    target_pet_visit_id: parsed.data.petVisitId,
+  });
+  if (error)
+    redirect(
+      `/app/arrivals/${parsed.data.bookingId}?error=That+care+change+requires+manager+review+or+an+active+visit.`,
+    );
+  redirect(`/app/arrivals/${parsed.data.bookingId}?notice=Visit-only+care+amendment+added.`);
+}

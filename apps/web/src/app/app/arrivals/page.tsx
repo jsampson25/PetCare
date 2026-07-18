@@ -16,7 +16,7 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
   const { data: items } = await supabase
     .from('booking_items')
     .select(
-      'booking_id,starts_at,ends_at,pets(name,breed),service_versions(customer_name),bookings!inner(booking_number,status,customers(first_name,last_name),locations(name),operational_visits(status))',
+      'booking_id,starts_at,ends_at,pets(name,breed),service_versions(customer_name),bookings!inner(booking_number,status,customers(first_name,last_name),locations(name),operational_visits(status,pet_visits(handoff_status)))',
     )
     .eq('business_id', context.businessId)
     .eq('status', 'confirmed')
@@ -49,11 +49,22 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
                 status: string;
                 customers: { first_name: string; last_name: string } | null;
                 locations: { name: string } | null;
-                operational_visits: { status: string }[] | null;
+                operational_visits:
+                  | {
+                      status: string;
+                      pet_visits: { handoff_status: string }[] | null;
+                    }[]
+                  | null;
               };
               const pet = item.pets as unknown as { name: string; breed: string } | null;
               const service = item.service_versions as unknown as { customer_name: string } | null;
               const visitStatus = booking.operational_visits?.[0]?.status ?? 'expected';
+              const pendingHandoff = booking.operational_visits?.[0]?.pet_visits?.some(
+                (visit) => visit.handoff_status === 'pending',
+              );
+              const displayStatus = pendingHandoff
+                ? 'handoff pending'
+                : visitStatus.replaceAll('_', ' ');
               return (
                 <div
                   className="flex flex-wrap items-center justify-between gap-4 py-4"
@@ -77,14 +88,16 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
                   <div className="flex items-center gap-3">
                     <Badge
                       tone={
-                        visitStatus === 'in_care'
-                          ? 'success'
-                          : visitStatus === 'arrived'
-                            ? 'warning'
-                            : 'info'
+                        pendingHandoff
+                          ? 'warning'
+                          : visitStatus === 'in_care'
+                            ? 'success'
+                            : visitStatus === 'arrived'
+                              ? 'warning'
+                              : 'info'
                       }
                     >
-                      {visitStatus.replaceAll('_', ' ')}
+                      {displayStatus}
                     </Badge>
                     <ButtonLink href={`/app/arrivals/${item.booking_id}`} variant="secondary">
                       Open check-in

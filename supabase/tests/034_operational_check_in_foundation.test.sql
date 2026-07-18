@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(40);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(50);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -20,6 +20,13 @@ select is(app.record_booking_arrival((select business_id from bookings),(select 
 select is((select count(*) from operational_visits),1::bigint,'one operational visit created');
 select is((select status from operational_visits),'arrived','arrival remains distinct from check-in');
 select is((select status from pet_visits),'arrived','pet is physically arrived');
+insert into booking_action_items(business_id,booking_id,booking_revision_id,action_type,audience,title,metadata) values((select business_id from bookings),(select id from bookings),(select id from booking_revisions order by revision_number desc limit 1),'intake','manager','Review changed arrival instruction','{"overrideable":true}');
+select throws_ok($$select app.complete_pet_check_in((select business_id from bookings),(select id from bookings),(select id from pets),'Pat Owner','owner','photo_id','["name:Milo","breed:Mixed breed"]','{}','[]','blocked-checkin')$$,'P0001','blocking booking actions remain open','open action blocks custody acceptance');
+select lives_ok($$select app.resolve_check_in_blocker((select business_id from bookings),(select id from booking_action_items),'approved_exception','Manager verified a safe visit-only exception','{"review":"completed"}','resolve-intake')$$,'manager resolves policy-marked blocker');
+select is((select status from booking_action_items where title='Review changed arrival instruction'),'resolved','resolved blocker closes explicitly');
+select is(app.resolve_check_in_blocker((select business_id from bookings),(select id from booking_action_items),'approved_exception','Manager verified a safe visit-only exception','{}','resolve-intake'),(select id from check_in_blocker_resolutions),'resolution retry is idempotent');
+select is((select count(*) from check_in_blocker_resolutions),1::bigint,'one blocker resolution retained');
+select throws_ok($$update check_in_blocker_resolutions set reason='rewritten evidence'$$,'P0001','commercial snapshots are immutable','manager resolution cannot be rewritten');
 select lives_ok($$select app.complete_pet_check_in((select business_id from bookings),(select id from bookings),(select id from pets),'Pat Owner','owner','photo_id','["name:Milo","breed:Mixed breed"]','{"notes":"No visible concerns"}','[{"category":"belonging","name":"Blue leash","quantity":1,"unit":"item","storage":"Cubby A","return_expected":true}]','checkin-once')$$,'custody accepted');
 select is(app.complete_pet_check_in((select business_id from bookings),(select id from bookings),(select id from pets),'Pat Owner','owner','photo_id','["name:Milo","breed:Mixed breed"]','{"notes":"No visible concerns"}','[]','checkin-once'),(select id from check_in_records),'check-in retry returns same record');
 select is((select status from operational_visits),'in_care','visit enters care after all pets check in');
@@ -42,4 +49,8 @@ select is((select count(*) from operational_timeline_events),3::bigint,'handoff 
 select throws_ok($$select app.accept_operational_handoff((select business_id from pet_visits),(select id from pet_visits),null,'Duplicate handoff','handoff-different')$$,'P0002','pet handoff unavailable','second handoff is rejected');
 select throws_ok($$update operational_handoffs set handoff_notes='rewritten'$$,'P0001','commercial snapshots are immutable','accepted handoff cannot be rewritten');
 select is((select ends_at-starts_at from visit_resource_assignments),(select scheduled_end-scheduled_start from operational_visits),'resource assignment covers the visit schedule');
+select lives_ok($$select app.add_visit_care_amendment((select business_id from pet_visits),(select id from pet_visits),'feeding','{"instructions":"Offer half portion at first meal"}','Customer reported mild travel appetite',true,'amendment-once')$$,'visit-only care amendment added');
+select is(app.add_visit_care_amendment((select business_id from pet_visits),(select id from pet_visits),'feeding','{"instructions":"Offer half portion at first meal"}','Customer reported mild travel appetite',true,'amendment-once'),(select id from care_plan_amendments),'care amendment retry is idempotent');
+select is((select count(*) from care_plan_amendments),1::bigint,'one care amendment retained');
+select is((select master_update_status from care_plan_amendments),'proposed','master-profile work remains a separate proposal');
 select * from finish();rollback;
