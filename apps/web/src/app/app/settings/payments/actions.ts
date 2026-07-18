@@ -40,3 +40,17 @@ export async function startStripeOnboarding() {
     redirect('/app/settings/payments?error=Stripe+onboarding+could+not+be+started.');
   }
 }
+
+export async function requeueTransactionalEmail(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context?.permissions.has('payments.manage')) redirect('/denied');
+  const messageId = formData.get('messageId');
+  if (typeof messageId !== 'string') redirect('/app/settings/payments?error=Message+unavailable.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('requeue_transactional_email', {
+    target_business_id: context.businessId,
+    target_message_id: messageId,
+  });
+  if (error) redirect('/app/settings/payments?error=Message+could+not+be+requeued.');
+  redirect('/app/settings/payments?notice=Message+queued+for+another+delivery+attempt.');
+}

@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { startStripeOnboarding } from './actions';
+import { requeueTransactionalEmail, startStripeOnboarding } from './actions';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 export default async function PaymentSettingsPage({
@@ -18,7 +18,7 @@ export default async function PaymentSettingsPage({
   if (!context?.permissions.has('payments.manage')) redirect('/denied');
   const parameters = await searchParams;
   const supabase = await createSupabaseServerClient();
-  const [{ data: merchant }, { data: events }] = await Promise.all([
+  const [{ data: merchant }, { data: events }, { data: messages }] = await Promise.all([
     supabase
       .from('merchant_accounts')
       .select(
@@ -31,6 +31,14 @@ export default async function PaymentSettingsPage({
       .select('id,provider_event_id,event_type,status,quarantine_reason,received_at,attempt_count')
       .eq('business_id', context.businessId)
       .order('received_at', { ascending: false })
+      .limit(25),
+    supabase
+      .from('transactional_message_outbox')
+      .select(
+        'id,message_type,status,attempt_count,last_error_category,last_attempt_at,created_at,customers(first_name,last_name,email)',
+      )
+      .eq('business_id', context.businessId)
+      .order('created_at', { ascending: false })
       .limit(25),
   ]);
   return (
@@ -87,6 +95,64 @@ export default async function PaymentSettingsPage({
             {merchant ? 'Continue Stripe onboarding' : 'Connect with Stripe'}
           </Button>
         </form>
+      </Card>
+      <Card
+        title="Transactional email delivery"
+        description="Payment messages are committed before delivery and retry independently from financial transactions."
+      >
+        {messages?.length ? (
+          <div className="divide-y">
+            {messages.map((message) => {
+              const customer = message.customers as unknown as {
+                first_name: string;
+                last_name: string;
+                email: string;
+              } | null;
+              return (
+                <div
+                  className="flex flex-wrap items-center justify-between gap-3 py-3"
+                  key={message.id}
+                >
+                  <div>
+                    <p className="font-bold">{message.message_type.replaceAll('_', ' ')}</p>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      {customer?.first_name} {customer?.last_name} · {customer?.email} · attempt{' '}
+                      {message.attempt_count}
+                    </p>
+                    {message.last_error_category ? (
+                      <p className="text-sm text-[var(--status-danger)]">
+                        {message.last_error_category}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge
+                      tone={
+                        message.status === 'sent'
+                          ? 'success'
+                          : message.status === 'failed'
+                            ? 'danger'
+                            : 'info'
+                      }
+                    >
+                      {message.status}
+                    </Badge>
+                    {message.status === 'failed' ? (
+                      <form action={requeueTransactionalEmail}>
+                        <input name="messageId" type="hidden" value={message.id} />
+                        <Button type="submit" variant="secondary">
+                          Retry
+                        </Button>
+                      </form>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-sm text-[var(--text-secondary)]">No transactional messages queued.</p>
+        )}
       </Card>
       <Card
         title="Verified webhook inbox"

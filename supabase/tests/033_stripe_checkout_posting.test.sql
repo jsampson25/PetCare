@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(35);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(43);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','81000000-0000-4000-8000-000000000001','authenticated','authenticated','checkout-owner@example.test','',now(),'{}','{"display_name":"Checkout Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"81000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkout-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Checkout Test','checkout-test','Main','main','America/Chicago')$$,'tenant created');
@@ -38,4 +38,15 @@ select is((select count(*) from invoice_credits),1::bigint,'matching invoice cre
 select is((select paid_minor from invoice_balances),6000::bigint,'refunded amount leaves net payment');
 select is((select count(*) from refund_receipts),1::bigint,'refund receipt created');
 select is((select count(*) from transactional_message_outbox where message_type='refund_issued'),1::bigint,'refund delivery queued once');
+set local role service_role;
+create temporary table claimed_messages as select * from app.claim_transactional_email(20);
+select is((select count(*) from claimed_messages),3::bigint,'worker claims all due email messages');
+select is((select count(*) from transactional_message_outbox where status='processing'),3::bigint,'claims become processing atomically');
+select lives_ok($$select app.complete_transactional_email((select message_id from claimed_messages order by message_id limit 1),true,'resend','email_test','')$$,'successful delivery completes');
+select is((select count(*) from transactional_message_outbox where status='sent'),1::bigint,'sent delivery recorded');
+select lives_ok($$select app.complete_transactional_email((select message_id from claimed_messages order by message_id offset 1 limit 1),false,'resend','','provider_503')$$,'failed delivery schedules retry');
+select is((select count(*) from transactional_message_outbox where status='failed'),1::bigint,'failed delivery retained');
+set local role authenticated;
+select lives_ok($$select app.requeue_transactional_email((select id from businesses where public_slug='checkout-test'),(select id from transactional_message_outbox where status='failed'))$$,'authorized operator requeues failure');
+select is((select count(*) from transactional_message_outbox where status='pending'),1::bigint,'manual retry returns message to queue');
 select * from finish();rollback;
