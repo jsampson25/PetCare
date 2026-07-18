@@ -223,6 +223,12 @@ Registration for one business does not expose whether the identity has relations
 
 ## Sessions
 
+### Initial session controls
+
+The security screen displays only safe claims from the current session: assurance level and access-token issue/expiry times. It supports provider-backed revocation of every other session and global revocation including the current device. Session and refresh tokens are never rendered, logged, or stored in application tables.
+
+Supabase's normal user API does not provide a safe per-device session inventory, so naming and revoking one remote device is not represented as complete. That capability remains pending a provider-supported user-session API or an approved server-side session projection. The interface does not invent device history from browser-local data.
+
 Each session tracks safe metadata such as creation time, last activity, authentication method, assurance level, client type, approximate device label, and revocation state. It does not store raw credentials in application-visible records.
 
 ### Session controls
@@ -326,6 +332,8 @@ Decision = authenticated identity
 ```
 
 Any required term that fails causes denial. Explicit safety, privacy, tenant, or platform restrictions take precedence over grants.
+
+The shared denial page uses one non-enumerating message for missing, foreign-tenant, and unauthorized targets. It accepts only a safe internal return path, emits a server-side correlation reference without target or personal data, and is marked non-indexable.
 
 ### Permission naming
 
