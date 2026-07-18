@@ -6,7 +6,15 @@ import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { changeServiceStatus, createServiceDraft, publishService } from './actions';
+import {
+  addServiceQuestion,
+  addServiceRequirement,
+  changeServiceStatus,
+  createCapacityPool,
+  createServiceDraft,
+  publishService,
+  saveCapacityOverride,
+} from './actions';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 
@@ -15,7 +23,14 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
   if (!context || !context.permissions.has('services.view')) redirect('/denied');
   const parameters = await searchParams;
   const supabase = await createSupabaseServerClient();
-  const [{ data: services }, { data: versions }, { data: locations }] = await Promise.all([
+  const [
+    { data: services },
+    { data: versions },
+    { data: locations },
+    { data: pools },
+    { data: requirements },
+    { data: questions },
+  ] = await Promise.all([
     supabase
       .from('services')
       .select('id,category,internal_name,status,display_order')
@@ -35,11 +50,30 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
       .eq('business_id', context.businessId)
       .eq('status', 'active')
       .order('name'),
+    supabase
+      .from('capacity_pools')
+      .select(
+        'id,service_id,location_id,name,capacity_model,configured_capacity,physical_maximum,status',
+      )
+      .eq('business_id', context.businessId)
+      .order('name'),
+    supabase
+      .from('service_requirements')
+      .select('id,service_version_id,requirement_type,requirement_key,enforcement,customer_message')
+      .eq('business_id', context.businessId)
+      .eq('active', true),
+    supabase
+      .from('service_booking_questions')
+      .select('id,service_version_id,prompt,response_type,required')
+      .eq('business_id', context.businessId)
+      .eq('active', true),
   ]);
   const latestByService = new Map<string, NonNullable<typeof versions>[number]>();
   for (const version of versions ?? [])
     if (!latestByService.has(version.service_id)) latestByService.set(version.service_id, version);
   const canManage = context.permissions.has('services.manage');
+  const canManageCapacity = context.permissions.has('capacity.manage');
+  const publishedVersions = (versions ?? []).filter((version) => version.status === 'published');
 
   return (
     <div className="space-y-6">
@@ -129,6 +163,221 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
           </form>
         </Card>
       ) : null}
+      {canManage && publishedVersions.length ? (
+        <div className="grid gap-6 xl:grid-cols-2">
+          <Card
+            title="Add an eligibility requirement"
+            description="Requirements produce customer-safe block, review, or warning explanations."
+          >
+            <form action={addServiceRequirement} className="grid gap-4 md:grid-cols-2">
+              <label className="text-sm font-bold">
+                Published service
+                <select
+                  className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                  name="versionId"
+                >
+                  {publishedVersions.map((version) => (
+                    <option key={version.id} value={version.id}>
+                      {version.customer_name} · v{version.version_number}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-sm font-bold">
+                Requirement type
+                <select
+                  className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                  name="requirementType"
+                >
+                  <option value="vaccination">Vaccination</option>
+                  <option value="daycare_evaluation">Daycare evaluation</option>
+                  <option value="minimum_age_months">Minimum age (months)</option>
+                  <option value="maximum_weight_kg">Maximum weight (kg)</option>
+                  <option value="document">Document/manual review</option>
+                </select>
+              </label>
+              <Field
+                label="Rule key"
+                name="requirementKey"
+                hint="Example: rabies_current"
+                required
+              />
+              <Field
+                label="Required value"
+                name="comparisonValue"
+                hint="Example: rabies, 6, or 45"
+                required
+              />
+              <label className="text-sm font-bold">
+                Enforcement
+                <select
+                  className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                  name="enforcement"
+                >
+                  <option value="block">Block booking</option>
+                  <option value="staff_review">Staff review</option>
+                  <option value="warn">Warning</option>
+                </select>
+              </label>
+              <Field label="Customer explanation" name="customerMessage" required />
+              <div className="md:col-span-2">
+                <Button type="submit">Add requirement</Button>
+              </div>
+            </form>
+          </Card>
+          <Card
+            title="Add a booking question"
+            description="Versioned intake questions are answered once for each booking item or pet."
+          >
+            <form action={addServiceQuestion} className="grid gap-4 md:grid-cols-2">
+              <label className="text-sm font-bold">
+                Published service
+                <select
+                  className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                  name="versionId"
+                >
+                  {publishedVersions.map((version) => (
+                    <option key={version.id} value={version.id}>
+                      {version.customer_name} · v{version.version_number}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-sm font-bold">
+                Response type
+                <select
+                  className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                  name="responseType"
+                >
+                  <option value="short_text">Short text</option>
+                  <option value="long_text">Long text</option>
+                  <option value="yes_no">Yes/no</option>
+                  <option value="single_select">Single select</option>
+                  <option value="multi_select">Multi-select</option>
+                  <option value="date">Date</option>
+                  <option value="number">Number</option>
+                </select>
+              </label>
+              <Field
+                label="Question key"
+                name="questionKey"
+                hint="Example: pickup_contact"
+                required
+              />
+              <Field label="Customer prompt" name="prompt" required />
+              <Field label="Options" name="options" hint="Comma-separated for select questions." />
+              <label className="flex items-center gap-2 self-end pb-3 text-sm font-bold">
+                <input type="checkbox" name="required" />
+                Required answer
+              </label>
+              <div className="md:col-span-2">
+                <Button type="submit">Add question</Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      ) : null}
+      {canManageCapacity && (services ?? []).length && locations?.length ? (
+        <div className="grid gap-6 xl:grid-cols-2">
+          <Card
+            title="Create a capacity pool"
+            description="Configured capacity may never exceed the physical maximum."
+          >
+            <form action={createCapacityPool} className="grid gap-4 md:grid-cols-2">
+              <label className="text-sm font-bold">
+                Service
+                <select
+                  className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                  name="serviceId"
+                >
+                  {(services ?? [])
+                    .filter((service) => service.status === 'active')
+                    .map((service) => (
+                      <option key={service.id} value={service.id}>
+                        {service.internal_name}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <label className="text-sm font-bold">
+                Location
+                <select
+                  className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                  name="locationId"
+                >
+                  {locations.map((location) => (
+                    <option key={location.id} value={location.id}>
+                      {location.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <Field label="Pool name" name="name" required />
+              <label className="text-sm font-bold">
+                Capacity model
+                <select
+                  className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                  name="model"
+                >
+                  <option value="pet_count">Pet count</option>
+                  <option value="service_unit">Service units</option>
+                  <option value="named_resource">Named resources</option>
+                </select>
+              </label>
+              <Field
+                label="Physical maximum"
+                name="physicalMaximum"
+                type="number"
+                min="1"
+                required
+              />
+              <Field
+                label="Sellable capacity"
+                name="configuredCapacity"
+                type="number"
+                min="1"
+                required
+              />
+              <div className="md:col-span-2">
+                <Button type="submit">Create capacity pool</Button>
+              </div>
+            </form>
+          </Card>
+          <Card
+            title="Schedule a capacity override"
+            description="Temporarily reduce sellable capacity for staffing or operational constraints."
+          >
+            {pools?.length ? (
+              <form action={saveCapacityOverride} className="grid gap-4 md:grid-cols-2">
+                <label className="text-sm font-bold md:col-span-2">
+                  Capacity pool
+                  <select
+                    className="mt-2 min-h-12 w-full rounded-lg border bg-white px-3"
+                    name="poolId"
+                  >
+                    {pools
+                      .filter((pool) => pool.status === 'active')
+                      .map((pool) => (
+                        <option key={pool.id} value={pool.id}>
+                          {pool.name} · {pool.configured_capacity}/{pool.physical_maximum}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                <Field label="Starts" name="startsOn" type="date" required />
+                <Field label="Ends" name="endsOn" type="date" required />
+                <Field label="Capacity" name="capacity" type="number" min="0" required />
+                <Field label="Reason" name="reason" required />
+                <div className="md:col-span-2">
+                  <Button type="submit">Save override</Button>
+                </div>
+              </form>
+            ) : (
+              <p className="text-sm text-[var(--text-secondary)]">Create a capacity pool first.</p>
+            )}
+          </Card>
+        </div>
+      ) : null}
       <section className="grid gap-4">
         {(services ?? []).length ? (
           (services ?? []).map((service) => {
@@ -153,6 +402,20 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
                     <dd>{version?.status ?? 'Missing'}</dd>
                   </div>
                 </dl>
+                {version ? (
+                  <p className="mt-4 text-sm text-[var(--text-secondary)]">
+                    {requirements?.filter((item) => item.service_version_id === version.id)
+                      .length ?? 0}{' '}
+                    requirements ·{' '}
+                    {questions?.filter((item) => item.service_version_id === version.id).length ??
+                      0}{' '}
+                    booking questions ·{' '}
+                    {pools?.filter(
+                      (pool) => pool.service_id === service.id && pool.status === 'active',
+                    ).length ?? 0}{' '}
+                    capacity pools
+                  </p>
+                ) : null}
                 {canManage && version?.status === 'draft' && locations?.length ? (
                   <form action={publishService} className="mt-5 flex flex-wrap items-end gap-3">
                     <input type="hidden" name="serviceId" value={service.id} />

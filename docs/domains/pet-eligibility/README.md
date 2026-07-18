@@ -319,6 +319,8 @@ The veterinary-contact slice adds structured clinic and provider details with ex
 
 The grooming-profile slice separates coat type and condition, grooming sensitivity, safety-related handling constraints, style preferences, structured nail/ear/teeth options, and preferred groomer. Replacements require a reason and create a new current version while preserving the prior profile. A preferred groomer remains explicitly non-guaranteed. Automated vaccine compliance and broader service/date eligibility remain subsequent E05 work.
 
+The E05 eligibility core evaluates active requirements bound to the exact published service version. It consumes accepted or waived vaccination evidence, approved or conditional daycare evaluations, birth date, and latest recorded weight; document requirements route to staff review until the document domain is implemented. Results contain deterministic eligible/review flags and customer-safe reason objects while underlying pet evidence remains authoritative.
+
 ## Domain events
 
 - `pet.created`

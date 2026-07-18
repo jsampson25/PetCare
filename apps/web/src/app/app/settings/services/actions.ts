@@ -93,3 +93,145 @@ export async function changeServiceStatus(formData: FormData) {
   if (error) redirect('/app/settings/services?error=The+service+status+could+not+be+changed.');
   redirect('/app/settings/services?notice=Service+status+updated.');
 }
+
+const requirementSchema = z.object({
+  comparisonValue: z.string().trim().min(1).max(120),
+  customerMessage: z.string().trim().min(2).max(500),
+  enforcement: z.enum(['block', 'staff_review', 'warn']),
+  requirementKey: z
+    .string()
+    .trim()
+    .regex(/^[a-z][a-z0-9_]*$/),
+  requirementType: z.enum([
+    'vaccination',
+    'daycare_evaluation',
+    'minimum_age_months',
+    'maximum_weight_kg',
+    'document',
+  ]),
+  versionId: z.uuid(),
+});
+
+export async function addServiceRequirement(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('services.manage')) redirect('/denied');
+  const parsed = requirementSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/settings/services?error=Check+the+requirement+details.');
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_service_requirement', {
+    comparison_value_text: parsed.data.comparisonValue,
+    customer_message_text: parsed.data.customerMessage,
+    enforcement_value: parsed.data.enforcement,
+    requirement_key_value: parsed.data.requirementKey,
+    requirement_type_value: parsed.data.requirementType,
+    target_business_id: context.businessId,
+    target_service_version_id: parsed.data.versionId,
+  });
+  if (error) redirect('/app/settings/services?error=The+requirement+could+not+be+saved.');
+  redirect('/app/settings/services?notice=Service+requirement+saved.');
+}
+
+const questionSchema = z.object({
+  options: z.string().trim().max(1000),
+  prompt: z.string().trim().min(2).max(300),
+  questionKey: z
+    .string()
+    .trim()
+    .regex(/^[a-z][a-z0-9_]*$/),
+  responseType: z.enum([
+    'short_text',
+    'long_text',
+    'yes_no',
+    'single_select',
+    'multi_select',
+    'date',
+    'number',
+  ]),
+  versionId: z.uuid(),
+});
+
+export async function addServiceQuestion(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('services.manage')) redirect('/denied');
+  const parsed = questionSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect('/app/settings/services?error=Check+the+booking+question.');
+  const options = parsed.data.options
+    ? parsed.data.options
+        .split(',')
+        .map((option) => option.trim())
+        .filter(Boolean)
+    : [];
+  if (['single_select', 'multi_select'].includes(parsed.data.responseType) && !options.length) {
+    redirect('/app/settings/services?error=Selection+questions+need+comma-separated+options.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('add_service_booking_question', {
+    options_value: options,
+    prompt_value: parsed.data.prompt,
+    question_key_value: parsed.data.questionKey,
+    required_value: formData.get('required') === 'on',
+    response_type_value: parsed.data.responseType,
+    target_business_id: context.businessId,
+    target_service_version_id: parsed.data.versionId,
+  });
+  if (error) redirect('/app/settings/services?error=The+booking+question+could+not+be+saved.');
+  redirect('/app/settings/services?notice=Booking+question+saved.');
+}
+
+const poolSchema = z.object({
+  configuredCapacity: z.coerce.number().int().positive(),
+  locationId: z.uuid(),
+  model: z.enum(['pet_count', 'service_unit', 'named_resource']),
+  name: z.string().trim().min(1).max(120),
+  physicalMaximum: z.coerce.number().int().positive(),
+  serviceId: z.uuid(),
+});
+
+export async function createCapacityPool(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('capacity.manage')) redirect('/denied');
+  const parsed = poolSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success || parsed.data.configuredCapacity > parsed.data.physicalMaximum) {
+    redirect('/app/settings/services?error=Check+the+capacity+limits.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('configure_capacity_pool', {
+    configured_limit: parsed.data.configuredCapacity,
+    model_value: parsed.data.model,
+    physical_limit: parsed.data.physicalMaximum,
+    pool_name: parsed.data.name,
+    target_business_id: context.businessId,
+    target_location_id: parsed.data.locationId,
+    target_service_id: parsed.data.serviceId,
+  });
+  if (error) redirect('/app/settings/services?error=The+capacity+pool+could+not+be+created.');
+  redirect('/app/settings/services?notice=Capacity+pool+created.');
+}
+
+const overrideSchema = z.object({
+  capacity: z.coerce.number().int().nonnegative(),
+  endsOn: z.string().date(),
+  poolId: z.uuid(),
+  reason: z.string().trim().min(2).max(300),
+  startsOn: z.string().date(),
+});
+
+export async function saveCapacityOverride(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('capacity.manage')) redirect('/denied');
+  const parsed = overrideSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success || parsed.data.endsOn < parsed.data.startsOn) {
+    redirect('/app/settings/services?error=Check+the+capacity+override.');
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc('save_capacity_override', {
+    end_date: parsed.data.endsOn,
+    override_capacity: parsed.data.capacity,
+    override_reason: parsed.data.reason,
+    start_date: parsed.data.startsOn,
+    target_business_id: context.businessId,
+    target_pool_id: parsed.data.poolId,
+  });
+  if (error) redirect('/app/settings/services?error=The+capacity+override+could+not+be+saved.');
+  redirect('/app/settings/services?notice=Capacity+override+saved.');
+}

@@ -281,6 +281,10 @@ Events include tenant, location, resource/pool, interval, actor, source, version
 6. Which alternate-date recommendations are P0 versus P1.
 7. Whether a digital facility map is required for the first pilot or follows the list/board view.
 
+## Implemented foundation
+
+The E05 capacity core is implemented by `20260718000100_service_requirements_capacity_availability.sql`. It provides tenant/location/service-scoped pools, physical and configured limits, optional named resources, dated reductions, closure-aware availability, overlap-aware holds and commitments, idempotent hold creation, advisory transaction locking for last-capacity races, and explicit release/conversion lifecycles. The staff Services settings page configures pools and dated overrides. Booking ownership, resource assignment boards, automated hold cleanup, and staffing-derived grooming limits remain later integration work.
+
 ## Dependencies
 
 - Business Configuration for locations, areas, hours, and closures
