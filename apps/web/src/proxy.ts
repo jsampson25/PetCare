@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { getSafeRedirect } from './lib/auth/safe-redirect';
 
-const protectedPrefixes = ['/app', '/platform', '/portal'];
+const protectedPrefixes = ['/app', '/onboarding', '/platform', '/portal'];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });

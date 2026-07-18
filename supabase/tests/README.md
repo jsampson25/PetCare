@@ -9,3 +9,5 @@ The staff-invitation suite verifies token secrecy, recipient binding, single use
 Invitation-preview tests verify default-deny behavior and the deliberately narrow anonymous execution grant.
 
 Privileged-MFA tests prove the same owner receives no permission/location access at AAL1 and regains the expected grants only at AAL2.
+
+Business-onboarding tests exercise tenant provisioning, profile persistence, a seven-day schedule, readiness calculation, audit evidence, and AAL1 denial.

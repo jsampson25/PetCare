@@ -14,7 +14,7 @@ export default async function SelectBusinessPage({ searchParams }: { searchParam
   if (!data?.claims?.sub) redirect('/auth/sign-in?next=/auth/select-business');
 
   const businesses = await listBusinessContexts();
-  if (businesses.length === 0) redirect('/denied');
+  if (businesses.length === 0) redirect('/onboarding');
   const parameters = await searchParams;
   const error = typeof parameters.error === 'string' ? parameters.error : undefined;
 

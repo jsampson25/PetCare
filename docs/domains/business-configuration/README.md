@@ -229,7 +229,13 @@ Readiness has two outputs:
 | ConfigurationRevision | Auditable version/change record |
 | ReadinessAssessment | Point-in-time readiness result and findings |
 
-Detailed tables and migrations will be created when this domain enters implementation.
+Additional tables and migrations are created incrementally with each implementation slice.
+
+### Initial E03 implementation
+
+The first implementation slice extends businesses and locations with required contact, locale, currency, time-zone, and postal-address fields. `location_operating_hours` stores one validated recurring interval or a closed state for each weekday. All records are tenant-scoped, protected by RLS, and emit configuration audit events.
+
+New verified identities without a tenant enter `/onboarding`, create a draft business and first location atomically, enroll MFA, and then complete the combined business/location/hours form. `get_business_setup_readiness` calculates the three foundation checks server-side and returns no saved-state inference to an unauthorized or AAL1 privileged session. This foundation score is not the final launch gate; services, capacity, pricing, policies, payments, communications, and operational readiness remain later checks.
 
 ## Domain events
 
@@ -290,4 +296,3 @@ Events must include `business_id`, actor context, timestamp, event version, and 
 - Payments for merchant connection state
 - Website and Content for full publication behavior
 - Audit platform capability for revision history
-
