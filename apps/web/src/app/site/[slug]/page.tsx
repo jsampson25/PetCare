@@ -16,6 +16,13 @@ type Site = {
   locations: Array<{ name: string; time_zone: string }>;
   seo: { title: string; description: string };
 };
+type SectionId = 'services' | 'about' | 'faq' | 'contact';
+const defaultSectionLayout: Array<{ id: SectionId; visible: boolean }> = [
+  { id: 'services', visible: true },
+  { id: 'about', visible: true },
+  { id: 'faq', visible: true },
+  { id: 'contact', visible: true },
+];
 async function getSite(slug: string) {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.rpc('get_public_tenant_website', { public_slug_value: slug });
@@ -50,6 +57,17 @@ export default async function TenantSitePage({
   const faqs = Array.isArray(content.faqs)
     ? (content.faqs as Array<{ question: string; answer: string }>)
     : [];
+  const sectionLayout = Array.isArray(content.section_layout)
+    ? (content.section_layout as Array<{ id: SectionId; visible: boolean }>)
+    : defaultSectionLayout;
+  const sectionStyle = (id: SectionId): CSSProperties => ({
+    display:
+      sectionLayout.find((section) => section.id === id)?.visible === false ? 'none' : undefined,
+    order: Math.max(
+      0,
+      sectionLayout.findIndex((section) => section.id === id),
+    ),
+  });
   const centeredHeader = site.theme_key === 'modern';
   const splitHeader = site.theme_key === 'warm';
   const logoMark = (
@@ -199,158 +217,169 @@ export default async function TenantSitePage({
           </div>
         </div>
       </section>
-      <section className="border-y border-black/5 bg-white py-20" id="services">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="max-w-2xl">
+      <div className="flex flex-col">
+        <section
+          className="border-y border-black/5 bg-white py-20"
+          id="services"
+          style={sectionStyle('services')}
+        >
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="max-w-2xl">
+              <p
+                className="text-xs font-black uppercase tracking-[0.18em]"
+                style={{ color: 'var(--tenant-primary)' }}
+              >
+                Ways we care
+              </p>
+              <h2 className="mt-3 text-4xl font-black tracking-tight">Everything your pet needs</h2>
+              <p className="mt-4 leading-7 text-slate-600">
+                Choose a service built around comfort, safety, and a simple experience for you.
+              </p>
+            </div>
+            <div className="mt-10 grid gap-5 md:grid-cols-3">
+              {site.services.map((service, index) => (
+                <article
+                  className="group rounded-3xl border border-black/10 bg-[#fbfcfa] p-6 transition hover:-translate-y-1 hover:shadow-xl"
+                  key={service.name}
+                >
+                  <span
+                    className="grid size-11 place-items-center rounded-2xl bg-white font-black shadow-sm"
+                    style={{ color: 'var(--tenant-primary)' }}
+                  >
+                    0{index + 1}
+                  </span>
+                  <p className="mt-6 text-xs font-black uppercase tracking-wide text-slate-500">
+                    {service.category}
+                  </p>
+                  <h3 className="mt-1 text-xl font-black">{service.name}</h3>
+                  <p className="mt-3 leading-7 text-slate-600">{service.description}</p>
+                  <a
+                    className="mt-6 inline-block text-sm font-black"
+                    style={{ color: 'var(--tenant-primary)' }}
+                    href={`/book?tenant=${site.business.slug}`}
+                  >
+                    Explore this service →
+                  </a>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section className="px-6 py-20" id="about" style={sectionStyle('about')}>
+          <div className="mx-auto max-w-7xl rounded-[2rem] bg-[#173f30] p-8 text-white sm:p-10">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
+              Why families choose us
+            </p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight">Care that feels personal</h2>
+            <p className="mt-5 text-lg leading-8 text-emerald-50/80">{String(content.about)}</p>
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              {[
+                'Individual care notes',
+                'Secure pet profiles',
+                'Easy communication',
+                'Consistent routines',
+              ].map((item) => (
+                <div
+                  className="rounded-xl border border-white/15 bg-white/5 p-3 text-sm font-bold"
+                  key={item}
+                >
+                  ✓ {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section className="bg-white px-6 py-20" id="faq" style={sectionStyle('faq')}>
+          <div className="mx-auto max-w-3xl">
             <p
               className="text-xs font-black uppercase tracking-[0.18em]"
               style={{ color: 'var(--tenant-primary)' }}
             >
-              Ways we care
+              Good to know
             </p>
-            <h2 className="mt-3 text-4xl font-black tracking-tight">Everything your pet needs</h2>
-            <p className="mt-4 leading-7 text-slate-600">
-              Choose a service built around comfort, safety, and a simple experience for you.
-            </p>
-          </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {site.services.map((service, index) => (
-              <article
-                className="group rounded-3xl border border-black/10 bg-[#fbfcfa] p-6 transition hover:-translate-y-1 hover:shadow-xl"
-                key={service.name}
-              >
-                <span
-                  className="grid size-11 place-items-center rounded-2xl bg-white font-black shadow-sm"
-                  style={{ color: 'var(--tenant-primary)' }}
-                >
-                  0{index + 1}
-                </span>
-                <p className="mt-6 text-xs font-black uppercase tracking-wide text-slate-500">
-                  {service.category}
-                </p>
-                <h3 className="mt-1 text-xl font-black">{service.name}</h3>
-                <p className="mt-3 leading-7 text-slate-600">{service.description}</p>
-                <a
-                  className="mt-6 inline-block text-sm font-black"
-                  style={{ color: 'var(--tenant-primary)' }}
-                  href={`/book?tenant=${site.business.slug}`}
-                >
-                  Explore this service →
-                </a>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-      <section
-        className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-2 lg:items-start"
-        id="about"
-      >
-        <div className="rounded-[2rem] bg-[#173f30] p-8 text-white sm:p-10">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
-            Why families choose us
-          </p>
-          <h2 className="mt-3 text-4xl font-black tracking-tight">Care that feels personal</h2>
-          <p className="mt-5 text-lg leading-8 text-emerald-50/80">{String(content.about)}</p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            {[
-              'Individual care notes',
-              'Secure pet profiles',
-              'Easy communication',
-              'Consistent routines',
-            ].map((item) => (
-              <div
-                className="rounded-xl border border-white/15 bg-white/5 p-3 text-sm font-bold"
-                key={item}
-              >
-                ✓ {item}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div id="faq">
-          <p
-            className="text-xs font-black uppercase tracking-[0.18em]"
-            style={{ color: 'var(--tenant-primary)' }}
-          >
-            Good to know
-          </p>
-          <h2 className="mt-3 text-4xl font-black tracking-tight">Frequently asked questions</h2>
-          <div className="mt-7 divide-y divide-black/10 border-y border-black/10">
-            {faqs.map((faq) => (
-              <details className="group py-5" key={faq.question}>
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-black">
-                  {faq.question}
-                  <span className="text-xl font-normal transition group-open:rotate-45">+</span>
-                </summary>
-                <p className="mt-3 max-w-xl leading-7 text-slate-600">{faq.answer}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-      <section className="bg-[#102d23] py-20 text-white" id="contact">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.8fr_1.2fr]">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
-              We&apos;re here to help
-            </p>
-            <h2 className="mt-3 text-4xl font-black">Let&apos;s talk about your pet</h2>
-            <p className="mt-5 leading-7 text-emerald-50/70">
-              {String(content.contact_email)} · {String(content.contact_phone)}
-            </p>
-            <div className="mt-7 space-y-3">
-              {site.locations.map((location) => (
-                <div className="rounded-xl border border-white/15 p-4" key={location.name}>
-                  <p className="font-black">{location.name}</p>
-                  <p className="mt-1 text-sm text-emerald-50/60">
-                    Local time: {location.time_zone}
-                  </p>
-                </div>
+            <h2 className="mt-3 text-4xl font-black tracking-tight">Frequently asked questions</h2>
+            <div className="mt-7 divide-y divide-black/10 border-y border-black/10">
+              {faqs.map((faq) => (
+                <details className="group py-5" key={faq.question}>
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-black">
+                    {faq.question}
+                    <span className="text-xl font-normal transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p className="mt-3 max-w-xl leading-7 text-slate-600">{faq.answer}</p>
+                </details>
               ))}
             </div>
-            <h3 className="mt-8 font-black">Policies</h3>
-            <p className="mt-2 text-sm leading-6 text-emerald-50/60">{String(content.policies)}</p>
           </div>
-          <form
-            action={submitInquiry}
-            className="grid gap-4 rounded-[2rem] bg-white p-6 text-slate-950 shadow-2xl sm:grid-cols-2 sm:p-8"
-          >
-            <div className="sm:col-span-2">
-              <h2 className="text-2xl font-black">Send an inquiry</h2>
-              <p className="mt-1 text-sm text-slate-500">
-                The care team will respond using the details below.
+        </section>
+        <section
+          className="bg-[#102d23] py-20 text-white"
+          id="contact"
+          style={sectionStyle('contact')}
+        >
+          <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
+                We&apos;re here to help
+              </p>
+              <h2 className="mt-3 text-4xl font-black">Let&apos;s talk about your pet</h2>
+              <p className="mt-5 leading-7 text-emerald-50/70">
+                {String(content.contact_email)} · {String(content.contact_phone)}
+              </p>
+              <div className="mt-7 space-y-3">
+                {site.locations.map((location) => (
+                  <div className="rounded-xl border border-white/15 p-4" key={location.name}>
+                    <p className="font-black">{location.name}</p>
+                    <p className="mt-1 text-sm text-emerald-50/60">
+                      Local time: {location.time_zone}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <h3 className="mt-8 font-black">Policies</h3>
+              <p className="mt-2 text-sm leading-6 text-emerald-50/60">
+                {String(content.policies)}
               </p>
             </div>
-            {typeof query.notice === 'string' ? (
-              <p className="font-bold text-green-700 sm:col-span-2">{query.notice}</p>
-            ) : null}
-            {typeof query.error === 'string' ? (
-              <p className="font-bold text-red-700 sm:col-span-2">{query.error}</p>
-            ) : null}
-            <input name="slug" type="hidden" value={site.business.slug} />
-            <input className="hidden" name="website" tabIndex={-1} />
-            <Field label="Name" name="name" required />
-            <Field label="Email" name="email" required type="email" />
-            <Field label="Phone" name="phone" />
-            <label className="text-sm font-bold sm:col-span-2">
-              How can we help?
-              <textarea
-                className="mt-2 min-h-28 w-full rounded-xl border border-slate-300 p-3"
-                name="message"
-                required
-              />
-            </label>
-            <label className="flex gap-3 text-sm sm:col-span-2">
-              <input name="consent" required type="checkbox" value="yes" />I agree that this
-              business may respond to my inquiry.
-            </label>
-            <div className="sm:col-span-2">
-              <Button type="submit">Send message</Button>
-            </div>
-          </form>
-        </div>
-      </section>
+            <form
+              action={submitInquiry}
+              className="grid gap-4 rounded-[2rem] bg-white p-6 text-slate-950 shadow-2xl sm:grid-cols-2 sm:p-8"
+            >
+              <div className="sm:col-span-2">
+                <h2 className="text-2xl font-black">Send an inquiry</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  The care team will respond using the details below.
+                </p>
+              </div>
+              {typeof query.notice === 'string' ? (
+                <p className="font-bold text-green-700 sm:col-span-2">{query.notice}</p>
+              ) : null}
+              {typeof query.error === 'string' ? (
+                <p className="font-bold text-red-700 sm:col-span-2">{query.error}</p>
+              ) : null}
+              <input name="slug" type="hidden" value={site.business.slug} />
+              <input className="hidden" name="website" tabIndex={-1} />
+              <Field label="Name" name="name" required />
+              <Field label="Email" name="email" required type="email" />
+              <Field label="Phone" name="phone" />
+              <label className="text-sm font-bold sm:col-span-2">
+                How can we help?
+                <textarea
+                  className="mt-2 min-h-28 w-full rounded-xl border border-slate-300 p-3"
+                  name="message"
+                  required
+                />
+              </label>
+              <label className="flex gap-3 text-sm sm:col-span-2">
+                <input name="consent" required type="checkbox" value="yes" />I agree that this
+                business may respond to my inquiry.
+              </label>
+              <div className="sm:col-span-2">
+                <Button type="submit">Send message</Button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

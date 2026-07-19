@@ -6,6 +6,26 @@ import { createSupabaseServerClient } from '../../../../lib/supabase/server';
 export async function saveWebsiteDraft(formData: FormData) {
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('website.edit')) redirect('/denied');
+  const websiteSectionSchema = z.object({
+    id: z.enum(['services', 'about', 'faq', 'contact']),
+    visible: z.boolean(),
+  });
+  const raw = Object.fromEntries(formData);
+  const sectionLayout = z
+    .array(websiteSectionSchema)
+    .length(4)
+    .refine((sections) => new Set(sections.map((section) => section.id)).size === 4)
+    .safeParse(
+      typeof raw.sectionLayout === 'string'
+        ? (() => {
+            try {
+              return JSON.parse(raw.sectionLayout);
+            } catch {
+              return null;
+            }
+          })()
+        : null,
+    );
   const parsed = z
     .object({
       theme: z.enum(['modern', 'warm', 'classic']),
@@ -22,8 +42,8 @@ export async function saveWebsiteDraft(formData: FormData) {
       seoTitle: z.string().trim().max(70),
       seoDescription: z.string().trim().max(170),
     })
-    .safeParse(Object.fromEntries(formData));
-  if (!parsed.success)
+    .safeParse(raw);
+  if (!parsed.success || !sectionLayout.success)
     redirect('/app/settings/website?error=Complete+the+required+website+content.');
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.rpc('save_tenant_website_draft', {
@@ -40,6 +60,7 @@ export async function saveWebsiteDraft(formData: FormData) {
       contact_phone: parsed.data.contactPhone,
       seo_title: parsed.data.seoTitle,
       seo_description: parsed.data.seoDescription,
+      section_layout: sectionLayout.data,
     },
   });
   if (error) redirect('/app/settings/website?error=Website+draft+could+not+be+saved.');

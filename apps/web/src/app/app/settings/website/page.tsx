@@ -7,6 +7,11 @@ import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
 import { publishWebsite, requestCustomDomain, saveWebsiteDraft, unpublishWebsite } from './actions';
+import {
+  defaultWebsiteSections,
+  WebsiteSectionEditor,
+  type WebsiteSection,
+} from './website-section-editor';
 type SP = Promise<Record<string, string | string[] | undefined>>;
 export default async function WebsiteSettingsPage({ searchParams }: { searchParams: SP }) {
   const context = await resolveBusinessContext();
@@ -41,6 +46,9 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
   const c = (site?.draft_content ?? {}) as Record<string, unknown>;
   const b = (site?.brand_tokens ?? {}) as Record<string, unknown>;
   const faq = Array.isArray(c.faqs) ? (c.faqs[0] as Record<string, string> | undefined) : undefined;
+  const storedSections = Array.isArray(c.section_layout)
+    ? (c.section_layout as WebsiteSection[])
+    : defaultWebsiteSections;
   return (
     <div className="space-y-6">
       <header>
@@ -132,6 +140,7 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
               ))}
             </div>
           </fieldset>
+          <WebsiteSectionEditor initialSections={storedSections} />
           <Field
             defaultValue={String(b.primary ?? '#23664f')}
             label="Primary color"
