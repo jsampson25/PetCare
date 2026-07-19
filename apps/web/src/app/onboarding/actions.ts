@@ -83,34 +83,36 @@ export async function createFirstBusiness(
     .eq('business_id', businessId)
     .maybeSingle();
   if (!existingWebsite) {
-    const { error: websiteError } = await supabase.schema('app').rpc('save_tenant_website_draft', {
-      target_business_id: businessId,
-      theme_value: 'modern',
-      brand_value: { primary: '#5b35e8', accent: '#f3a712' },
-      content_value: {
-        hero_title: `Exceptional care for every pet`,
-        hero_body: `${parsed.data.businessName} makes boarding, daycare, and grooming feel simple, safe, and personal.`,
-        about: `Welcome to ${parsed.data.businessName}. Tell customers what makes your team, facility, and approach to care special.`,
-        faqs: [
-          {
-            question: 'What should I bring for my pet?',
-            answer: 'Add your preferred preparation instructions and required items here.',
-          },
-        ],
-        policies: 'Add your vaccination, cancellation, arrival, and pickup policies here.',
-        contact_email: emailFromClaims(await supabase.auth.getClaims()),
-        contact_phone: '555-555-0100',
-        seo_title: `${parsed.data.businessName} | Pet care`,
-        seo_description: `Boarding, daycare, and grooming from ${parsed.data.businessName}.`,
-        section_layout: [
-          { id: 'services', visible: true },
-          { id: 'about', visible: true },
-          { id: 'faq', visible: true },
-          { id: 'contact', visible: true },
-        ],
-        custom_pages: [],
-      },
-    });
+    const { error: websiteError } = await supabase
+      .schema('app')
+      .rpc('bootstrap_tenant_website_draft', {
+        target_business_id: businessId,
+        theme_value: 'modern',
+        brand_value: { primary: '#5b35e8', accent: '#f3a712' },
+        content_value: {
+          hero_title: `Exceptional care for every pet`,
+          hero_body: `${parsed.data.businessName} makes boarding, daycare, and grooming feel simple, safe, and personal.`,
+          about: `Welcome to ${parsed.data.businessName}. Tell customers what makes your team, facility, and approach to care special.`,
+          faqs: [
+            {
+              question: 'What should I bring for my pet?',
+              answer: 'Add your preferred preparation instructions and required items here.',
+            },
+          ],
+          policies: 'Add your vaccination, cancellation, arrival, and pickup policies here.',
+          contact_email: emailFromClaims(await supabase.auth.getClaims()),
+          contact_phone: '555-555-0100',
+          seo_title: `${parsed.data.businessName} | Pet care`,
+          seo_description: `Boarding, daycare, and grooming from ${parsed.data.businessName}.`,
+          section_layout: [
+            { id: 'services', visible: true },
+            { id: 'about', visible: true },
+            { id: 'faq', visible: true },
+            { id: 'contact', visible: true },
+          ],
+          custom_pages: [],
+        },
+      });
     if (websiteError) {
       return {
         error: 'Your business was created, but its website draft could not be prepared. Try again.',
