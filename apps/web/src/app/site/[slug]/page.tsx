@@ -17,6 +17,13 @@ type Site = {
   seo: { title: string; description: string };
 };
 type SectionId = 'services' | 'about' | 'faq' | 'contact';
+type CustomPage = {
+  id: string;
+  title: string;
+  slug: string;
+  body: string;
+  showInNavigation: boolean;
+};
 const defaultSectionLayout: Array<{ id: SectionId; visible: boolean }> = [
   { id: 'services', visible: true },
   { id: 'about', visible: true },
@@ -60,6 +67,9 @@ export default async function TenantSitePage({
   const sectionLayout = Array.isArray(content.section_layout)
     ? (content.section_layout as Array<{ id: SectionId; visible: boolean }>)
     : defaultSectionLayout;
+  const customPages = Array.isArray(content.custom_pages)
+    ? (content.custom_pages as CustomPage[])
+    : [];
   const sectionStyle = (id: SectionId): CSSProperties => ({
     display:
       sectionLayout.find((section) => section.id === id)?.visible === false ? 'none' : undefined,
@@ -104,6 +114,14 @@ export default async function TenantSitePage({
       <a href="#about">About</a>
       <a href="#faq">FAQ</a>
       <a href="#contact">Contact</a>
+      {customPages
+        .filter((page) => page.showInNavigation)
+        .slice(0, 2)
+        .map((page) => (
+          <a href={`/site/${site.business.slug}/pages/${page.slug}`} key={page.id}>
+            {page.title}
+          </a>
+        ))}
     </nav>
   );
   return (

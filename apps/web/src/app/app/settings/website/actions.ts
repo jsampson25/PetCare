@@ -10,6 +10,19 @@ export async function saveWebsiteDraft(formData: FormData) {
     id: z.enum(['services', 'about', 'faq', 'contact']),
     visible: z.boolean(),
   });
+  const customPageSchema = z.object({
+    id: z.uuid(),
+    title: z.string().trim().min(2).max(80),
+    slug: z
+      .string()
+      .trim()
+      .min(2)
+      .max(60)
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+      .refine((slug) => !['book', 'portal', 'services', 'contact'].includes(slug)),
+    body: z.string().trim().min(1).max(10000),
+    showInNavigation: z.boolean(),
+  });
   const raw = Object.fromEntries(formData);
   const sectionLayout = z
     .array(websiteSectionSchema)
@@ -20,6 +33,21 @@ export async function saveWebsiteDraft(formData: FormData) {
         ? (() => {
             try {
               return JSON.parse(raw.sectionLayout);
+            } catch {
+              return null;
+            }
+          })()
+        : null,
+    );
+  const customPages = z
+    .array(customPageSchema)
+    .max(10)
+    .refine((pages) => new Set(pages.map((page) => page.slug)).size === pages.length)
+    .safeParse(
+      typeof raw.customPages === 'string'
+        ? (() => {
+            try {
+              return JSON.parse(raw.customPages);
             } catch {
               return null;
             }
@@ -43,7 +71,7 @@ export async function saveWebsiteDraft(formData: FormData) {
       seoDescription: z.string().trim().max(170),
     })
     .safeParse(raw);
-  if (!parsed.success || !sectionLayout.success)
+  if (!parsed.success || !sectionLayout.success || !customPages.success)
     redirect('/app/settings/website?error=Complete+the+required+website+content.');
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.rpc('save_tenant_website_draft', {
@@ -61,6 +89,7 @@ export async function saveWebsiteDraft(formData: FormData) {
       seo_title: parsed.data.seoTitle,
       seo_description: parsed.data.seoDescription,
       section_layout: sectionLayout.data,
+      custom_pages: customPages.data,
     },
   });
   if (error) redirect('/app/settings/website?error=Website+draft+could+not+be+saved.');

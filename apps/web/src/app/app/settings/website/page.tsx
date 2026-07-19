@@ -12,6 +12,7 @@ import {
   WebsiteSectionEditor,
   type WebsiteSection,
 } from './website-section-editor';
+import { WebsiteCustomPagesEditor, type WebsiteCustomPage } from './website-custom-pages-editor';
 type SP = Promise<Record<string, string | string[] | undefined>>;
 export default async function WebsiteSettingsPage({ searchParams }: { searchParams: SP }) {
   const context = await resolveBusinessContext();
@@ -49,6 +50,7 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
   const storedSections = Array.isArray(c.section_layout)
     ? (c.section_layout as WebsiteSection[])
     : defaultWebsiteSections;
+  const customPages = Array.isArray(c.custom_pages) ? (c.custom_pages as WebsiteCustomPage[]) : [];
   return (
     <div className="space-y-6">
       <header>
@@ -141,6 +143,7 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
             </div>
           </fieldset>
           <WebsiteSectionEditor initialSections={storedSections} />
+          <WebsiteCustomPagesEditor initialPages={customPages} />
           <Field
             defaultValue={String(b.primary ?? '#23664f')}
             label="Primary color"
