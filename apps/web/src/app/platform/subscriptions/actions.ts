@@ -28,3 +28,41 @@ export async function transitionSubscription(formData: FormData) {
   });
   revalidatePath('/platform/subscriptions');
 }
+export async function previewPlanChange(formData: FormData) {
+  const context = await resolvePlatformContext();
+  if (!context?.permissions.has('platform.subscriptions.manage')) return;
+  const supabase = await createSupabaseServerClient();
+  await supabase.rpc('preview_tenant_saas_plan_change', {
+    target_business_id: String(formData.get('businessId')),
+    target_plan_version_id: String(formData.get('planVersionId')),
+    effective_timing_value: String(formData.get('effectiveTiming')),
+    reason_value: String(formData.get('reason')),
+  });
+  revalidatePath('/platform/subscriptions');
+}
+export async function applyPlanChange(formData: FormData) {
+  const context = await resolvePlatformContext();
+  if (!context?.permissions.has('platform.subscriptions.manage')) return;
+  const supabase = await createSupabaseServerClient();
+  await supabase.rpc('apply_tenant_saas_plan_change', {
+    change_request_id_value: String(formData.get('changeRequestId')),
+    preview_fingerprint_value: String(formData.get('fingerprint')),
+    confirmation_value: String(formData.get('confirmation')),
+    request_key: `plan-change-${randomUUID()}`,
+  });
+  revalidatePath('/platform/subscriptions');
+}
+export async function grantEntitlementOverride(formData: FormData) {
+  const context = await resolvePlatformContext();
+  if (!context?.permissions.has('platform.subscriptions.manage')) return;
+  const supabase = await createSupabaseServerClient();
+  await supabase.rpc('grant_tenant_entitlement_override', {
+    target_business_id: String(formData.get('businessId')),
+    entitlement_key_value: String(formData.get('entitlementKey')),
+    value_value: JSON.parse(String(formData.get('value') || 'null')),
+    starts_at_value: new Date().toISOString(),
+    expires_at_value: new Date(String(formData.get('expiresAt'))).toISOString(),
+    reason_value: String(formData.get('reason')),
+  });
+  revalidatePath('/platform/subscriptions');
+}

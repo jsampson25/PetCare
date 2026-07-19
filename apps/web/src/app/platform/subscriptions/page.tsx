@@ -4,7 +4,13 @@ import { Button } from '@petcare/ui/button';
 import { Card } from '@petcare/ui/card';
 import { resolvePlatformContext } from '../../../lib/auth/platform-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
-import { assignSubscription, transitionSubscription } from './actions';
+import {
+  applyPlanChange,
+  assignSubscription,
+  grantEntitlementOverride,
+  previewPlanChange,
+  transitionSubscription,
+} from './actions';
 type Plan = {
   billing_interval: string;
   currency_code: string;
@@ -36,13 +42,24 @@ export default async function SubscriptionsPage() {
   const context = await resolvePlatformContext();
   if (!context) return null;
   const supabase = await createSupabaseServerClient();
-  const [planResult, subscriptionResult] = await Promise.all([
+  const [planResult, subscriptionResult, changeResult] = await Promise.all([
     supabase.rpc('list_saas_plans'),
     supabase.rpc('list_tenant_saas_subscriptions'),
+    supabase
+      .from('tenant_saas_plan_change_requests')
+      .select('id,business_id,preview,preview_fingerprint,status')
+      .eq('status', 'previewed'),
   ]);
   const plans = (planResult.data ?? []) as Plan[];
   const subscriptions = (subscriptionResult.data ?? []) as Subscription[];
   const canManage = context.permissions.has('platform.subscriptions.manage');
+  const changes = (changeResult.data ?? []) as {
+    id: string;
+    business_id: string;
+    preview: Record<string, unknown>;
+    preview_fingerprint: string;
+    status: string;
+  }[];
   return (
     <div className="space-y-6">
       <header>
@@ -134,38 +151,127 @@ export default async function SubscriptionsPage() {
               </form>
             ) : null}
             {canManage && item.status ? (
-              <form
-                action={transitionSubscription}
-                className="mt-5 grid gap-3 rounded-lg border border-[var(--border)] p-4 sm:grid-cols-2"
-              >
-                <input name="businessId" type="hidden" value={item.business_id} />
-                <label className="grid gap-1 text-sm font-semibold">
-                  Next state
+              <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                <form
+                  action={transitionSubscription}
+                  className="grid gap-3 rounded-lg border border-[var(--border)] p-4 sm:grid-cols-2"
+                >
+                  <input name="businessId" type="hidden" value={item.business_id} />
+                  <label className="grid gap-1 text-sm font-semibold">
+                    Next state
+                    <select
+                      className="rounded-lg border border-[var(--border)] bg-white px-3 py-2"
+                      name="nextStatus"
+                      required
+                    >
+                      <option value="">Select</option>
+                      <option value="active">Active</option>
+                      <option value="past_due">Past due</option>
+                      <option value="cancel_scheduled">Cancel scheduled</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </label>
+                  <label className="grid gap-1 text-sm font-semibold">
+                    Documented reason
+                    <textarea
+                      className="rounded-lg border border-[var(--border)] px-3 py-2"
+                      minLength={12}
+                      name="reason"
+                      required
+                    />
+                  </label>
+                  <div>
+                    <Button type="submit">Apply state change</Button>
+                  </div>
+                </form>
+                <form
+                  action={previewPlanChange}
+                  className="grid gap-3 rounded-lg border border-[var(--border)] p-4 sm:grid-cols-2"
+                >
+                  <input name="businessId" type="hidden" value={item.business_id} />
+                  <strong className="sm:col-span-2">Preview plan change</strong>
                   <select
                     className="rounded-lg border border-[var(--border)] bg-white px-3 py-2"
-                    name="nextStatus"
-                    required
+                    name="planVersionId"
                   >
-                    <option value="">Select</option>
-                    <option value="active">Active</option>
-                    <option value="past_due">Past due</option>
-                    <option value="cancel_scheduled">Cancel scheduled</option>
-                    <option value="cancelled">Cancelled</option>
+                    {plans.map((plan) => (
+                      <option key={plan.version_id} value={plan.version_id}>
+                        {plan.display_name}
+                      </option>
+                    ))}
                   </select>
-                </label>
-                <label className="grid gap-1 text-sm font-semibold">
-                  Documented reason
+                  <select
+                    className="rounded-lg border border-[var(--border)] bg-white px-3 py-2"
+                    name="effectiveTiming"
+                  >
+                    <option value="immediate">Immediate</option>
+                    <option value="period_end">Period end</option>
+                  </select>
+                  <textarea
+                    className="rounded-lg border border-[var(--border)] px-3 py-2 sm:col-span-2"
+                    minLength={12}
+                    name="reason"
+                    placeholder="Documented reason"
+                    required
+                  />
+                  <Button type="submit">Create preview</Button>
+                </form>
+                {changes
+                  .filter((c) => c.business_id === item.business_id)
+                  .map((c) => (
+                    <form
+                      action={applyPlanChange}
+                      className="grid gap-3 rounded-lg border border-[var(--border)] p-4 sm:col-span-2"
+                      key={c.id}
+                    >
+                      <input name="changeRequestId" type="hidden" value={c.id} />
+                      <input name="fingerprint" type="hidden" value={c.preview_fingerprint} />
+                      <pre className="overflow-auto text-xs sm:col-span-2">
+                        {JSON.stringify(c.preview, null, 2)}
+                      </pre>
+                      <input
+                        className="rounded-lg border border-[var(--border)] px-3 py-2"
+                        name="confirmation"
+                        placeholder={item.public_slug}
+                        required
+                      />
+                      <Button type="submit">Confirm current preview</Button>
+                    </form>
+                  ))}
+                <form
+                  action={grantEntitlementOverride}
+                  className="grid gap-3 rounded-lg border border-[var(--border)] p-4 sm:col-span-2 md:grid-cols-2"
+                >
+                  <input name="businessId" type="hidden" value={item.business_id} />
+                  <strong className="md:col-span-2">Temporary entitlement override</strong>
+                  <input
+                    className="rounded-lg border border-[var(--border)] px-3 py-2"
+                    name="entitlementKey"
+                    placeholder="feature.key"
+                    required
+                  />
+                  <input
+                    className="rounded-lg border border-[var(--border)] px-3 py-2"
+                    name="value"
+                    placeholder='true or {"limit":2}'
+                    required
+                  />
+                  <input
+                    className="rounded-lg border border-[var(--border)] px-3 py-2"
+                    name="expiresAt"
+                    type="datetime-local"
+                    required
+                  />
                   <textarea
                     className="rounded-lg border border-[var(--border)] px-3 py-2"
                     minLength={12}
                     name="reason"
+                    placeholder="Approved reason"
                     required
                   />
-                </label>
-                <div>
-                  <Button type="submit">Apply state change</Button>
-                </div>
-              </form>
+                  <Button type="submit">Grant bounded override</Button>
+                </form>
+              </div>
             ) : null}
           </Card>
         ))}

@@ -715,6 +715,14 @@ Consumers must handle duplicates and verify that the event tenant and lifecycle 
 **When** an operator opens the job  
 **Then** no retry control is offered and the supported remediation path is shown.
 
+## E14 governance completion
+
+- Emergency access is incident-bound, restricted to explicit operational, security, or audit scopes, expires within 15 minutes, alerts security immediately, and requires a post-use review within 24 hours.
+- SaaS plan changes begin with a persisted price, billing-timing, and entitlement preview. Applying the change requires the current preview fingerprint and tenant slug; period-end changes are scheduled rather than applied early.
+- Temporary entitlement overrides have a documented approver and reason, last no more than 90 days, and disappear automatically from the effective entitlement projection at expiry.
+- Irreversible tenant purge requires an eligible closure case, a current readiness fingerprint, an explicit request, a separate approval step, and service-worker completion. Completion evidence is minimized and cannot contain deleted customer or pet content.
+- Every emergency-access and purge transition is append-only evidence protected by platform permissions and row-level security.
+
 ## Measurement
 
 - Tenant provisioning success rate and median completion time

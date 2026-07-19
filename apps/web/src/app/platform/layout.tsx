@@ -37,6 +37,11 @@ const platformNavigation = [
     requiredPermissions: ['platform.closure.read'],
   },
   {
+    href: '/platform/governance',
+    label: 'Safety governance',
+    requiredPermissions: ['platform.break_glass.read'],
+  },
+  {
     href: '/platform/features',
     label: 'Feature controls',
     requiredPermissions: ['platform.features.read'],
