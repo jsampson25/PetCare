@@ -51,51 +51,67 @@ function ArrowIcon() {
 
 function ProductPreview() {
   return (
-    <div className="relative mx-auto w-full max-w-[620px] lg:mr-0">
-      <div className="absolute -left-14 top-20 hidden h-36 w-36 rounded-full bg-[#7dd3fc]/30 blur-3xl sm:block" />
-      <div className="absolute -right-10 -top-12 h-52 w-52 rounded-full bg-[#93c5fd]/35 blur-3xl" />
-      <div className="relative overflow-hidden rounded-[28px] border border-white bg-white p-3 shadow-[0_35px_100px_rgba(30,64,175,0.17)]">
-        <div className="flex items-center justify-between border-b border-[#e4ecf7] px-3 py-3 sm:px-5">
+    <div className="relative mx-auto mt-16 w-full max-w-6xl">
+      <div className="absolute -left-16 top-10 h-56 w-56 rounded-full bg-[#7dd3fc]/25 blur-3xl" />
+      <div className="absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-[#a5b4fc]/25 blur-3xl" />
+      <div className="relative rounded-[32px] border border-white/90 bg-white/75 p-3 shadow-[0_40px_120px_rgba(30,64,175,0.16)] backdrop-blur sm:p-5">
+        <div className="flex items-center justify-between px-2 pb-4 sm:px-3">
           <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#ff846e]" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#f3bd57]" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#57bb8a]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#fb7185]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#fbbf24]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#34d399]" />
           </div>
-          <div className="rounded-full bg-[#eef5ff] px-4 py-1.5 text-[10px] font-semibold text-[#40516a]">
-            Happy Paws · Live operations
-          </div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#52627a]">
+            One brand · Two connected experiences
+          </p>
           <span className="h-7 w-7 rounded-full bg-[#dbeafe]" />
         </div>
-        <div className="grid min-h-[390px] grid-cols-[70px_1fr] sm:grid-cols-[150px_1fr]">
-          <aside className="border-r border-[#dbe7f5] bg-[#0b1f3a] p-3 text-white sm:p-4">
-            <div className="mb-7 flex items-center gap-2">
-              <span className="grid h-8 w-8 place-items-center rounded-xl bg-[#60a5fa] text-sm font-black text-[#07182d]">
-                H
-              </span>
-              <span className="hidden text-xs font-bold sm:block">Happy Paws</span>
-            </div>
-            {['Overview', 'Calendar', 'Guests', 'Care board', 'Messages'].map((item, index) => (
-              <div
-                className={`mb-2 rounded-lg px-2 py-2 text-[10px] ${index === 0 ? 'bg-[#2563eb] font-bold text-white' : 'text-white/75'}`}
-                key={item}
-              >
-                <span className="hidden sm:inline">{item}</span>
-                <span className="mx-auto block h-2.5 w-2.5 rounded-full bg-current sm:hidden" />
+        <div className="grid overflow-hidden rounded-[24px] border border-[#dbe7f5] lg:grid-cols-[0.82fr_1.18fr]">
+          <div className="relative min-h-[410px] overflow-hidden bg-[#eaf3ff] p-6 sm:p-8">
+            <div className="absolute right-[-70px] top-[-60px] h-52 w-52 rounded-full bg-[#93c5fd]/55" />
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-[#2563eb] text-xs font-black text-white">
+                  H
+                </span>
+                <span className="text-xs font-bold">Happy Paws</span>
               </div>
-            ))}
-          </aside>
-          <div className="bg-[#f6f9fe] p-4 sm:p-6">
-            <div className="flex items-end justify-between gap-3">
+              <span className="text-[9px] font-bold text-[#40516a]">
+                Services&nbsp;&nbsp; About&nbsp;&nbsp; Contact
+              </span>
+            </div>
+            <div className="relative mt-12 max-w-sm">
+              <span className="rounded-full bg-white/80 px-3 py-1.5 text-[9px] font-bold text-[#1d4ed8]">
+                Nashville’s neighborhood pet retreat
+              </span>
+              <h3 className="mt-5 text-4xl font-semibold leading-[1.02] tracking-[-0.05em]">
+                Care they love. Confidence you feel.
+              </h3>
+              <p className="mt-4 text-sm leading-6 text-[#40516a]">
+                Boarding, daycare, and grooming in a safe, joyful place that feels like home.
+              </p>
+              <button
+                className="mt-6 rounded-xl bg-[#2563eb] px-4 py-2.5 text-[10px] font-bold text-white"
+                type="button"
+              >
+                Book their stay
+              </button>
+            </div>
+            <div className="absolute bottom-5 right-5 rounded-2xl border border-white bg-white/90 p-3 shadow-lg">
+              <p className="text-[9px] font-bold">4.9 ★</p>
+              <p className="mt-1 text-[8px] text-[#52627a]">Loved by 240+ pet parents</p>
+            </div>
+          </div>
+          <div className="bg-[#f7faff] p-5 sm:p-7">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#52627a]">
-                  Sunday, July 19
+                <p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#52627a]">
+                  Live operations
                 </p>
-                <p className="mt-1 text-xl font-bold tracking-[-0.03em] text-[#0b1f3a] sm:text-2xl">
-                  Good afternoon, Jason
-                </p>
+                <h3 className="mt-1 text-xl font-bold tracking-[-.03em]">Today at Happy Paws</h3>
               </div>
               <button
-                className="hidden rounded-xl bg-[#2563eb] px-3 py-2 text-[10px] font-bold text-white sm:block"
+                className="rounded-xl bg-[#0b1f3a] px-3 py-2 text-[9px] font-bold text-white"
                 type="button"
               >
                 New reservation
@@ -104,51 +120,59 @@ function ProductPreview() {
             <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
               {[
                 ['34', 'In care'],
-                ['8', 'Arrivals'],
-                ['6', 'Departures'],
-                ['12', 'Tasks due'],
+                ['8', 'Arriving'],
+                ['6', 'Departing'],
+                ['12', 'Tasks'],
               ].map(([value, label]) => (
                 <div className="rounded-xl border border-[#dbe7f5] bg-white p-3" key={label}>
-                  <p className="text-xl font-bold text-[#0b1f3a]">{value}</p>
+                  <p className="text-xl font-bold">{value}</p>
                   <p className="mt-1 text-[9px] font-medium text-[#52627a]">{label}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-[1.3fr_0.7fr]">
+            <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_.9fr]">
               <div className="rounded-2xl border border-[#dbe7f5] bg-white p-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-bold">Occupancy</p>
-                  <p className="text-[9px] font-medium text-[#52627a]">This week</p>
+                  <p className="text-xs font-bold">Care pulse</p>
+                  <span className="text-[9px] text-[#52627a]">92% complete</span>
                 </div>
-                <div className="mt-6 flex h-24 items-end gap-2">
-                  {[42, 58, 51, 76, 88, 94, 72].map((height, index) => (
-                    <div className="flex flex-1 flex-col items-center gap-2" key={height + index}>
-                      <div
-                        className="w-full rounded-t-md bg-[#60a5fa]"
-                        style={{ height: `${height}%` }}
-                      />
-                      <span className="text-[8px] text-[#8a948e]">{'SMTWTFS'[index]}</span>
+                <div className="mt-5 space-y-3">
+                  {[
+                    ['Breakfast', 'Complete', 'bg-[#22c55e]'],
+                    ['Morning meds', '2 due', 'bg-[#f59e0b]'],
+                    ['Playgroups', 'On schedule', 'bg-[#2563eb]'],
+                  ].map(([label, status, color]) => (
+                    <div className="flex items-center justify-between text-[10px]" key={label}>
+                      <span className="flex items-center gap-2 font-semibold">
+                        <span className={`h-2 w-2 rounded-full ${color}`} />
+                        {label}
+                      </span>
+                      <span className="text-[#52627a]">{status}</span>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="rounded-2xl bg-[#0b1f3a] p-4 text-white">
-                <p className="text-[10px] font-semibold text-white/80">Care completion</p>
-                <p className="mt-3 text-3xl font-bold">92%</p>
-                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/15">
-                  <div className="h-full w-[92%] rounded-full bg-[#60a5fa]" />
+                <p className="text-[10px] font-semibold text-white/75">Next arrival</p>
+                <div className="mt-4 flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-[#60a5fa] text-xs font-black text-[#07182d]">
+                    C
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold">Cooper</p>
+                    <p className="mt-1 text-[9px] text-white/70">10:30 AM · Suite 12</p>
+                  </div>
                 </div>
-                <p className="mt-4 text-[9px] leading-4 text-white/75">
-                  48 of 52 scheduled care tasks completed
-                </p>
+                <div className="mt-5 rounded-xl bg-white/10 px-3 py-2 text-[9px] text-white/80">
+                  Vaccines verified · Deposit paid
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div className="absolute -bottom-8 -left-4 hidden rounded-2xl border border-[#dbe7f5] bg-white p-4 shadow-[0_18px_50px_rgba(30,64,175,0.14)] sm:block">
-        <p className="text-[10px] font-semibold text-[#52627a]">Website conversion</p>
-        <p className="mt-1 text-xl font-bold text-[#1d4ed8]">+18.4%</p>
+      <div className="absolute left-1/2 top-[49%] hidden -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-[#f7faff] bg-[#2563eb] px-4 py-2 text-[9px] font-black uppercase tracking-[.13em] text-white shadow-xl lg:block">
+        Always connected
       </div>
     </div>
   );
@@ -161,21 +185,23 @@ export default function HomePage() {
 
       <section className="relative border-b border-[#dbe7f5]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(191,219,254,0.72),transparent_30rem),radial-gradient(circle_at_5%_70%,rgba(224,242,254,0.8),transparent_25rem)]" />
-        <div className="relative mx-auto grid max-w-7xl gap-16 px-6 pb-24 pt-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-8 lg:pb-32 lg:pt-24">
-          <div>
+        <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-16 lg:px-8 lg:pb-32 lg:pt-24">
+          <div className="mx-auto max-w-5xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#c8dcf5] bg-white/85 px-3 py-1.5 text-xs font-bold text-[#1e4f91] shadow-sm backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-[#2563eb]" />
-              The modern platform for pet-care businesses
+              Website, booking, and care operations in one platform
             </div>
-            <h1 className="mt-7 max-w-3xl text-[3.35rem] font-semibold leading-[0.98] tracking-[-0.065em] sm:text-7xl lg:text-[5rem]">
-              Your website and your operation,
-              <span className="text-[#2563eb]"> finally together.</span>
+            <h1 className="mx-auto mt-8 max-w-5xl text-[3.25rem] font-semibold leading-[0.98] tracking-[-0.06em] sm:text-7xl lg:text-[5.75rem]">
+              Make every part of pet care
+              <span className="block bg-gradient-to-r from-[#2563eb] via-[#0ea5e9] to-[#2563eb] bg-clip-text text-transparent">
+                feel connected.
+              </span>
             </h1>
-            <p className="mt-7 max-w-xl text-lg leading-8 text-[#40516a] sm:text-xl">
-              Roventra gives boarding, daycare, and grooming businesses a beautiful website,
-              effortless booking, and one connected workspace for every day of care.
+            <p className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-[#40516a] sm:text-xl">
+              Give customers a beautiful, customizable website—and give your team one calm workspace
+              for reservations, pet records, payments, and daily care.
             </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#2563eb] px-6 text-sm font-bold text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)] transition hover:-translate-y-0.5 hover:bg-[#1d4ed8]"
                 href="/pricing"
@@ -189,10 +215,16 @@ export default function HomePage() {
                 See how it works
               </a>
             </div>
-            <div className="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold text-[#40516a]">
-              <span>✓ One connected brand</span>
-              <span>✓ Guided setup</span>
-              <span>✓ Cancel anytime</span>
+            <div className="mt-9 flex flex-wrap justify-center gap-x-7 gap-y-2 text-xs font-semibold text-[#40516a]">
+              <span>One connected brand</span>
+              <span aria-hidden="true" className="text-[#93b6df]">
+                •
+              </span>
+              <span>Guided setup</span>
+              <span aria-hidden="true" className="text-[#93b6df]">
+                •
+              </span>
+              <span>Cancel anytime</span>
             </div>
           </div>
           <ProductPreview />
