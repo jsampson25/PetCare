@@ -12,6 +12,11 @@ const platformNavigation = [
     requiredPermissions: ['platform.businesses.read'],
   },
   {
+    href: '/platform/provisioning',
+    label: 'Provisioning',
+    requiredPermissions: ['platform.provisioning.read'],
+  },
+  {
     href: '/platform/subscriptions',
     label: 'Subscriptions',
     requiredPermissions: ['platform.subscriptions.read'],

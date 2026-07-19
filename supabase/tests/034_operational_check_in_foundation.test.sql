@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(293);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(304);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -301,4 +301,17 @@ select is(jsonb_array_length(app.search_platform_audit_events((select id from bu
 select is(jsonb_array_length(app.search_platform_audit_events(null,null,'support.','SUP-1042',null,null,100)),2,'audit search filters by support case');
 select is((select count(*) from invoices),1::bigint,'health and audit projections never mutate tenant commerce');
 select is((select count(*) from customers),1::bigint,'platform health never exposes or mutates customer records');
+select is(app.platform_has_permission('platform.provisioning.manage'),true,'platform administrator receives provisioning recovery permission');
+set local role service_role;
+select lives_ok($$select app.register_tenant_provisioning_run((select id from businesses where public_slug='checkin-test'),'provisioning-checkin-test')$$,'worker registers resumable provisioning run');
+select lives_ok($$select app.record_tenant_provisioning_step((select id from tenant_provisioning_runs),'reserve_tenant','completed','','',true,'provision-reserved')$$,'first provisioning step completes');
+select lives_ok($$select app.record_tenant_provisioning_step((select id from tenant_provisioning_runs),'owner_membership','failed','identity_provider_timeout','Identity provider did not respond before safe timeout.',true,'provision-owner-failed')$$,'worker records sanitized retryable failure');
+set local role authenticated;
+select is((select status from tenant_provisioning_runs),'failed','provisioning run exposes failed state');
+select is((select current_step_key from tenant_provisioning_runs),'owner_membership','failed step remains explicit');
+select is(jsonb_array_length(app.list_tenant_provisioning_runs()),1,'provisioning directory returns ordered run');
+select lives_ok($$select app.retry_tenant_provisioning_step((select id from tenant_provisioning_runs),'Identity provider recovered; retry owner membership.','provision-owner-retry')$$,'operator safely retries failed step');
+select is((select status from tenant_provisioning_runs),'running','retry resumes provisioning run');
+select is((select status from tenant_provisioning_steps where step_key='owner_membership'),'running','retry resumes only failed step');
+select is((select count(*) from tenant_provisioning_events),4::bigint,'provisioning history remains immutable and additive');
 select * from finish();rollback;

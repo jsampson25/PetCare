@@ -125,7 +125,9 @@ The administrative job directory exposes only safe operational metadata: tenant 
 
 Privacy operations now coordinate access, correction, export, restriction, deletion, and objection requests without issuing an unreviewed cross-domain cascade. Identity verification is required before fulfillment work, each owning domain records its action and minimized evidence, retained records require a retention basis, legal holds block fulfillment, and the request cannot complete while any domain action remains pending, in progress, or blocked.
 
-Platform health now derives cross-tenant counts for lifecycle restrictions, past-due subscriptions, active support access, safely retryable job failures, overdue privacy requests, and open critical issues. Founder support can correlate a sanitized issue to a tenant or platform source without copying customer or pet data. The unified administrative audit search applies bounded tenant, actor, event, case/correlation, and time filters across every E14 control history.
+Platform health now derives cross-tenant counts for lifecycle restrictions, past-due subscriptions, active support access, safely retryable job failures, overdue privacy requests, and open critical issues. Founder support can correlate a sanitized issue to a tenant or platform source without copying customer or pet data. The unified administrative audit search applies bounded tenant, actor, event, case/correlation, and time filters across tenant, subscription, feature, support, job, privacy, and health control history.
+
+Tenant provisioning now records a resumable run with ordered steps for tenant reservation, owner membership, security context, defaults, trial subscription, hostname, onboarding readiness, and isolation validation. Internal workers append sanitized step outcomes. Operators can see the exact failed step and may retry only when its contract is explicitly marked retryable; completed work remains intact and the run resumes from the failure.
 
 ```text
 Prospect
