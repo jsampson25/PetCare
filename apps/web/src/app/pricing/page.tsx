@@ -27,6 +27,7 @@ const plans = [
       'Email confirmations',
     ],
     featured: false,
+    trial: true,
   },
   {
     key: 'growth',
@@ -44,6 +45,7 @@ const plans = [
       'Reports and performance insights',
     ],
     featured: true,
+    trial: true,
   },
   {
     key: 'scale',
@@ -61,6 +63,7 @@ const plans = [
       'Guided migration and onboarding',
     ],
     featured: false,
+    trial: false,
   },
 ];
 
@@ -151,6 +154,12 @@ export default function PricingPage() {
             Every plan brings your public website, customer booking experience, and business
             workspace together.
           </p>
+          <div className="mx-auto mt-7 flex w-fit items-center gap-3 rounded-2xl border border-[#bfdbfe] bg-white/85 px-5 py-3 text-sm font-bold text-[#1e4f91] shadow-sm backdrop-blur">
+            <span className="grid h-7 w-7 place-items-center rounded-full bg-[#dbeafe] text-[#1d4ed8]">
+              14
+            </span>
+            Try Starter or Growth free for 14 days. No credit card required.
+          </div>
           <div className="mx-auto mt-8 inline-flex rounded-full border border-[#c8d9ee] bg-white p-1 text-xs font-bold shadow-sm">
             <span className="rounded-full bg-[#2563eb] px-4 py-2 text-white">Monthly</span>
             <span className="px-4 py-2 text-[#40516a]">Annual · save 15%</span>
@@ -168,6 +177,11 @@ export default function PricingPage() {
               {plan.featured ? (
                 <span className="absolute right-6 top-6 rounded-full bg-[#7dd3fc] px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#0b1f3a]">
                   Most popular
+                </span>
+              ) : null}
+              {plan.trial && !plan.featured ? (
+                <span className="absolute right-6 top-6 rounded-full bg-[#e8f1ff] px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#1d4ed8]">
+                  14 days free
                 </span>
               ) : null}
               <p
@@ -190,10 +204,21 @@ export default function PricingPage() {
               </div>
               <Link
                 className={`mt-8 inline-flex min-h-12 items-center justify-center rounded-xl text-sm font-bold transition ${plan.featured ? 'bg-[#60a5fa] text-[#07182d] hover:bg-[#93c5fd]' : 'bg-[#2563eb] text-white hover:bg-[#1d4ed8]'}`}
-                href={`/auth/register?plan=${plan.key}`}
+                href={
+                  plan.trial
+                    ? `/auth/register?plan=${plan.key}&trial=14`
+                    : `/auth/register?plan=${plan.key}`
+                }
               >
-                {plan.key === 'scale' ? 'Talk to our team' : 'Choose plan'}
+                {plan.key === 'scale' ? 'Talk to our team' : 'Start 14-day free trial'}
               </Link>
+              {plan.trial ? (
+                <p
+                  className={`mt-3 text-center text-xs ${plan.featured ? 'text-white/65' : 'text-[#52627a]'}`}
+                >
+                  Explore the platform before choosing to pay.
+                </p>
+              ) : null}
               <div className={`my-8 h-px ${plan.featured ? 'bg-white/20' : 'bg-[#e4ecf7]'}`} />
               <ul className="space-y-4 text-sm">
                 {plan.features.map((feature) => (
@@ -213,8 +238,8 @@ export default function PricingPage() {
           ))}
         </div>
         <p className="mt-8 text-center text-xs leading-5 text-[#52627a]">
-          Preview pricing for the Roventra early-access release. Plan billing and final entitlements
-          are confirmed before checkout.
+          Your 14-day trial starts after account verification. You can choose a paid plan or stop
+          before the trial ends. Scale plans use guided onboarding.
         </p>
       </section>
 

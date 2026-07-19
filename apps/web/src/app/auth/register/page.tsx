@@ -11,13 +11,22 @@ type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 export default async function RegisterPage({ searchParams }: { searchParams: SearchParameters }) {
   const parameters = await searchParams;
   const error = typeof parameters.error === 'string' ? parameters.error : undefined;
+  const requestedPlan =
+    typeof parameters.plan === 'string' && ['starter', 'growth', 'scale'].includes(parameters.plan)
+      ? parameters.plan
+      : 'growth';
+  const startsWithTrial = parameters.trial === '14' && requestedPlan !== 'scale';
   const next = getSafeRedirect(
     typeof parameters.next === 'string' ? parameters.next : undefined,
     '/onboarding',
   );
   return (
     <AuthCard
-      description="Create your owner account, set up your pet-care business, and begin building its website."
+      description={
+        startsWithTrial
+          ? `Create your owner account to begin a 14-day ${requestedPlan} trial. No credit card is required.`
+          : 'Create your owner account, set up your pet-care business, and begin building its website.'
+      }
       error={error}
       footer={
         <>
@@ -27,10 +36,21 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
           </Link>
         </>
       }
-      title="Start your pet-care business"
+      title={startsWithTrial ? 'Start your free trial' : 'Start your pet-care business'}
     >
       <form action={register} className="space-y-5">
         <input name="next" type="hidden" value={next} />
+        <input name="plan" type="hidden" value={requestedPlan} />
+        <input name="trial" type="hidden" value={startsWithTrial ? '14' : ''} />
+        {startsWithTrial ? (
+          <div className="rounded-xl border border-[#bfdbfe] bg-[#eff6ff] px-4 py-3 text-sm text-[#1e4f91]">
+            <strong className="capitalize">{requestedPlan} plan</strong>
+            <span className="mx-2 text-[#93b6df]">•</span>
+            14 days free
+            <span className="mx-2 text-[#93b6df]">•</span>
+            No credit card
+          </div>
+        ) : null}
         <Field autoComplete="name" label="Your name" name="displayName" required />
         <Field autoComplete="email" label="Email address" name="email" required type="email" />
         <Field

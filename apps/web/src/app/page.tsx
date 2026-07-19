@@ -204,9 +204,9 @@ export default function HomePage() {
             <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#2563eb] px-6 text-sm font-bold text-white shadow-[0_12px_30px_rgba(37,99,235,0.25)] transition hover:-translate-y-0.5 hover:bg-[#1d4ed8]"
-                href="/pricing"
+                href="/auth/register?plan=growth&trial=14"
               >
-                Explore plans <ArrowIcon />
+                Start free for 14 days <ArrowIcon />
               </Link>
               <a
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#c8d9ee] bg-white/85 px-6 text-sm font-bold text-[#18324f] transition hover:border-[#93b6df] hover:bg-white"
@@ -216,7 +216,7 @@ export default function HomePage() {
               </a>
             </div>
             <div className="mt-9 flex flex-wrap justify-center gap-x-7 gap-y-2 text-xs font-semibold text-[#40516a]">
-              <span>One connected brand</span>
+              <span>No credit card required</span>
               <span aria-hidden="true" className="text-[#93b6df]">
                 •
               </span>
@@ -224,7 +224,7 @@ export default function HomePage() {
               <span aria-hidden="true" className="text-[#93b6df]">
                 •
               </span>
-              <span>Cancel anytime</span>
+              <span>Full guided setup</span>
             </div>
           </div>
           <ProductPreview />
@@ -312,9 +312,9 @@ export default function HomePage() {
           </div>
           <Link
             className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2563eb] px-6 text-sm font-bold text-white shadow-[0_12px_30px_rgba(37,99,235,0.2)] transition hover:-translate-y-0.5 hover:bg-[#1d4ed8]"
-            href="/pricing"
+            href="/auth/register?plan=growth&trial=14"
           >
-            View pricing <ArrowIcon />
+            Start your free trial <ArrowIcon />
           </Link>
         </div>
       </section>

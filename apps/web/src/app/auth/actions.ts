@@ -44,6 +44,12 @@ export async function register(formData: FormData) {
   const password = passwordSchema.safeParse(field(formData, 'password'));
   const confirmation = field(formData, 'passwordConfirmation');
   const displayName = z.string().min(1).max(120).safeParse(field(formData, 'displayName'));
+  const requestedPlan = z
+    .enum(['starter', 'growth', 'scale'])
+    .catch('growth')
+    .parse(field(formData, 'plan'));
+  const requestedTrialDays =
+    field(formData, 'trial') === '14' && requestedPlan !== 'scale' ? 14 : 0;
   const next = getSafeRedirect(field(formData, 'next'), '/auth/verified');
   if (
     !email.success ||
@@ -67,7 +73,11 @@ export async function register(formData: FormData) {
     email: email.data,
     password: password.data,
     options: {
-      data: { display_name: displayName.data },
+      data: {
+        display_name: displayName.data,
+        requested_plan: requestedPlan,
+        requested_trial_days: requestedTrialDays,
+      },
       emailRedirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });

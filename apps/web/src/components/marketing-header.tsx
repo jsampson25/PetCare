@@ -35,16 +35,16 @@ export function MarketingHeader() {
           </Link>
           <Link
             className="rounded-xl bg-[#2563eb] px-5 py-3 text-white shadow-[0_8px_22px_rgba(37,99,235,0.22)] transition hover:-translate-y-0.5 hover:bg-[#1d4ed8]"
-            href="/pricing"
+            href="/auth/register?plan=growth&trial=14"
           >
-            Get started
+            Start free trial
           </Link>
         </nav>
         <Link
           className="rounded-xl bg-[#2563eb] px-4 py-2.5 text-sm font-bold text-white md:hidden"
-          href="/pricing"
+          href="/auth/register?plan=growth&trial=14"
         >
-          Plans
+          Try free
         </Link>
       </div>
     </header>
