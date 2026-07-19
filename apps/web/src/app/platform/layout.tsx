@@ -26,6 +26,11 @@ const platformNavigation = [
     label: 'Support access',
     requiredPermissions: ['platform.support.read'],
   },
+  {
+    href: '/platform/jobs',
+    label: 'Administrative jobs',
+    requiredPermissions: ['platform.jobs.read'],
+  },
   { href: '/platform/audit', label: 'Audit', requiredPermissions: ['platform.audit.read'] },
 ] as const;
 

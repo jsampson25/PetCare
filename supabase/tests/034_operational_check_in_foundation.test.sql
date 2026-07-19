@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(255);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(267);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -261,4 +261,18 @@ select is(jsonb_array_length(app.list_platform_support_sessions()),1,'support di
 select lives_ok($$select app.revoke_platform_support_session((select id from platform_support_sessions),'Reported diagnostic review completed.','support-revoke')$$,'operator revokes support access immediately');
 select is(app.platform_support_session_allows((select id from businesses where public_slug='checkin-test'),'operations',false),false,'revoked support session no longer authorizes access');
 select is((select count(*) from platform_support_session_events),2::bigint,'support session history is immutable and additive');
+select is(app.platform_has_permission('platform.jobs.manage'),true,'platform administrator receives safe retry permission');
+set local role service_role;
+select lives_ok($$select app.register_platform_administrative_job((select id from businesses where public_slug='checkin-test'),'subscription_reconciliation','subscription:test','failed',true,40,'provider_timeout','Provider did not respond before the safe timeout.','job-retryable')$$,'internal worker registers sanitized failed job');
+select lives_ok($$select app.register_platform_administrative_job((select id from businesses where public_slug='checkin-test'),'privacy_export','privacy:test','failed',false,20,'manual_review','Export requires privacy-operator review.','job-manual')$$,'internal worker registers nonretryable failure');
+set local role authenticated;
+select is(jsonb_array_length(app.list_platform_administrative_jobs()),2,'job directory exposes both safe records');
+select is((select next_action from platform_administrative_jobs where idempotency_key='job-retryable'),'retry','retryable failure exposes retry action');
+select is((select next_action from platform_administrative_jobs where idempotency_key='job-manual'),'investigate','nonretryable failure requires investigation');
+select throws_ok($$select app.retry_platform_administrative_job((select id from platform_administrative_jobs where idempotency_key='job-manual'),'Attempt an unsafe retry.','job-unsafe-retry')$$,'P0001','job is not safely retryable','unsafe job retry is rejected');
+select lives_ok($$select app.retry_platform_administrative_job((select id from platform_administrative_jobs where idempotency_key='job-retryable'),'Provider recovered; queue idempotent reconciliation.','job-safe-retry')$$,'safe retry is queued');
+select is((select status from platform_administrative_jobs where idempotency_key='job-retryable'),'queued','retried job returns to queue');
+select is((select attempt_count from platform_administrative_jobs where idempotency_key='job-retryable'),2,'retry increments attempt count');
+select is((select count(*) from platform_administrative_job_attempts),3::bigint,'original attempts remain alongside retry request');
+select is((select count(*) from invoices),1::bigint,'administrative jobs remain separate from customer commerce');
 select * from finish();rollback;

@@ -121,6 +121,8 @@ Feature controls now combine an explicit release state, stable tenant percentage
 
 Routine support access now requires a tenant-linked support case, purpose, one or more approved domain scopes, and a duration of no more than two hours. Read-only is the default; supported write commands require a separate platform permission. Every session uses the operator's own identity, expires automatically during authorization checks, can be revoked immediately, produces immutable events, and has a sanitized history available to an authorized tenant owner.
 
+The administrative job directory exposes only safe operational metadata: tenant reference, job type, opaque object reference, status, progress, attempt count, error category, sanitized message, and next permitted action. Internal workers register jobs through a service-only command. Operators may retry only a failed job explicitly declared retryable, and each retry appends an immutable attempt record rather than rewriting failure history.
+
 ```text
 Prospect
   -> Provisioning
