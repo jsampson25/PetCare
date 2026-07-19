@@ -22,6 +22,11 @@ const platformNavigation = [
     requiredPermissions: ['platform.subscriptions.read'],
   },
   {
+    href: '/platform/billing',
+    label: 'Billing reconciliation',
+    requiredPermissions: ['platform.subscriptions.read'],
+  },
+  {
     href: '/platform/features',
     label: 'Feature controls',
     requiredPermissions: ['platform.features.read'],

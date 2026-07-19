@@ -129,6 +129,8 @@ Platform health now derives cross-tenant counts for lifecycle restrictions, past
 
 Tenant provisioning now records a resumable run with ordered steps for tenant reservation, owner membership, security context, defaults, trial subscription, hostname, onboarding readiness, and isolation validation. Internal workers append sanitized step outcomes. Operators can see the exact failed step and may retry only when its contract is explicitly marked retryable; completed work remains intact and the run resumes from the failure.
 
+SaaS billing reconciliation now uses a separate minimized provider-event inbox. Only signature-verified events may update a tenant subscription projection, provider event IDs are deduplicated, and provider creation time prevents an older event from silently reversing newer state. Invalid signatures are quarantined, stale events are retained as evidence, and no SaaS billing event touches customer commerce records.
+
 ```text
 Prospect
   -> Provisioning

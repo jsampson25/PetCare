@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(304);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(318);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -314,4 +314,20 @@ select lives_ok($$select app.retry_tenant_provisioning_step((select id from tena
 select is((select status from tenant_provisioning_runs),'running','retry resumes provisioning run');
 select is((select status from tenant_provisioning_steps where step_key='owner_membership'),'running','retry resumes only failed step');
 select is((select count(*) from tenant_provisioning_events),4::bigint,'provisioning history remains immutable and additive');
+set local role service_role;
+select lives_ok($$select app.register_platform_saas_billing_event('stripe','evt_platform_new',now(),(select id from businesses where public_slug='checkin-test'),'cus_platform_test','sub_platform_test','invoice.payment_failed','past_due',true,repeat('a',64))$$,'verified SaaS billing event enters inbox');
+select lives_ok($$select app.process_platform_saas_billing_event((select id from platform_saas_billing_events where provider_event_id='evt_platform_new'))$$,'verified event converges subscription');
+select lives_ok($$select app.process_platform_saas_billing_event((select id from platform_saas_billing_events where provider_event_id='evt_platform_new'))$$,'repeated worker processing is idempotent');
+select lives_ok($$select app.register_platform_saas_billing_event('stripe','evt_platform_old',now()-interval '1 hour',(select id from businesses where public_slug='checkin-test'),'cus_platform_test','sub_platform_test','invoice.paid','active',true,repeat('b',64))$$,'older verified event is retained');
+select lives_ok($$select app.process_platform_saas_billing_event((select id from platform_saas_billing_events where provider_event_id='evt_platform_old'))$$,'out-of-order event is reconciled safely');
+select lives_ok($$select app.register_platform_saas_billing_event('stripe','evt_platform_bad',now()+interval '1 hour',(select id from businesses where public_slug='checkin-test'),'cus_platform_test','sub_platform_test','invoice.paid','active',false,repeat('c',64))$$,'invalid signature event is quarantined');
+select is(app.register_platform_saas_billing_event('stripe','evt_platform_bad',now()+interval '1 hour',(select id from businesses where public_slug='checkin-test'),'cus_platform_test','sub_platform_test','invoice.paid','active',false,repeat('c',64)),(select id from platform_saas_billing_events where provider_event_id='evt_platform_bad'),'provider event retry is deduplicated');
+set local role authenticated;
+select is((select status from tenant_saas_subscriptions),'past_due','newest verified event controls subscription state');
+select is((select status from platform_saas_billing_events where provider_event_id='evt_platform_old'),'stale','older event cannot reverse newer state');
+select is((select status from platform_saas_billing_events where provider_event_id='evt_platform_bad'),'quarantined','invalid signature remains quarantined');
+select is(jsonb_array_length(app.list_platform_saas_billing_reconciliation()),3,'reconciliation directory exposes all event outcomes');
+select is((select count(*) from platform_saas_billing_reconciliation_events),5::bigint,'billing reconciliation history is additive');
+select is((select count(*) from invoices),1::bigint,'SaaS billing inbox never changes customer invoices');
+select is((select count(*) from payment_transactions),1::bigint,'SaaS reconciliation never changes customer payments');
 select * from finish();rollback;
