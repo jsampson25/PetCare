@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(318);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(332);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -330,4 +330,18 @@ select is(jsonb_array_length(app.list_platform_saas_billing_reconciliation()),3,
 select is((select count(*) from platform_saas_billing_reconciliation_events),5::bigint,'billing reconciliation history is additive');
 select is((select count(*) from invoices),1::bigint,'SaaS billing inbox never changes customer invoices');
 select is((select count(*) from payment_transactions),1::bigint,'SaaS reconciliation never changes customer payments');
+select is(app.platform_has_permission('platform.communications.manage'),true,'platform administrator receives notice management permission');
+select lives_ok($$select app.create_platform_operational_notice('tenant',(select id from businesses where public_slug='checkin-test'),'warning','Scheduled provider maintenance','Payment provider maintenance may briefly delay updates.',now()-interval '1 minute',now()+interval '2 hours',true,'Coordinate a bounded tenant-visible maintenance notice.','platform-notice-test')$$,'operator creates bounded tenant notice draft');
+select is(app.create_platform_operational_notice('tenant',(select id from businesses where public_slug='checkin-test'),'warning','Scheduled provider maintenance','Payment provider maintenance may briefly delay updates.',now()-interval '1 minute',now()+interval '2 hours',true,'Coordinate a bounded tenant-visible maintenance notice.','platform-notice-test'),(select id from platform_operational_notices),'notice creation retry is idempotent');
+select lives_ok($$select app.transition_platform_operational_notice((select id from platform_operational_notices),'published','Maintenance timing and tenant impact are confirmed.','platform-notice-publish')$$,'operator publishes notice explicitly');
+select is((select status from platform_operational_notices),'published','notice lifecycle records publication');
+select lives_ok($$select app.create_platform_internal_tenant_note((select id from businesses where public_slug='checkin-test'),'support','Tenant requested contact before any provider maintenance change.',current_date+30,false,'Retain support coordination context for the active request.','platform-note-test')$$,'operator appends retention-aware internal note');
+select is((app.list_platform_communications()->'notices'->0->>'acknowledgement_required')::boolean,true,'operator directory exposes acknowledgement requirement');
+select is(jsonb_array_length(app.list_platform_communications()->'notes'),1,'authorized operator sees retained internal note');
+select is(jsonb_array_length(app.list_active_tenant_notices((select id from businesses where public_slug='checkin-test'))),1,'tenant receives active targeted notice');
+select is((app.list_active_tenant_notices((select id from businesses where public_slug='checkin-test'))->0->>'acknowledged')::boolean,false,'notice begins unacknowledged');
+select lives_ok($$select app.acknowledge_platform_notice((select id from businesses where public_slug='checkin-test'),(select id from platform_operational_notices))$$,'tenant member acknowledges active notice');
+select lives_ok($$select app.acknowledge_platform_notice((select id from businesses where public_slug='checkin-test'),(select id from platform_operational_notices))$$,'acknowledgement retry is idempotent');
+select is((select count(*) from platform_notice_acknowledgements),1::bigint,'one acknowledgement record is retained');
+select is((select count(*) from platform_communication_events),4::bigint,'notice and note history is immutable and additive');
 select * from finish();rollback;

@@ -131,6 +131,8 @@ Tenant provisioning now records a resumable run with ordered steps for tenant re
 
 SaaS billing reconciliation now uses a separate minimized provider-event inbox. Only signature-verified events may update a tenant subscription projection, provider event IDs are deduplicated, and provider creation time prevents an older event from silently reversing newer state. Invalid signatures are quarantined, stale events are retained as evidence, and no SaaS billing event touches customer commerce records.
 
+Platform communications now separates tenant-visible operational notices from restricted internal notes. Notices have an explicit audience, severity, active window, publication lifecycle, and optional per-user acknowledgement. Internal notes are append-only, permission-restricted, tenant-linked, and hidden after their retention date unless a legal hold applies. Tenant users never receive internal note content through the notice API.
+
 ```text
 Prospect
   -> Provisioning

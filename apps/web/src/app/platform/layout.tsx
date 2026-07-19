@@ -27,6 +27,11 @@ const platformNavigation = [
     requiredPermissions: ['platform.subscriptions.read'],
   },
   {
+    href: '/platform/communications',
+    label: 'Notices and notes',
+    requiredPermissions: ['platform.communications.read'],
+  },
+  {
     href: '/platform/features',
     label: 'Feature controls',
     requiredPermissions: ['platform.features.read'],

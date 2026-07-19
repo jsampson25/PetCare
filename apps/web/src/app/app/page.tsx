@@ -5,6 +5,17 @@ import { Card } from '@petcare/ui/card';
 
 import { resolveBusinessContext } from '../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../lib/supabase/server';
+import { acknowledgePlatformNotice } from './actions';
+
+type PlatformNotice = {
+  acknowledgement_required: boolean;
+  acknowledged: boolean;
+  ends_at: string;
+  message: string;
+  notice_id: string;
+  severity: 'critical' | 'info' | 'warning';
+  title: string;
+};
 
 export default async function BusinessHomePage() {
   const context = await resolveBusinessContext();
@@ -15,6 +26,10 @@ export default async function BusinessHomePage() {
     context.permissions.has('operations.record_feeding') ||
     context.permissions.has('operations.record_medication');
   const canExecuteServices = context.permissions.has('operations.execute_service');
+  const { data: noticeData } = await supabase.rpc('list_active_tenant_notices', {
+    target_business_id: context.businessId,
+  });
+  const platformNotices = (noticeData ?? []) as PlatformNotice[];
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   const end = new Date(start);
@@ -72,6 +87,32 @@ export default async function BusinessHomePage() {
           Live work and exceptions needing attention now.
         </p>
       </header>
+      {platformNotices.map((notice) => (
+        <Alert
+          key={notice.notice_id}
+          title={notice.title}
+          tone={
+            notice.severity === 'critical'
+              ? 'danger'
+              : notice.severity === 'warning'
+                ? 'warning'
+                : 'info'
+          }
+        >
+          <p>{notice.message}</p>
+          <p className="mt-1 text-xs">Ends {new Date(notice.ends_at).toLocaleString()}</p>
+          {notice.acknowledgement_required && !notice.acknowledged ? (
+            <form action={acknowledgePlatformNotice} className="mt-3">
+              <input name="noticeId" type="hidden" value={notice.notice_id} />
+              <button className="font-semibold underline" type="submit">
+                Acknowledge notice
+              </button>
+            </form>
+          ) : notice.acknowledged ? (
+            <p className="mt-2 text-xs font-semibold">Acknowledged</p>
+          ) : null}
+        </Alert>
+      ))}
       {openAlerts ? (
         <Alert title={`${openAlerts} care alert(s) need follow-up`} tone="danger">
           Refused, missed, unavailable, and adverse care outcomes remain visible until resolved.
