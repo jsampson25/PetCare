@@ -137,6 +137,8 @@ Tenant restrictions now require a current impact preview containing only adminis
 
 Tenant closure now has a separate readiness case and current-state fingerprint. Closure cannot begin while pets remain in care, future bookings or balances remain unresolved, or the tenant export is unverified. Legal, financial, privacy, security, and contract holds are recorded separately with minimized bases. Closing and closed states disable new commerce; purge eligibility requires the retention date to pass and all holds to clear, and does not itself delete tenant data.
 
+Administrative audit exports now require an explicit purpose, bounded tenant/actor/event/case/time filters, a maximum row count, authorization, and an expiration of no more than 24 hours. Approval is a separate recorded event. Every CSV retrieval re-evaluates the stored filters against the authoritative audit search, prevents caching, escapes spreadsheet formulas, and appends a download event and counter. Ordinary audit search never creates an export implicitly.
+
 ```text
 Prospect
   -> Provisioning

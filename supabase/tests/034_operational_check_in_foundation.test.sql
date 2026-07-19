@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(356);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(366);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -368,4 +368,14 @@ select is((select lifecycle_status from platform_tenant_controls),'closing','ten
 select lives_ok($$select app.transition_tenant_closure((select id from tenant_closure_cases),'closed',(app.tenant_closure_readiness((select id from businesses where public_slug='checkin-test'))->>'fingerprint'),'Tenant access disabled while governed retention continues.','checkin-test','closure-closed-test')$$,'operator completes non-destructive closure');
 select is((select status from businesses),'archived','closed tenant is removed from interactive business access');
 select throws_ok($$select app.transition_tenant_closure((select id from tenant_closure_cases),'purge_eligible',(app.tenant_closure_readiness((select id from businesses where public_slug='checkin-test'))->>'fingerprint'),'Request purge eligibility before retention obligations expire.','checkin-test','closure-purge-blocked')$$,'P0001','current closure readiness and explicit confirmation required','retention date and active hold block purge eligibility');
+select is(app.platform_has_permission('platform.audit.export'),true,'platform administrator receives protected audit export permission');
+select lives_ok($$select app.request_platform_audit_export((select id from businesses where public_slug='checkin-test'),null,'health.','',now()-interval '2 days',now()+interval '1 day',100,'Investigate correlated platform health events.',now()+interval '1 hour','audit-export-test')$$,'operator requests bounded purpose-bound export');
+select is(app.request_platform_audit_export((select id from businesses where public_slug='checkin-test'),null,'health.','',now()-interval '2 days',now()+interval '1 day',100,'Investigate correlated platform health events.',now()+interval '1 hour','audit-export-test'),(select id from platform_audit_export_requests),'export request retry is idempotent');
+select is((select status from platform_audit_export_requests),'requested','export requires explicit approval');
+select lives_ok($$select app.approve_platform_audit_export((select id from platform_audit_export_requests),'Approved for bounded founder incident review.','audit-export-approve')$$,'authorized operator approves export');
+select is((select status from platform_audit_export_requests),'approved','approved export becomes downloadable until expiry');
+select is(jsonb_typeof(app.consume_platform_audit_export((select id from platform_audit_export_requests),'audit-download-test')->'rows'),'array','download re-evaluates stored audit filters');
+select lives_ok($$select app.consume_platform_audit_export((select id from platform_audit_export_requests),'audit-download-test')$$,'download retry is idempotently audited');
+select is((select download_count from platform_audit_export_requests),1,'one logical download is counted');
+select is((select count(*) from platform_audit_export_events),3::bigint,'request approval and download history is additive');
 select * from finish();rollback;
