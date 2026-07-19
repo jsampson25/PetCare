@@ -7,6 +7,8 @@ import { createSupabaseServerClient } from '../../../lib/supabase/server';
 import { transitionTenant } from './actions';
 type Tenant = {
   active_member_count: number;
+  block_marketing: boolean;
+  block_new_bookings: boolean;
   business_id: string;
   business_status: string;
   changed_at: string;
@@ -14,8 +16,20 @@ type Tenant = {
   lifecycle_status: string;
   location_count: number;
   name: string;
+  impact: {
+    active_pets_in_care: number;
+    active_staff_members: number;
+    fingerprint: string;
+    future_bookings: number;
+    open_care_tasks: number;
+    published_website: boolean;
+    unpaid_invoice_count: number;
+  };
+  preserve_care_access: boolean;
   public_slug: string;
+  review_at: string | null;
   restriction_code: string | null;
+  tenant_read_only: boolean;
 };
 export default async function PlatformBusinessesPage() {
   const context = await resolvePlatformContext();
@@ -61,12 +75,31 @@ export default async function PlatformBusinessesPage() {
             <p className="mt-3 text-xs text-[var(--text-secondary)]">
               Control changed {new Date(tenant.changed_at).toLocaleString()}
             </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                ['Pets currently in care', tenant.impact.active_pets_in_care],
+                ['Future bookings', tenant.impact.future_bookings],
+                ['Open care tasks', tenant.impact.open_care_tasks],
+                ['Unpaid invoices', tenant.impact.unpaid_invoice_count],
+              ].map(([label, value]) => (
+                <div className="rounded-lg border border-[var(--border)] p-3" key={label}>
+                  <p className="text-xl font-bold tabular-nums">{value}</p>
+                  <p className="text-xs text-[var(--text-secondary)]">{label}</p>
+                </div>
+              ))}
+            </div>
+            <Alert title="Restriction impact preview" tone="warning">
+              New bookings and marketing will stop. Existing care access remains available so staff
+              can record care and complete checkout. Suspension additionally makes ordinary tenant
+              administration read-only. This preview must still match when the change is submitted.
+            </Alert>
             {canManage ? (
               <form
                 action={transitionTenant}
                 className="mt-5 grid gap-3 rounded-lg border border-[var(--border)] p-4 sm:grid-cols-2"
               >
                 <input name="businessId" type="hidden" value={tenant.business_id} />
+                <input name="impactFingerprint" type="hidden" value={tenant.impact.fingerprint} />
                 <label className="grid gap-1 text-sm font-semibold">
                   Next status
                   <select
@@ -95,6 +128,14 @@ export default async function PlatformBusinessesPage() {
                     minLength={12}
                     name="reason"
                     required
+                  />
+                </label>
+                <label className="grid gap-1 text-sm font-semibold sm:col-span-2">
+                  Required review time for a restriction
+                  <input
+                    className="rounded-lg border border-[var(--border)] px-3 py-2"
+                    name="reviewAt"
+                    type="datetime-local"
                   />
                 </label>
                 <label className="grid gap-1 text-sm font-semibold sm:col-span-2">

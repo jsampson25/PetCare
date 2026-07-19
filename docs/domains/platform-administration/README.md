@@ -133,6 +133,8 @@ SaaS billing reconciliation now uses a separate minimized provider-event inbox. 
 
 Platform communications now separates tenant-visible operational notices from restricted internal notes. Notices have an explicit audience, severity, active window, publication lifecycle, and optional per-user acknowledgement. Internal notes are append-only, permission-restricted, tenant-linked, and hidden after their retention date unless a legal hold applies. Tenant users never receive internal note content through the notice API.
 
+Tenant restrictions now require a current impact preview containing only administrative counts: pets in care, future bookings, open care tasks, unpaid invoices, website state, and active staff. A stale preview cannot authorize a transition. Restricted tenants stop accepting new bookings and outbound marketing while existing care work remains available; suspension adds a tenant read-only posture. Every restriction has a review time, reason, policy code, and immutable impact evidence, and reactivation clears the restriction policy.
+
 ```text
 Prospect
   -> Provisioning
