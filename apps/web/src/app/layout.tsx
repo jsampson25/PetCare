@@ -5,10 +5,11 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'PetCare',
-    template: '%s | PetCare',
+    default: 'Roventra | Pet-care business software, beautifully connected',
+    template: '%s | Roventra',
   },
-  description: 'Modern reservations and operations for pet care businesses.',
+  description:
+    'A modern website, booking experience, and operating platform for boarding, daycare, and grooming businesses.',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
