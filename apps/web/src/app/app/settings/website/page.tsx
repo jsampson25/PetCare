@@ -47,7 +47,8 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
         <p className="text-sm font-bold text-[var(--action-primary)]">Customer website</p>
         <h1 className="mt-2 text-3xl font-black">Website editor</h1>
         <p className="mt-2 text-[var(--text-secondary)]">
-          Edit a governed light theme, preview safely, and publish an immutable version.
+          Choose a complete site layout, apply your brand, preview every customer-facing surface,
+          and publish when it is ready.
         </p>
       </header>
       {typeof q.notice === 'string' ? (
@@ -62,18 +63,75 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
       ) : null}
       <Card title="Draft content" description={`Live status: ${site?.status ?? 'not configured'}`}>
         <form action={saveWebsiteDraft} className="grid gap-4 sm:grid-cols-2">
-          <label className="text-sm font-bold">
-            Theme
-            <select
-              className="mt-2 min-h-12 w-full rounded-lg border px-3"
-              defaultValue={site?.theme_key ?? 'modern'}
-              name="theme"
-            >
-              <option value="modern">Modern</option>
-              <option value="warm">Warm</option>
-              <option value="classic">Classic</option>
-            </select>
-          </label>
+          <fieldset className="sm:col-span-2">
+            <legend className="text-sm font-black">Choose your site layout</legend>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              Each layout changes the logo, navigation, hero, and page composition. Your colors and
+              identity also carry into booking and the customer portal.
+            </p>
+            <div className="mt-4 grid gap-4 lg:grid-cols-3">
+              {[
+                {
+                  key: 'modern',
+                  name: 'Clean centered',
+                  description: 'Centered logo and an editorial, premium presentation.',
+                  preview: 'centered',
+                },
+                {
+                  key: 'classic',
+                  name: 'Classic left',
+                  description: 'Familiar left-aligned brand with clear navigation.',
+                  preview: 'left',
+                },
+                {
+                  key: 'warm',
+                  name: 'Modern split',
+                  description: 'Balanced brand, navigation, and booking action.',
+                  preview: 'split',
+                },
+              ].map((theme) => (
+                <label
+                  className="group cursor-pointer rounded-2xl border border-[var(--border-default)] bg-white p-3 has-[:checked]:border-[var(--action-primary)] has-[:checked]:ring-2 has-[:checked]:ring-[var(--action-primary)]/15"
+                  key={theme.key}
+                >
+                  <input
+                    className="sr-only"
+                    defaultChecked={(site?.theme_key ?? 'modern') === theme.key}
+                    name="theme"
+                    type="radio"
+                    value={theme.key}
+                  />
+                  <span className="block overflow-hidden rounded-xl border bg-[#fafafa]">
+                    <span
+                      className={`grid min-h-14 items-center gap-2 border-b bg-white px-3 ${theme.preview === 'centered' ? 'grid-cols-3' : 'grid-cols-[auto_1fr_auto]'}`}
+                    >
+                      {theme.preview === 'centered' ? (
+                        <span className="h-1 w-12 bg-slate-200" />
+                      ) : null}
+                      <span
+                        className={`${theme.preview === 'centered' ? 'justify-self-center' : ''} size-7 rounded-lg bg-[var(--action-primary)]`}
+                      />
+                      <span className="flex justify-end gap-1">
+                        <span className="h-1 w-6 bg-slate-200" />
+                        <span className="h-1 w-6 bg-slate-200" />
+                      </span>
+                    </span>
+                    <span className="grid min-h-28 place-items-center p-4 text-center">
+                      <span>
+                        <span className="mx-auto block h-2 w-28 rounded bg-slate-800" />
+                        <span className="mx-auto mt-2 block h-1.5 w-36 rounded bg-slate-200" />
+                        <span className="mx-auto mt-3 block h-6 w-16 rounded-md bg-[var(--action-primary)]" />
+                      </span>
+                    </span>
+                  </span>
+                  <span className="mt-3 block font-black">{theme.name}</span>
+                  <span className="mt-1 block text-sm leading-5 text-[var(--text-secondary)]">
+                    {theme.description}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <Field
             defaultValue={String(b.primary ?? '#23664f')}
             label="Primary color"

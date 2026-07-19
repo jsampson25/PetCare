@@ -9,6 +9,7 @@ import { submitInquiry } from './actions';
 
 type Site = {
   business: { name: string; slug: string };
+  theme_key: 'modern' | 'warm' | 'classic';
   brand_tokens: { primary: string; accent: string };
   content: Record<string, unknown>;
   services: Array<{ name: string; description: string | null; category: string }>;
@@ -49,6 +50,44 @@ export default async function TenantSitePage({
   const faqs = Array.isArray(content.faqs)
     ? (content.faqs as Array<{ question: string; answer: string }>)
     : [];
+  const centeredHeader = site.theme_key === 'modern';
+  const splitHeader = site.theme_key === 'warm';
+  const logoMark = (
+    <span
+      className="grid size-10 place-items-center rounded-2xl text-sm font-black text-white"
+      style={{ background: 'var(--tenant-primary)' }}
+      aria-hidden="true"
+    >
+      HP
+    </span>
+  );
+  const brand = (
+    <a
+      className={`flex items-center gap-3 font-black tracking-tight ${centeredHeader ? 'flex-col gap-1 text-center' : 'text-lg'}`}
+      href="#top"
+    >
+      {logoMark}
+      <span>
+        <span className="block">{site.business.name}</span>
+        {centeredHeader ? (
+          <span className="block text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Boarding · Daycare · Grooming
+          </span>
+        ) : null}
+      </span>
+    </a>
+  );
+  const navigation = (
+    <nav
+      className="hidden items-center gap-7 text-sm font-bold md:flex"
+      aria-label="Business website"
+    >
+      <a href="#services">Services</a>
+      <a href="#about">About</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  );
   return (
     <main
       className="min-h-screen bg-[#fbfcfa] text-[#17211b]"
@@ -60,43 +99,56 @@ export default async function TenantSitePage({
         } as CSSProperties
       }
     >
-      <header className="sticky top-0 z-30 border-b border-black/5 bg-[#fbfcfa]/90 backdrop-blur">
-        <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-6 px-6">
-          <a className="flex items-center gap-3 text-lg font-black tracking-tight" href="#top">
-            <span
-              className="grid size-10 place-items-center rounded-2xl text-white"
-              style={{ background: 'var(--tenant-primary)' }}
-              aria-hidden="true"
-            >
-              P
-            </span>
-            {site.business.name}
-          </a>
-          <nav className="hidden gap-7 text-sm font-bold md:flex" aria-label="Business website">
-            <a href="#services">Services</a>
-            <a href="#about">About</a>
-            <a href="#faq">FAQ</a>
-            <a href="#contact">Contact</a>
-          </nav>
-          <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book care</ButtonLink>
-        </div>
+      <header className="sticky top-0 z-30 border-b border-black/5 bg-white/95 backdrop-blur">
+        {centeredHeader ? (
+          <div className="mx-auto max-w-7xl px-6 py-4">
+            <div className="flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr]">
+              <div className="hidden md:flex">{navigation}</div>
+              {brand}
+              <div className="flex justify-end gap-3">
+                <ButtonLink href="/portal" variant="secondary">
+                  Sign in
+                </ButtonLink>
+                <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
+              </div>
+            </div>
+          </div>
+        ) : splitHeader ? (
+          <div className="mx-auto grid min-h-24 max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-8 px-6">
+            {brand}
+            <div className="justify-self-center">{navigation}</div>
+            <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
+          </div>
+        ) : (
+          <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-6 px-6">
+            {brand}
+            <div className="ml-auto">{navigation}</div>
+            <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
+          </div>
+        )}
       </header>
       <section className="relative overflow-hidden" id="top">
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-24">
-          <div>
+        <div
+          className={`mx-auto grid max-w-7xl gap-12 px-6 py-16 lg:items-center lg:py-24 ${centeredHeader ? 'text-center' : 'lg:grid-cols-[1.05fr_0.95fr]'}`}
+        >
+          <div className={centeredHeader ? 'mx-auto max-w-4xl' : ''}>
             <p
               className="text-xs font-black uppercase tracking-[0.22em]"
               style={{ color: 'var(--tenant-primary)' }}
             >
               Thoughtful care. Happy pets.
             </p>
-            <h1 className="mt-5 max-w-3xl text-5xl font-black leading-[1.02] tracking-[-0.05em] sm:text-6xl">
+            <h1
+              className={`mt-5 max-w-3xl text-5xl font-black leading-[1.02] tracking-[-0.05em] sm:text-6xl ${centeredHeader ? 'mx-auto' : ''}`}
+            >
               {String(content.hero_title)}
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+            <p
+              className={`mt-6 max-w-2xl text-lg leading-8 text-slate-600 ${centeredHeader ? 'mx-auto' : ''}`}
+            >
               {String(content.hero_body)}
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className={`mt-8 flex flex-wrap gap-3 ${centeredHeader ? 'justify-center' : ''}`}>
               <ButtonLink href={`/book?tenant=${site.business.slug}`}>
                 Book your pet&apos;s visit
               </ButtonLink>
@@ -104,13 +156,17 @@ export default async function TenantSitePage({
                 Customer portal
               </ButtonLink>
             </div>
-            <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm font-bold text-slate-600">
+            <div
+              className={`mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm font-bold text-slate-600 ${centeredHeader ? 'justify-center' : ''}`}
+            >
               <span>✓ Secure online booking</span>
               <span>✓ Care updates</span>
               <span>✓ Trusted local team</span>
             </div>
           </div>
-          <div className="relative min-h-[28rem] overflow-hidden rounded-[2.25rem] bg-[linear-gradient(145deg,#dcece1,#f5ead1)] shadow-[0_28px_80px_rgba(30,55,42,.16)]">
+          <div
+            className={`relative min-h-[28rem] overflow-hidden rounded-[2.25rem] bg-[linear-gradient(145deg,color-mix(in_srgb,var(--tenant-accent)_18%,white),color-mix(in_srgb,var(--tenant-primary)_10%,white))] shadow-[0_28px_80px_rgba(30,55,42,.12)] ${centeredHeader ? 'mx-auto mt-2 w-full max-w-5xl' : ''}`}
+          >
             <div className="absolute inset-x-8 bottom-8 rounded-3xl bg-white/90 p-5 shadow-xl backdrop-blur">
               <p
                 className="text-xs font-black uppercase tracking-[0.16em]"
