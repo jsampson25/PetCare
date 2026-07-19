@@ -16,7 +16,8 @@ export function MarketingFooter() {
           </p>
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-[#40516a]">
-          <Link href="/#platform">Platform</Link>
+          <Link href="/solutions">Solutions</Link>
+          <Link href="/features">Features</Link>
           <Link href="/pricing">Pricing</Link>
           <Link href="/auth/sign-in">Sign in</Link>
         </div>

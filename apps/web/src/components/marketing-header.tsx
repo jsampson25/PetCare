@@ -14,8 +14,11 @@ export function MarketingHeader() {
           className="hidden items-center gap-8 text-sm font-semibold text-[#40516a] md:flex"
           aria-label="Marketing navigation"
         >
-          <Link className="transition hover:text-[#1d4ed8]" href="/#platform">
-            Platform
+          <Link className="transition hover:text-[#1d4ed8]" href="/solutions">
+            Solutions
+          </Link>
+          <Link className="transition hover:text-[#1d4ed8]" href="/features">
+            Features
           </Link>
           <Link className="transition hover:text-[#1d4ed8]" href="/pricing">
             Pricing
