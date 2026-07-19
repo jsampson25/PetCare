@@ -21,6 +21,11 @@ const platformNavigation = [
     label: 'Feature controls',
     requiredPermissions: ['platform.features.read'],
   },
+  {
+    href: '/platform/support',
+    label: 'Support access',
+    requiredPermissions: ['platform.support.read'],
+  },
   { href: '/platform/audit', label: 'Audit', requiredPermissions: ['platform.audit.read'] },
 ] as const;
 

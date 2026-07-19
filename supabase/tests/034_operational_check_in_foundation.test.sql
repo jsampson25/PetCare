@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(245);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(255);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -251,4 +251,14 @@ select lives_ok($$select app.configure_platform_feature('live.operations','Live 
 select is((app.evaluate_tenant_feature((select id from businesses where public_slug='checkin-test'),'live.operations')->>'source'),'kill_switch','kill switch wins over tenant targeting');
 select is((select count(*) from platform_feature_events),4::bigint,'feature changes preserve immutable audit history');
 select is((select count(*) from invoices),1::bigint,'feature controls never mutate customer commerce');
+select is(app.platform_has_permission('platform.support.manage'),true,'platform administrator receives support session permission');
+select lives_ok($$select app.open_platform_support_session((select id from businesses where public_slug='checkin-test'),'SUP-1042','Investigate delayed operational dashboard refresh.',array['operations','audit'],false,30,'Review safe operational diagnostics for reported delay.','support-open')$$,'operator opens case-linked support session');
+select is((select count(*) from platform_support_cases),1::bigint,'support case is tenant linked');
+select is((select status from platform_support_sessions),'active','support session begins active');
+select is(app.platform_support_session_allows((select id from businesses where public_slug='checkin-test'),'operations',false),true,'active support scope authorizes read access');
+select is(app.platform_support_session_allows((select id from businesses where public_slug='checkin-test'),'operations',true),false,'read-only support session cannot authorize writes');
+select is(jsonb_array_length(app.list_platform_support_sessions()),1,'support directory lists safe session metadata');
+select lives_ok($$select app.revoke_platform_support_session((select id from platform_support_sessions),'Reported diagnostic review completed.','support-revoke')$$,'operator revokes support access immediately');
+select is(app.platform_support_session_allows((select id from businesses where public_slug='checkin-test'),'operations',false),false,'revoked support session no longer authorizes access');
+select is((select count(*) from platform_support_session_events),2::bigint,'support session history is immutable and additive');
 select * from finish();rollback;

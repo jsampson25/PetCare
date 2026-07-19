@@ -119,6 +119,8 @@ The initial SaaS subscription projection contains versioned plans and entitlemen
 
 Feature controls now combine an explicit release state, stable tenant percentage assignment, current SaaS entitlement, and optional time-bounded tenant override. An emergency kill switch overrides every rollout or tenant grant, requires feature-key confirmation, and leaves an immutable platform event. Tenant overrides require a reason and cannot manufacture an entitlement that the active plan does not provide.
 
+Routine support access now requires a tenant-linked support case, purpose, one or more approved domain scopes, and a duration of no more than two hours. Read-only is the default; supported write commands require a separate platform permission. Every session uses the operator's own identity, expires automatically during authorization checks, can be revoked immediately, produces immutable events, and has a sanitized history available to an authorized tenant owner.
+
 ```text
 Prospect
   -> Provisioning
