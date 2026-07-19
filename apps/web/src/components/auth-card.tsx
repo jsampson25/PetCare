@@ -4,16 +4,20 @@ import type { ReactNode } from 'react';
 
 type AuthCardProps = {
   children: ReactNode;
+  description?: string;
   error?: string;
   footer?: ReactNode;
   notice?: string;
   title: string;
 };
 
-export function AuthCard({ children, error, footer, notice, title }: AuthCardProps) {
+export function AuthCard({ children, description, error, footer, notice, title }: AuthCardProps) {
   return (
     <Card className="rounded-[1.75rem] border-white/70 bg-white/95 p-6 shadow-[0_24px_70px_rgba(30,55,42,.13)] backdrop-blur sm:p-8">
       <h1 className="text-2xl font-black tracking-tight">{title}</h1>
+      {description ? (
+        <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{description}</p>
+      ) : null}
       {error ? (
         <div className="mt-5">
           <Alert title="Unable to continue" tone="danger">

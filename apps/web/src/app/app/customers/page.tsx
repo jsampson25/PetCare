@@ -48,21 +48,27 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
         </Alert>
       ) : null}
       {canCreate ? (
-        <Card
-          title="Add a customer and first dog"
-          description="This creates one customer, their household, and the first pet together. More household members and pets come next."
-        >
-          <form action={createCustomerHouseholdWithPet} className="space-y-7">
-            <fieldset className="grid gap-5 sm:grid-cols-2">
-              <legend className="col-span-full text-lg font-bold">Customer</legend>
+        <Card className="overflow-hidden !p-0">
+          <div className="bg-[linear-gradient(135deg,#edf6f0,#fff)] px-6 py-5">
+            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--action-primary)]">
+              New household
+            </p>
+            <h2 className="mt-1 text-xl font-black">Add a customer and first dog</h2>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              Create the relationship and care profile together.
+            </p>
+          </div>
+          <form action={createCustomerHouseholdWithPet} className="grid gap-5 p-6 lg:grid-cols-2">
+            <fieldset className="grid gap-5 rounded-2xl border border-[var(--border-default)] p-5 sm:grid-cols-2">
+              <legend className="px-2 text-lg font-bold">1 · Customer</legend>
               <Field label="First name" name="firstName" required />
               <Field label="Last name" name="lastName" required />
               <Field label="Preferred name (optional)" name="preferredName" />
               <Field autoComplete="email" label="Email" name="email" required type="email" />
               <Field autoComplete="tel" label="Phone" name="phone" required type="tel" />
             </fieldset>
-            <fieldset className="grid gap-5 sm:grid-cols-2">
-              <legend className="col-span-full text-lg font-bold">First dog</legend>
+            <fieldset className="grid gap-5 rounded-2xl border border-[var(--border-default)] p-5 sm:grid-cols-2">
+              <legend className="px-2 text-lg font-bold">2 · First dog</legend>
               <Field label="Pet name" name="petName" required />
               <Field label="Breed or mix" name="breed" required />
               <Field
@@ -85,7 +91,9 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
                 Birth date is estimated
               </label>
             </fieldset>
-            <Button type="submit">Create customer and pet</Button>
+            <div className="lg:col-span-2">
+              <Button type="submit">Create customer and pet</Button>
+            </div>
           </form>
         </Card>
       ) : null}

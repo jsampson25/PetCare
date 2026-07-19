@@ -77,10 +77,12 @@ export default async function OnboardingSetupPage({
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--action-primary)]">Business setup</p>
-        <h1 className="text-3xl font-black tracking-tight">Business and first location</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
+      <header className="rounded-[2rem] bg-[#173f30] p-7 text-white shadow-[var(--elevation-2)] sm:p-9">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
+          Business setup
+        </p>
+        <h1 className="mt-2 text-3xl font-black tracking-tight">Business and first location</h1>
+        <p className="mt-2 text-emerald-50/75">
           Complete these basics before adding services, capacity, and pricing.
         </p>
       </header>
@@ -95,13 +97,26 @@ export default async function OnboardingSetupPage({
         </Alert>
       ) : null}
       <Card
+        className="overflow-hidden border-emerald-100"
         title={`Foundation readiness: ${readiness?.completion_percent ?? 0}%`}
         description={`${readiness?.completed_steps ?? 0} of ${readiness?.total_steps ?? 3} initial sections complete.`}
       >
-        <ul className="grid gap-2 text-sm sm:grid-cols-3">
-          <li>{readiness?.business_profile_complete ? '✓' : '○'} Business profile</li>
-          <li>{readiness?.location_profile_complete ? '✓' : '○'} Location profile</li>
-          <li>{readiness?.operating_hours_complete ? '✓' : '○'} Operating hours</li>
+        <div className="mb-5 h-2 overflow-hidden rounded-full bg-[var(--surface-subtle)]">
+          <div
+            className="h-full rounded-full bg-[var(--action-primary)]"
+            style={{ width: `${readiness?.completion_percent ?? 0}%` }}
+          />
+        </div>
+        <ul className="grid gap-3 text-sm sm:grid-cols-3">
+          <li className="rounded-xl bg-[var(--surface-subtle)] p-3 font-bold">
+            {readiness?.business_profile_complete ? '✓' : '○'} Business profile
+          </li>
+          <li className="rounded-xl bg-[var(--surface-subtle)] p-3 font-bold">
+            {readiness?.location_profile_complete ? '✓' : '○'} Location profile
+          </li>
+          <li className="rounded-xl bg-[var(--surface-subtle)] p-3 font-bold">
+            {readiness?.operating_hours_complete ? '✓' : '○'} Operating hours
+          </li>
         </ul>
       </Card>
       <Card title="Setup details">

@@ -17,6 +17,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
   );
   return (
     <AuthCard
+      description="Create one secure account for reservations, pet profiles, care updates, and billing."
       error={error}
       footer={
         <>
@@ -26,7 +27,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
           </Link>
         </>
       }
-      title="Create your account"
+      title="Create your PetCare account"
     >
       <form action={register} className="space-y-5">
         <input name="next" type="hidden" value={next} />

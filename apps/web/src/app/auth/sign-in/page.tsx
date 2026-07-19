@@ -16,6 +16,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Searc
 
   return (
     <AuthCard
+      description="Welcome back. Sign in to continue to your secure workspace or customer portal."
       error={error}
       footer={
         <>

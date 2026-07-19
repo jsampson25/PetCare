@@ -179,8 +179,29 @@ export default async function CustomerHouseholdPage({
         </Card>
       ) : null}
       {canAddPet ? (
-        <Card title="Add another dog" description="Create another pet under the same household.">
-          <form action={addPetToCustomerHousehold} className="grid gap-5 sm:grid-cols-2">
+        <Card
+          className="overflow-hidden border-emerald-100"
+          title="Add another dog"
+          description="Create another pet under the same household."
+        >
+          <div className="mb-5 flex items-center gap-4 rounded-2xl bg-[var(--surface-subtle)] p-4">
+            <span
+              className="grid size-12 place-items-center rounded-2xl bg-[var(--action-primary)] text-xl text-white"
+              aria-hidden="true"
+            >
+              +
+            </span>
+            <div>
+              <p className="font-black">New pet profile</p>
+              <p className="text-sm text-[var(--text-secondary)]">
+                Identity details first; care and vaccine records follow on the pet profile.
+              </p>
+            </div>
+          </div>
+          <form
+            action={addPetToCustomerHousehold}
+            className="grid gap-5 rounded-2xl border border-[var(--border-default)] p-5 sm:grid-cols-2"
+          >
             <input name="customerId" type="hidden" value={customer.id} />
             <Field label="Pet name" name="petName" required />
             <Field label="Breed or mix" name="breed" required />
