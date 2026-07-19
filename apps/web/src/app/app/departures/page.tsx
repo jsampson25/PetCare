@@ -83,13 +83,20 @@ export default async function DeparturesPage({ searchParams }: { searchParams: S
   const canOverride = context.roles.includes('owner') || context.roles.includes('manager');
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--action-primary)]">Departure operations</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Checkout & reconciliation</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Release the correct pet only after authority, care, incidents, belongings, report card,
-          and balance are reconciled.
-        </p>
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border-default)] pb-6">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--action-primary)]">
+            Departure operations
+          </p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight">Checkout & reconciliation</h1>
+          <p className="mt-2 text-[var(--text-secondary)]">
+            Release the correct pet only after authority, care, incidents, belongings, report card,
+            and balance are reconciled.
+          </p>
+        </div>
+        <span className="rounded-full bg-[var(--surface-subtle)] px-4 py-2 text-sm font-black">
+          {visits?.length ?? 0} in care
+        </span>
       </header>
       {typeof parameters.notice === 'string' ? (
         <Alert title="Departure updated" tone="success">
@@ -139,6 +146,7 @@ export default async function DeparturesPage({ searchParams }: { searchParams: S
             ].filter(Boolean) as string[];
             return (
               <Card
+                className="overflow-hidden border-slate-200"
                 key={visit.id}
                 title={`${pet?.name} · ${pet?.breed}`}
                 description={`${operational?.locations?.name} · scheduled ${new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(operational?.scheduled_end ?? ''))}`}

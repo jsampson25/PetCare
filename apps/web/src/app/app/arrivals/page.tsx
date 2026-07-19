@@ -25,12 +25,19 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
     .limit(100);
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--action-primary)]">Operations</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Arrivals</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Record physical arrival first, then complete identity, safety, care, and custody review.
-        </p>
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border-default)] pb-6">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--action-primary)]">
+            Operations
+          </p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight">Arrivals</h1>
+          <p className="mt-2 text-[var(--text-secondary)]">
+            Record physical arrival first, then complete identity, safety, care, and custody review.
+          </p>
+        </div>
+        <span className="rounded-full bg-[var(--surface-subtle)] px-4 py-2 text-sm font-black">
+          {items?.length ?? 0} expected
+        </span>
       </header>
       {typeof parameters.error === 'string' ? (
         <Alert title="Arrival unavailable" tone="danger">
@@ -38,11 +45,12 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
         </Alert>
       ) : null}
       <Card
+        className="overflow-hidden"
         title="Expected pets"
         description="Confirmed bookings remain reservations until custody is explicitly accepted."
       >
         {items?.length ? (
-          <div className="divide-y">
+          <div className="divide-y divide-[var(--border-default)]">
             {items.map((item, index) => {
               const booking = item.bookings as unknown as {
                 booking_number: string;
@@ -67,9 +75,15 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
                 : visitStatus.replaceAll('_', ' ');
               return (
                 <div
-                  className="flex flex-wrap items-center justify-between gap-4 py-4"
+                  className="grid gap-4 p-5 transition hover:bg-[var(--surface-subtle)] sm:grid-cols-[auto_1fr_auto] sm:items-center"
                   key={`${item.booking_id}-${index}`}
                 >
+                  <span
+                    className="grid size-12 place-items-center rounded-2xl bg-[#dcece2] font-black text-[#155b3d]"
+                    aria-hidden="true"
+                  >
+                    {pet?.name?.slice(0, 2).toUpperCase()}
+                  </span>
                   <div>
                     <p className="font-black">
                       {pet?.name} · {service?.customer_name}

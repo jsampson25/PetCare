@@ -1,5 +1,4 @@
 import { Alert } from '@petcare/ui/alert';
-import { Badge } from '@petcare/ui/badge';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 
@@ -78,14 +77,18 @@ export default async function BusinessHomePage() {
   const openAlerts = alertResult.count ?? 0;
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--action-primary)]">
+      <header className="relative overflow-hidden rounded-[2rem] bg-[#173f30] p-7 text-white shadow-[var(--elevation-2)] sm:p-9">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
           {new Intl.DateTimeFormat('en-US', { dateStyle: 'full' }).format(new Date())}
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Today</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Live work and exceptions needing attention now.
+        <h1 className="mt-2 text-4xl font-black tracking-tight">Today&apos;s command center</h1>
+        <p className="mt-2 text-emerald-50/75">
+          Live work, pets in care, and exceptions needing attention now.
         </p>
+        <div
+          className="absolute -bottom-20 -right-16 size-60 rounded-full bg-emerald-300/10"
+          aria-hidden="true"
+        />
       </header>
       {platformNotices.map((notice) => (
         <Alert
@@ -122,37 +125,63 @@ export default async function BusinessHomePage() {
           The current operational queue has no unresolved care exceptions.
         </Alert>
       )}
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {[
-          ['Arrivals today', arrivalResult.count ?? 0, 'info'],
-          ['Pets in care', visitResult.count ?? 0, 'success'],
-          ['Tasks due', taskResult.count ?? 0, taskResult.count ? 'warning' : 'neutral'],
-          ['Active services', executionResult.count ?? 0, 'info'],
-        ].map(([label, value, tone]) => (
-          <Card key={label}>
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-3xl font-bold tabular-nums">{value}</p>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">{label}</p>
+      <section>
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--action-primary)]">
+              Live operations
+            </p>
+            <h2 className="mt-1 text-2xl font-black tracking-tight">At a glance</h2>
+          </div>
+          <span className="rounded-full border border-[var(--border-default)] bg-white px-3 py-1.5 text-xs font-bold">
+            Auto-refresh on reload
+          </span>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            ['Arrivals today', arrivalResult.count ?? 0, 'info'],
+            ['Pets in care', visitResult.count ?? 0, 'success'],
+            ['Tasks due', taskResult.count ?? 0, taskResult.count ? 'warning' : 'neutral'],
+            ['Active services', executionResult.count ?? 0, 'info'],
+          ].map(([label, value]) => (
+            <Card
+              className="group transition hover:-translate-y-0.5 hover:border-[var(--action-primary)]"
+              key={label}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-4xl font-black tabular-nums tracking-tight">{value}</p>
+                  <p className="mt-2 text-sm font-bold text-[var(--text-secondary)]">{label}</p>
+                </div>
+                <span
+                  className="grid size-9 place-items-center rounded-xl bg-[var(--surface-subtle)] text-sm font-black text-[var(--action-primary)]"
+                  aria-hidden="true"
+                >
+                  {String(label).slice(0, 1)}
+                </span>
               </div>
-              <Badge tone={tone as 'info' | 'neutral' | 'success' | 'warning'}>{label}</Badge>
-            </div>
-          </Card>
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-3">
-        {canWork ? <ButtonLink href="/app/tasks">Open care work</ButtonLink> : null}
-        {canExecuteServices ? (
-          <ButtonLink href="/app/service-board" variant="secondary">
-            Open service boards
-          </ButtonLink>
-        ) : null}
-        {canCheckIn ? (
-          <ButtonLink href="/app/arrivals" variant="secondary">
-            Open arrivals
-          </ButtonLink>
-        ) : null}
-      </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+      <Card
+        title="Quick actions"
+        description="Jump directly into the work queues used throughout the day."
+      >
+        <div className="flex flex-wrap gap-3">
+          {canWork ? <ButtonLink href="/app/tasks">Open care work</ButtonLink> : null}
+          {canExecuteServices ? (
+            <ButtonLink href="/app/service-board" variant="secondary">
+              Open service boards
+            </ButtonLink>
+          ) : null}
+          {canCheckIn ? (
+            <ButtonLink href="/app/arrivals" variant="secondary">
+              Open arrivals
+            </ButtonLink>
+          ) : null}
+        </div>
+      </Card>
     </div>
   );
 }

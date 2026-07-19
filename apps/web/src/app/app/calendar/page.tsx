@@ -49,9 +49,11 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
   }
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border-default)] pb-6">
         <div>
-          <p className="text-sm font-bold text-[var(--text-secondary)]">Reservations</p>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--action-primary)]">
+            Reservations
+          </p>
           <h1 className="text-3xl font-black tracking-tight">Calendar agenda</h1>
           <p className="mt-2 text-[var(--text-secondary)]">
             Seven-day authoritative schedule with an accessible list presentation.
@@ -59,7 +61,10 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
         </div>
         <ButtonLink href="/app/bookings/new">New booking</ButtonLink>
       </header>
-      <Card title="Choose week">
+      <Card
+        className="border-emerald-100 bg-[linear-gradient(135deg,#f1f8f3,#fff)]"
+        title="Choose week"
+      >
         <form className="flex flex-wrap items-end gap-3" method="get">
           <label className="text-sm font-bold">
             Starting date
@@ -115,6 +120,9 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
         const dayItems = grouped.get(key) ?? [];
         return (
           <Card
+            className={
+              index === 0 ? 'overflow-hidden border-[var(--action-primary)]' : 'overflow-hidden'
+            }
             key={key}
             title={new Intl.DateTimeFormat('en-US', {
               weekday: 'long',
@@ -124,7 +132,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
             description={`${dayItems.length} scheduled service item${dayItems.length === 1 ? '' : 's'}`}
           >
             {dayItems.length ? (
-              <div className="divide-y">
+              <div className="divide-y divide-[var(--border-default)]">
                 {dayItems.map((item) => {
                   const booking = item.bookings as unknown as {
                     booking_number: string;
@@ -136,12 +144,12 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
                   const service = item.service_versions as unknown as { customer_name: string };
                   return (
                     <a
-                      className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                      className="group flex flex-wrap items-center justify-between gap-3 rounded-xl px-3 py-3 transition hover:bg-[var(--surface-subtle)] first:pt-0 last:pb-0"
                       href={`/app/bookings/${item.booking_id}`}
                       key={item.id}
                     >
                       <div>
-                        <p className="font-bold">
+                        <p className="font-black">
                           {new Intl.DateTimeFormat('en-US', { timeStyle: 'short' }).format(
                             new Date(item.starts_at),
                           )}{' '}
