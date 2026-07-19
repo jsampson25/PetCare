@@ -74,7 +74,7 @@ export async function saveWebsiteDraft(formData: FormData) {
   if (!parsed.success || !sectionLayout.success || !customPages.success)
     redirect('/app/settings/website?error=Complete+the+required+website+content.');
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.rpc('save_tenant_website_draft', {
+  const { error } = await supabase.schema('app').rpc('save_tenant_website_draft', {
     target_business_id: context.businessId,
     theme_value: parsed.data.theme,
     brand_value: { primary: parsed.data.primary, accent: parsed.data.accent },
@@ -103,7 +103,7 @@ export async function publishWebsite(formData: FormData) {
     .safeParse(formData.get('sourcePublicationId') ?? '');
   if (!source.success) redirect('/app/settings/website?error=Publication+is+invalid.');
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.rpc('publish_tenant_website', {
+  const { error } = await supabase.schema('app').rpc('publish_tenant_website', {
     target_business_id: context.businessId,
     source_publication_value: source.data || null,
   });
@@ -114,7 +114,7 @@ export async function unpublishWebsite() {
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('website.publish')) redirect('/denied');
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.rpc('unpublish_tenant_website', {
+  const { error } = await supabase.schema('app').rpc('unpublish_tenant_website', {
     target_business_id: context.businessId,
   });
   if (error) redirect('/app/settings/website?error=Live+website+could+not+be+unpublished.');

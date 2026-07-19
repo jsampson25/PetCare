@@ -58,7 +58,7 @@ export async function createFirstBusiness(
   }
 
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.rpc('create_business_with_owner', {
+  const { data, error } = await supabase.schema('app').rpc('create_business_with_owner', {
     business_name: parsed.data.businessName,
     business_slug: parsed.data.businessSlug,
     first_location_name: parsed.data.locationName,
@@ -83,7 +83,7 @@ export async function createFirstBusiness(
     .eq('business_id', businessId)
     .maybeSingle();
   if (!existingWebsite) {
-    const { error: websiteError } = await supabase.rpc('save_tenant_website_draft', {
+    const { error: websiteError } = await supabase.schema('app').rpc('save_tenant_website_draft', {
       target_business_id: businessId,
       theme_value: 'modern',
       brand_value: { primary: '#5b35e8', accent: '#f3a712' },
