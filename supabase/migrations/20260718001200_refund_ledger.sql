@@ -43,13 +43,13 @@ create trigger refund_receipts_immutable before update or delete on public.refun
 create or replace view public.invoice_balances with(security_invoker=true) as
 select i.business_id,i.id invoice_id,
  v.total_minor,
- coalesce(c.credit_minor,0)::bigint credit_minor,
- greatest(v.total_minor-coalesce(c.credit_minor,0),0)::bigint net_total_minor,
- coalesce(r.refunded_minor,0)::bigint refunded_minor,
  greatest(coalesce(p.paid_minor,0)-coalesce(r.refunded_minor,0),0)::bigint paid_minor,
  greatest((v.total_minor-coalesce(c.credit_minor,0))-(coalesce(p.paid_minor,0)-coalesce(r.refunded_minor,0)),0)::bigint balance_due_minor,
  greatest(v.deposit_required_minor-coalesce(c.credit_minor,0),0)::bigint deposit_required_minor,
- greatest(greatest(v.deposit_required_minor-coalesce(c.credit_minor,0),0)-greatest(coalesce(p.paid_minor,0)-coalesce(r.refunded_minor,0),0),0)::bigint deposit_due_minor
+ greatest(greatest(v.deposit_required_minor-coalesce(c.credit_minor,0),0)-greatest(coalesce(p.paid_minor,0)-coalesce(r.refunded_minor,0),0),0)::bigint deposit_due_minor,
+ coalesce(c.credit_minor,0)::bigint credit_minor,
+ greatest(v.total_minor-coalesce(c.credit_minor,0),0)::bigint net_total_minor,
+ coalesce(r.refunded_minor,0)::bigint refunded_minor
 from public.invoices i
 join public.invoice_versions v on v.business_id=i.business_id and v.invoice_id=i.id and v.version_number=i.current_version_number
 left join (select a.business_id,a.invoice_id,sum(a.amount_minor)::bigint paid_minor from public.payment_allocations a join public.payments p on p.business_id=a.business_id and p.id=a.payment_id and p.status='succeeded' group by a.business_id,a.invoice_id) p on p.business_id=i.business_id and p.invoice_id=i.id
