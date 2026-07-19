@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(232);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(245);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -238,4 +238,17 @@ select is((select status from tenant_saas_subscriptions),'active','subscription 
 select is((select count(*) from tenant_saas_subscription_events),2::bigint,'subscription history is additive');
 select is(jsonb_array_length(app.list_tenant_saas_subscriptions()),1,'tenant subscription directory remains safe and complete');
 select is((select count(*) from invoices),1::bigint,'SaaS subscription never creates customer invoice');
+select is(app.platform_has_permission('platform.features.manage'),true,'platform administrator receives feature control permission');
+select lives_ok($$select app.configure_platform_feature('live.operations','Live operations','Real-time operational command center release.','','enabled',100,'Initial controlled release to eligible tenants.','','feature-live')$$,'release manager creates global feature');
+select is(jsonb_array_length(app.list_platform_feature_controls()),1,'feature directory lists release control');
+select is((app.evaluate_tenant_feature((select id from businesses where public_slug='checkin-test'),'live.operations')->>'enabled'),'true','fully released feature evaluates enabled');
+select lives_ok($$select app.configure_platform_feature('custom.domains','Custom domains','Tenant custom domain capability release.','website.custom_domain','enabled',100,'Release remains subject to purchased entitlement.','','feature-domain')$$,'entitlement-bound feature is created');
+select is((app.evaluate_tenant_feature((select id from businesses where public_slug='checkin-test'),'custom.domains')->>'enabled'),'false','release flag cannot bypass false entitlement');
+select is((app.evaluate_tenant_feature((select id from businesses where public_slug='checkin-test'),'custom.domains')->>'source'),'entitlement_denied','evaluation explains entitlement denial');
+select lives_ok($$select app.set_platform_feature_override((select id from businesses where public_slug='checkin-test'),'live.operations','disabled','Design partner temporarily excluded from rollout.',now()+interval '1 day','feature-override')$$,'tenant override is documented');
+select is((app.evaluate_tenant_feature((select id from businesses where public_slug='checkin-test'),'live.operations')->>'enabled'),'false','active tenant override disables release');
+select lives_ok($$select app.configure_platform_feature('live.operations','Live operations','Real-time operational command center release.','','kill_switch',100,'Emergency containment while behavior is reviewed.','live.operations','feature-kill')$$,'confirmed kill switch activates');
+select is((app.evaluate_tenant_feature((select id from businesses where public_slug='checkin-test'),'live.operations')->>'source'),'kill_switch','kill switch wins over tenant targeting');
+select is((select count(*) from platform_feature_events),4::bigint,'feature changes preserve immutable audit history');
+select is((select count(*) from invoices),1::bigint,'feature controls never mutate customer commerce');
 select * from finish();rollback;

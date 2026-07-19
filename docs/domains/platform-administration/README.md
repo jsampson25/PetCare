@@ -117,6 +117,8 @@ The tenant directory exposes business name, slug, lifecycle state, location coun
 
 The initial SaaS subscription projection contains versioned plans and entitlements plus one current subscription per tenant. Trialing, active, past-due, scheduled-cancellation, and cancelled states use controlled transitions and immutable events. The platform console labels this as the business-to-PetCare commercial relationship and keeps it entirely separate from customer invoices, deposits, payments, refunds, receipts, and tenant financial reporting.
 
+Feature controls now combine an explicit release state, stable tenant percentage assignment, current SaaS entitlement, and optional time-bounded tenant override. An emergency kill switch overrides every rollout or tenant grant, requires feature-key confirmation, and leaves an immutable platform event. Tenant overrides require a reason and cannot manufacture an entitlement that the active plan does not provide.
+
 ```text
 Prospect
   -> Provisioning
