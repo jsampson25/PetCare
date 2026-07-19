@@ -733,6 +733,8 @@ Never report a failed payment, booking, medication record, or check-in as succes
 - Approved font pairing
 - Public imagery
 - Public theme preset
+- Public layout family and supported header/logo placement
+- Approved section order and section variants
 - Approved radius/image-style preset
 
 ### Remains platform-controlled
@@ -752,7 +754,8 @@ Never report a failed payment, booking, medication record, or check-in as succes
 - Unsafe colors are adjusted or rejected with guidance.
 - Logos require meaningful alternative text or approved decorative treatment.
 - Tenant font selections cannot introduce illegible or unavailable fonts.
-- Theme preview includes public site, booking, customer portal, validation, and status examples.
+- Theme preview includes the public site, booking, account creation, pet setup, customer portal, validation, and status examples.
+- Customer-facing surfaces consume one published theme snapshot; independently configured portal branding is prohibited.
 
 ## Accessibility foundation
 

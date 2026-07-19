@@ -7,7 +7,7 @@
 
 ## Purpose
 
-The Website and Content domain gives each pet-care business a polished, light-themed public website that feels continuous with booking and the customer portal. Authorized business users select a supported theme, apply their brand, manage structured pages, preview changes, and publish without writing code.
+The Website and Content domain gives each pet-care business a polished, light-themed public website that feels continuous with booking and the customer portal. Authorized business users select a supported site layout, apply their brand, compose pages from draggable sections, preview changes, and publish without writing code.
 
 The MVP is a governed template and content system. AI does not generate the customer's website. AI may assist with copy in a later phase, but publishing remains an explicit human action.
 
@@ -26,10 +26,12 @@ The MVP is a governed template and content system. AI does not generate the cust
 
 - One public website per tenant with one or more location pages
 - Supported responsive theme presets with a light customer-facing background
+- Multiple site-layout families with header, navigation, logo-placement, hero, content-width, and footer variants
 - Business logo, colors, typography selection, images, contact information, and social links
 - Structured Home, About, Services, Pricing, Requirements, FAQ, Policies, Contact, and Book Now experiences
 - Configurable navigation and footer
-- Reusable approved content sections
+- Reusable approved content sections with drag-to-reorder, add, duplicate, hide, and delete controls
+- Custom pages assembled from the same governed section library, including business-authored policy and informational pages
 - Service, location, hours, and selected pricing projections from source domains
 - Draft, preview, publish, unpublish, and version history
 - Platform subdomain and custom-domain connection workflow
@@ -41,7 +43,7 @@ The MVP is a governed template and content system. AI does not generate the cust
 
 ### Post-MVP
 
-- Additional themes and advanced layout controls
+- Additional theme families, section variants, and advanced responsive controls
 - Blog and scheduled article publishing
 - Campaign landing pages
 - Multi-language content and localized URLs
@@ -55,7 +57,7 @@ The MVP is a governed template and content system. AI does not generate the cust
 ### Out of scope
 
 - Free-form HTML or JavaScript injection
-- Fully unconstrained drag-and-drop page design
+- Arbitrary pixel-positioned design or unrestricted canvas editing
 - AI publishing content without explicit approval
 - Website hosting outside the platform in the MVP
 - Domain registration or domain ownership transfer
@@ -165,7 +167,23 @@ Each section type has a controlled schema, accessibility rules, responsive behav
 
 ## Theme and branding
 
-The MVP provides a small set of high-quality themes rather than a blank canvas. Themes share the platform design system and booking components while varying presentation.
+The MVP provides a curated set of high-quality site-layout families rather than a blank canvas. A layout family changes the composition of the site—not only its colors—including logo placement, navigation structure, hero composition, content width, section treatment, and footer structure. Initial layout choices shall include at least left-logo, centered-logo, and split-navigation header patterns.
+
+Within a layout family, the page editor provides structured drag-and-drop composition. Editors may add approved sections, move them through pointer or keyboard controls, select supported variants, edit content, hide or duplicate sections, and preview responsive behavior. The platform retains layout constraints so pages remain accessible and stable on mobile devices.
+
+Theme identity is shared across the complete customer journey:
+
+```text
+Published tenant theme
+    -> Public business website
+    -> Booking flow
+    -> Account creation and verification
+    -> Pet creation and vaccination upload
+    -> Authenticated customer portal
+    -> Customer-facing documents and communications where supported
+```
+
+The example purple shown in the Happy Paws reference is a tenant-selected brand color, not a platform-wide default. Another business can use a different approved palette while retaining the same clean component quality and interaction behavior.
 
 Configurable tokens include:
 
@@ -176,7 +194,9 @@ Configurable tokens include:
 - Border radius and restrained visual-density preference
 - Button treatment and image style where supported by the theme
 
-Customer-facing surfaces use a light background by default. A tenant may not select combinations that fail contrast or make critical controls unclear. Staff and business portal themes are separate from the public brand.
+Customer-facing surfaces use a light background by default. A tenant may not select combinations that fail contrast or make critical controls unclear. Staff and business portal themes are separate from the public brand, although tenant identity remains visible there.
+
+See [Customer Site Builder and Theme Continuity](../../ux/customer-site-builder.md) for layout families, editor behavior, inheritance rules, and the visual baseline for customer flows.
 
 ## Navigation and URL rules
 
@@ -191,7 +211,7 @@ Customer-facing surfaces use a light background by default. A tenant may not sel
 
 ## Booking and portal continuity
 
-The public site, booking flow, and portal use the same tenant identity and approved brand tokens. A booking CTA may carry:
+The public site, booking flow, account creation, pet onboarding, and portal resolve the same published tenant theme snapshot. These surfaces must not maintain independent color, logo, typography, or radius settings. A booking CTA may carry:
 
 - Tenant and public-site identity
 - Selected location
