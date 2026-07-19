@@ -22,6 +22,18 @@ const createSchema = z.object({
   timeZone: z.string().min(1).max(80),
 });
 
+function normalizeWebName(value: FormDataEntryValue | null) {
+  if (typeof value !== 'string') return '';
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/\.(com|net|org|co|io)(?:\/.*)?$/, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 function validTimeZone(value: string) {
   try {
     new Intl.DateTimeFormat('en-US', { timeZone: value }).format();
@@ -35,7 +47,12 @@ export async function createFirstBusiness(
   _previousState: CreateBusinessState,
   formData: FormData,
 ): Promise<CreateBusinessState> {
-  const parsed = createSchema.safeParse(Object.fromEntries(formData));
+  const values = Object.fromEntries(formData);
+  const parsed = createSchema.safeParse({
+    ...values,
+    businessSlug: normalizeWebName(formData.get('businessSlug')),
+    locationSlug: normalizeWebName(formData.get('locationSlug')),
+  });
   if (!parsed.success || !validTimeZone(parsed.data.timeZone)) {
     return { error: 'Check the business name, web address, location, and time zone.' };
   }

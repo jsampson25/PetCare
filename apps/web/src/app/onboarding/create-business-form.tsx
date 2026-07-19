@@ -24,20 +24,35 @@ export function CreateBusinessForm() {
         name="businessName"
         required
       />
-      <Field
-        hint="Lowercase letters, numbers, and hyphens. You can connect a custom domain later."
-        label="PetCare web address"
-        name="businessSlug"
-        pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-        placeholder="happy-paws"
-        required
-      />
+      <div>
+        <label className="block text-sm font-bold" htmlFor="businessSlug">
+          Website URL name
+        </label>
+        <p className="mt-1 text-sm leading-5 text-[var(--text-secondary)]">
+          Choose the short name used for your PetCare website. Do not enter .com here.
+        </p>
+        <div className="mt-2 flex min-h-12 items-center overflow-hidden rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-white focus-within:border-[var(--focus-ring)] focus-within:ring-3 focus-within:ring-[color-mix(in_srgb,var(--focus-ring)_25%,transparent)]">
+          <span className="hidden border-r bg-slate-50 px-3 py-3 text-sm text-slate-500 sm:block">
+            localhost:3000/site/
+          </span>
+          <input
+            className="min-w-0 flex-1 px-3 py-3 text-base outline-none"
+            id="businessSlug"
+            name="businessSlug"
+            placeholder="preppy-pet"
+            required
+          />
+        </div>
+        <p className="mt-2 text-xs text-[var(--text-secondary)]">
+          You can connect preppypet.com or another custom domain after setup.
+        </p>
+      </div>
       <Field label="First location name" name="locationName" placeholder="Main Facility" required />
       <Field
-        label="Location web address"
+        hint="A short internal name for this location—not a domain name."
+        label="Location URL name"
         name="locationSlug"
-        pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-        placeholder="main"
+        placeholder="main-location"
         required
       />
       <div>
