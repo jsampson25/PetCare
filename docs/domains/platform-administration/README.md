@@ -135,6 +135,8 @@ Platform communications now separates tenant-visible operational notices from re
 
 Tenant restrictions now require a current impact preview containing only administrative counts: pets in care, future bookings, open care tasks, unpaid invoices, website state, and active staff. A stale preview cannot authorize a transition. Restricted tenants stop accepting new bookings and outbound marketing while existing care work remains available; suspension adds a tenant read-only posture. Every restriction has a review time, reason, policy code, and immutable impact evidence, and reactivation clears the restriction policy.
 
+Tenant closure now has a separate readiness case and current-state fingerprint. Closure cannot begin while pets remain in care, future bookings or balances remain unresolved, or the tenant export is unverified. Legal, financial, privacy, security, and contract holds are recorded separately with minimized bases. Closing and closed states disable new commerce; purge eligibility requires the retention date to pass and all holds to clear, and does not itself delete tenant data.
+
 ```text
 Prospect
   -> Provisioning

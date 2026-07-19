@@ -32,6 +32,11 @@ const platformNavigation = [
     requiredPermissions: ['platform.communications.read'],
   },
   {
+    href: '/platform/closures',
+    label: 'Tenant closure',
+    requiredPermissions: ['platform.closure.read'],
+  },
+  {
     href: '/platform/features',
     label: 'Feature controls',
     requiredPermissions: ['platform.features.read'],
