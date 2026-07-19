@@ -13,11 +13,11 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
   const error = typeof parameters.error === 'string' ? parameters.error : undefined;
   const next = getSafeRedirect(
     typeof parameters.next === 'string' ? parameters.next : undefined,
-    '/auth/verified',
+    '/onboarding',
   );
   return (
     <AuthCard
-      description="Create one secure account for reservations, pet profiles, care updates, and billing."
+      description="Create your owner account, set up your pet-care business, and begin building its website."
       error={error}
       footer={
         <>
@@ -27,7 +27,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
           </Link>
         </>
       }
-      title="Create your PetCare account"
+      title="Start your pet-care business"
     >
       <form action={register} className="space-y-5">
         <input name="next" type="hidden" value={next} />

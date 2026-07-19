@@ -37,6 +37,7 @@ ci-failure.log
 .turbo/
 .vercel/
 supabase/.temp/
+supabase/.branches/
 
 # TypeScript and test artifacts
 *.tsbuildinfo
