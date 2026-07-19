@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(280);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(293);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -288,4 +288,17 @@ select is((select status from platform_privacy_requests),'fulfilled','privacy re
 select is(jsonb_array_length(app.list_platform_privacy_requests()),1,'privacy directory returns request and actions');
 select is((select count(*) from platform_privacy_events),6::bigint,'privacy history is immutable and additive');
 select is((select count(*) from invoices),1::bigint,'privacy coordination never changes customer commerce');
+select is(app.platform_has_permission('platform.health.manage'),true,'platform administrator receives health issue permission');
+select lives_ok($$select app.create_platform_operational_issue((select id from businesses where public_slug='checkin-test'),'provider:test:latency','provider','provider-incident-42','critical','Provider latency affects operational refresh.','One test tenant sees delayed non-safety-critical dashboard refresh.','Founder correlated provider and tenant evidence.','health-create')$$,'founder records sanitized correlated issue');
+select is((app.get_platform_health_summary()->>'open_critical_issues'),'1','health summary counts critical issue');
+select is((app.get_platform_health_summary()->'tenants'->>'suspended'),'1','health summary counts suspended tenant');
+select is(jsonb_array_length(app.list_platform_operational_issues()),1,'issue directory exposes correlated issue');
+select lives_ok($$select app.transition_platform_operational_issue((select id from platform_operational_issues),'monitoring','Provider recovery observed; continue monitoring.','health-monitor')$$,'issue moves to monitoring');
+select lives_ok($$select app.transition_platform_operational_issue((select id from platform_operational_issues),'resolved','Provider recovery confirmed and tenant impact ended.','health-resolve')$$,'issue resolves with evidence');
+select is((app.get_platform_health_summary()->>'open_critical_issues'),'0','resolved issue leaves active critical count');
+select is((select count(*) from platform_operational_issue_events),3::bigint,'issue history remains immutable and additive');
+select is(jsonb_array_length(app.search_platform_audit_events((select id from businesses where public_slug='checkin-test'),null,'health.',null,null,null,100)),3,'audit search filters correlated health events');
+select is(jsonb_array_length(app.search_platform_audit_events(null,null,'support.','SUP-1042',null,null,100)),2,'audit search filters by support case');
+select is((select count(*) from invoices),1::bigint,'health and audit projections never mutate tenant commerce');
+select is((select count(*) from customers),1::bigint,'platform health never exposes or mutates customer records');
 select * from finish();rollback;
