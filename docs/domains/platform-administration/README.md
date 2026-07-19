@@ -123,6 +123,8 @@ Routine support access now requires a tenant-linked support case, purpose, one o
 
 The administrative job directory exposes only safe operational metadata: tenant reference, job type, opaque object reference, status, progress, attempt count, error category, sanitized message, and next permitted action. Internal workers register jobs through a service-only command. Operators may retry only a failed job explicitly declared retryable, and each retry appends an immutable attempt record rather than rewriting failure history.
 
+Privacy operations now coordinate access, correction, export, restriction, deletion, and objection requests without issuing an unreviewed cross-domain cascade. Identity verification is required before fulfillment work, each owning domain records its action and minimized evidence, retained records require a retention basis, legal holds block fulfillment, and the request cannot complete while any domain action remains pending, in progress, or blocked.
+
 ```text
 Prospect
   -> Provisioning

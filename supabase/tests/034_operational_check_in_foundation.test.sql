@@ -1,4 +1,4 @@
-begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(267);
+begin;create extension if not exists pgtap with schema extensions;set local search_path=public,extensions;select plan(280);
 insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at,confirmation_token,email_change,email_change_token_new,recovery_token) values('00000000-0000-0000-0000-000000000000','82000000-0000-4000-8000-000000000001','authenticated','authenticated','checkin-owner@example.test','',now(),'{}','{"display_name":"Check-in Owner"}',now(),now(),'','','','');
 set local role authenticated;select set_config('request.jwt.claims','{"sub":"82000000-0000-4000-8000-000000000001","role":"authenticated","email":"checkin-owner@example.test","aal":"aal2"}',true);
 select lives_ok($$select * from app.create_business_with_owner('Check-in Test','checkin-test','Main','main','America/Chicago')$$,'tenant created');
@@ -275,4 +275,17 @@ select is((select status from platform_administrative_jobs where idempotency_key
 select is((select attempt_count from platform_administrative_jobs where idempotency_key='job-retryable'),2,'retry increments attempt count');
 select is((select count(*) from platform_administrative_job_attempts),3::bigint,'original attempts remain alongside retry request');
 select is((select count(*) from invoices),1::bigint,'administrative jobs remain separate from customer commerce');
+select is(app.platform_has_permission('platform.privacy.manage'),true,'platform administrator receives privacy coordination permission');
+select lives_ok($$select app.create_platform_privacy_request((select id from businesses where public_slug='checkin-test'),'portable_export','customer:checkin-owner','customer_support',now()+interval '30 days',false,'Customer requested a verified portable export.','privacy-create')$$,'privacy request is recorded with minimized reference');
+select is((select status from platform_privacy_requests),'received','privacy request begins received');
+select throws_ok($$select app.transition_platform_privacy_request((select id from platform_privacy_requests),'fulfilled','Attempt fulfillment before verification.','privacy-too-early')$$,'P0001','controlled privacy transition required','unverified request cannot be fulfilled');
+select lives_ok($$select app.transition_platform_privacy_request((select id from platform_privacy_requests),'identity_verified','Identity verification evidence was reviewed.','privacy-verified')$$,'identity verification is explicit');
+select lives_ok($$select app.record_platform_privacy_domain_action((select id from platform_privacy_requests),'customer','export','completed','Customer export artifact generated and reviewed.','','Customer domain completed approved export.','privacy-customer')$$,'domain action records minimized evidence');
+select lives_ok($$select app.transition_platform_privacy_request((select id from platform_privacy_requests),'in_progress','Verified request assigned to domain owners.','privacy-progress')$$,'verified request enters fulfillment');
+select lives_ok($$select app.transition_platform_privacy_request((select id from platform_privacy_requests),'review','All assigned domain actions are ready for review.','privacy-review')$$,'request enters final review');
+select lives_ok($$select app.transition_platform_privacy_request((select id from platform_privacy_requests),'fulfilled','Privacy operator approved completed export evidence.','privacy-fulfilled')$$,'completed domain work permits fulfillment');
+select is((select status from platform_privacy_requests),'fulfilled','privacy request reaches fulfilled');
+select is(jsonb_array_length(app.list_platform_privacy_requests()),1,'privacy directory returns request and actions');
+select is((select count(*) from platform_privacy_events),6::bigint,'privacy history is immutable and additive');
+select is((select count(*) from invoices),1::bigint,'privacy coordination never changes customer commerce');
 select * from finish();rollback;
