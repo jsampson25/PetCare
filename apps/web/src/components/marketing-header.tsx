@@ -27,6 +27,9 @@ export function MarketingHeader() {
           <Link className="transition hover:text-[#1d4ed8]" href="/features">
             Features
           </Link>
+          <Link className="transition hover:text-[#1d4ed8]" href="/integrations">
+            Integrations
+          </Link>
           <Link className="transition hover:text-[#1d4ed8]" href="/pricing">
             Pricing
           </Link>

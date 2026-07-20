@@ -3,7 +3,7 @@ import Link from 'next/link';
 export function MarketingFooter() {
   return (
     <footer className="border-t border-[#dbe7f5] bg-white">
-      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 sm:grid-cols-[1fr_auto] sm:items-end lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 lg:grid-cols-[1.2fr_repeat(3,.7fr)] lg:px-8">
         <div>
           <Link className="flex items-center gap-3" href="/">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#2563eb] text-xs font-black text-white">
@@ -15,10 +15,25 @@ export function MarketingFooter() {
             The connected website and operating platform for modern pet-care businesses.
           </p>
         </div>
-        <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-[#40516a]">
-          <Link href="/solutions">Solutions</Link>
+        <div className="grid content-start gap-3 text-sm text-[#40516a]">
+          <strong className="text-[#0b1f3a]">Platform</strong>
           <Link href="/features">Features</Link>
+          <Link href="/integrations">Integrations</Link>
+          <Link href="/security">Security</Link>
           <Link href="/pricing">Pricing</Link>
+        </div>
+        <div className="grid content-start gap-3 text-sm text-[#40516a]">
+          <strong className="text-[#0b1f3a]">Solutions</strong>
+          <Link href="/solutions/boarding">Boarding</Link>
+          <Link href="/solutions/daycare">Daycare</Link>
+          <Link href="/solutions/grooming">Grooming</Link>
+          <Link href="/solutions/website-builder">Website builder</Link>
+        </div>
+        <div className="grid content-start gap-3 text-sm text-[#40516a]">
+          <strong className="text-[#0b1f3a]">Get started</strong>
+          <Link href="/demo">See Roventra</Link>
+          <Link href="/switch-to-roventra">Switch to Roventra</Link>
+          <Link href="/auth/register?plan=growth&trial=14">Free trial</Link>
           <Link href="/auth/sign-in">Sign in</Link>
         </div>
       </div>
