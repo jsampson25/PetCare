@@ -94,31 +94,53 @@ export async function register(formData: FormData) {
     );
   }
 
-  const appUrl = await getApplicationUrl();
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signUp({
-    email: email.data,
-    password: password.data,
-    options: {
-      data: {
-        display_name: displayName.data,
-        requested_plan: requestedPlan,
-        requested_trial_days: requestedTrialDays,
-        legal_accepted_at: new Date().toISOString(),
-        terms_version: '2026-07-21',
-        privacy_version: '2026-07-21',
-      },
-      emailRedirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(next)}`,
-    },
-  });
-  if (error)
+  let appUrl: string;
+  try {
+    appUrl = await getApplicationUrl();
+  } catch (error) {
+    console.error('Registration application URL is unavailable.', error);
     redirect(
       messageUrl(
         '/auth/register',
         'error',
-        'Registration could not be completed. Please try again.',
+        'Registration is not configured for this website address yet.',
       ),
     );
+  }
+
+  let registrationError: string | undefined;
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.signUp({
+      email: email.data,
+      password: password.data,
+      options: {
+        data: {
+          display_name: displayName.data,
+          requested_plan: requestedPlan,
+          requested_trial_days: requestedTrialDays,
+          legal_accepted_at: new Date().toISOString(),
+          terms_version: '2026-07-21',
+          privacy_version: '2026-07-21',
+        },
+        emailRedirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(next)}`,
+      },
+    });
+    if (error) {
+      console.error('Supabase rejected registration.', { code: error.code, status: error.status });
+      registrationError =
+        error.code === 'over_email_send_rate_limit'
+          ? 'Too many verification emails were requested. Wait a few minutes and try again.'
+          : 'Registration could not be completed. Try another email address or try again later.';
+    }
+  } catch (error) {
+    console.error('Registration service is unavailable.', error);
+    registrationError =
+      'The registration service is not configured correctly. Check the beta deployment settings.';
+  }
+  if (registrationError) {
+    redirect(messageUrl('/auth/register', 'error', registrationError));
+  }
   redirect(messageUrl('/auth/check-email', 'notice', 'Check your email to verify your account.'));
 }
 
