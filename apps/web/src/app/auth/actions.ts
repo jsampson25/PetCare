@@ -168,8 +168,13 @@ export async function register(formData: FormData) {
       },
     });
     if (error) {
-      console.error('Supabase rejected registration.', { code: error.code, status: error.status });
+      console.error('Supabase rejected registration.', {
+        code: error.code,
+        message: error.message,
+        status: error.status,
+      });
       const errorCode = error.code ?? '';
+      const errorMessage = error.message.toLowerCase();
       if (['email_exists', 'identity_already_exists', 'user_already_exists'].includes(errorCode)) {
         registrationError =
           'An account already uses this email address. Sign in or reset your password.';
@@ -182,12 +187,14 @@ export async function register(formData: FormData) {
       } else if (errorCode === 'over_email_send_rate_limit') {
         registrationError =
           'Too many verification emails were requested. Wait a few minutes and try again.';
-      } else if (['database_error', 'unexpected_failure'].includes(errorCode)) {
+      } else if (
+        ['database_error', 'unexpected_failure'].includes(errorCode) ||
+        errorMessage.includes('database error')
+      ) {
         registrationError =
           'The account database could not finish registration. The production database setup needs attention.';
       } else {
-        registrationError =
-          'Registration could not be completed. Try another email address or try again later.';
+        registrationError = `Registration could not be completed. Reference code: ${errorCode || 'unclassified'}.`;
       }
     }
   } catch (error) {

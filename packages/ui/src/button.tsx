@@ -5,6 +5,7 @@ type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'quiet';
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
   loading?: boolean;
+  loadingLabel?: string;
   variant?: ButtonVariant;
 };
 
@@ -22,13 +23,15 @@ export function Button({
   className = '',
   disabled,
   loading = false,
+  loadingLabel = 'Working…',
   type = 'button',
   variant = 'primary',
   ...props
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-md)] px-5 py-2.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-55 ${variantStyles[variant]} ${className}`}
+      aria-busy={loading || undefined}
+      className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-md)] px-5 py-2.5 text-sm font-bold transition active:translate-y-px active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-55 ${variantStyles[variant]} ${className}`}
       disabled={disabled || loading}
       type={type}
       {...props}
@@ -39,7 +42,7 @@ export function Button({
           className="size-4 animate-spin rounded-full border-2 border-current border-r-transparent"
         />
       ) : null}
-      <span>{loading ? 'Working…' : children}</span>
+      <span>{loading ? loadingLabel : children}</span>
     </button>
   );
 }

@@ -1,4 +1,3 @@
-import { Button } from '@petcare/ui/button';
 import { Field } from '@petcare/ui/field';
 import Link from 'next/link';
 
@@ -6,6 +5,7 @@ import { AuthCard } from '../../../components/auth-card';
 import { getSafeRedirect } from '../../../lib/auth/safe-redirect';
 import { register } from '../actions';
 import { PasswordFields } from '../password-field';
+import { RegistrationSubmitButton } from '../registration-submit-button';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 
@@ -74,9 +74,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
             .
           </span>
         </label>
-        <Button className="w-full" type="submit">
-          Create account
-        </Button>
+        <RegistrationSubmitButton />
       </form>
     </AuthCard>
   );
