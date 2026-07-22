@@ -80,6 +80,8 @@ export async function register(formData: FormData) {
         requested_plan: requestedPlan,
         requested_trial_days: requestedTrialDays,
         legal_accepted_at: new Date().toISOString(),
+        terms_version: '2026-07-21',
+        privacy_version: '2026-07-21',
       },
       emailRedirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(next)}`,
     },
