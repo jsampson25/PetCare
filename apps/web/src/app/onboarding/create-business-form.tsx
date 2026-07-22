@@ -29,11 +29,11 @@ export function CreateBusinessForm() {
           Website URL name
         </label>
         <p className="mt-1 text-sm leading-5 text-[var(--text-secondary)]">
-          Choose the short name used for your PetCare website. Do not enter .com here.
+          Choose the short name used for your Roventra website. Do not enter .com here.
         </p>
         <div className="mt-2 flex min-h-12 items-center overflow-hidden rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-white focus-within:border-[var(--focus-ring)] focus-within:ring-3 focus-within:ring-[color-mix(in_srgb,var(--focus-ring)_25%,transparent)]">
           <span className="hidden border-r bg-slate-50 px-3 py-3 text-sm text-slate-500 sm:block">
-            localhost:3000/site/
+            getroventra.com/site/
           </span>
           <input
             className="min-w-0 flex-1 px-3 py-3 text-base outline-none"
@@ -49,7 +49,7 @@ export function CreateBusinessForm() {
       </div>
       <Field label="First location name" name="locationName" placeholder="Main Facility" required />
       <Field
-        hint="A short internal name for this location—not a domain name."
+        hint="A short internal name for this location, not a domain name."
         label="Location URL name"
         name="locationSlug"
         placeholder="main-location"
@@ -75,7 +75,7 @@ export function CreateBusinessForm() {
           <option value="Pacific/Honolulu">Hawaii</option>
         </select>
       </div>
-      <Button loading={pending} type="submit">
+      <Button className="w-full sm:w-auto" loading={pending} type="submit">
         Create business
       </Button>
     </form>

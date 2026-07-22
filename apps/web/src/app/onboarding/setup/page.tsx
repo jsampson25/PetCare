@@ -77,12 +77,15 @@ export default async function OnboardingSetupPage({
 
   return (
     <div className="space-y-6">
-      <header className="rounded-[2rem] bg-[#173f30] p-7 text-white shadow-[var(--elevation-2)] sm:p-9">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
+      <header className="relative overflow-hidden rounded-[2rem] bg-[#0b1f3a] p-7 text-white shadow-[0_24px_70px_rgba(11,31,58,.2)] sm:p-9">
+        <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-[#2563eb]/30 blur-2xl" />
+        <p className="relative text-xs font-black uppercase tracking-[0.18em] text-[#7dd3fc]">
           Business setup
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Business and first location</h1>
-        <p className="mt-2 text-emerald-50/75">
+        <h1 className="relative mt-2 text-3xl font-semibold tracking-[-.04em]">
+          Business and first location
+        </h1>
+        <p className="relative mt-2 text-white/70">
           Complete these basics before adding services, capacity, and pricing.
         </p>
       </header>
@@ -97,7 +100,7 @@ export default async function OnboardingSetupPage({
         </Alert>
       ) : null}
       <Card
-        className="overflow-hidden border-emerald-100"
+        className="overflow-hidden border-[#dbe7f5]"
         title={`Foundation readiness: ${readiness?.completion_percent ?? 0}%`}
         description={`${readiness?.completed_steps ?? 0} of ${readiness?.total_steps ?? 3} initial sections complete.`}
       >
