@@ -1,6 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
@@ -19,6 +20,31 @@ function field(formData: FormData, name: string) {
 function messageUrl(path: string, kind: 'error' | 'notice', message: string) {
   const parameters = new URLSearchParams({ [kind]: message });
   return `${path}?${parameters.toString()}`;
+}
+
+async function getApplicationUrl() {
+  const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (configuredUrl) {
+    const parsed = new URL(configuredUrl);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new Error('NEXT_PUBLIC_APP_URL must use HTTP or HTTPS.');
+    }
+    return parsed.origin;
+  }
+
+  const requestHeaders = await headers();
+  const host = (requestHeaders.get('x-forwarded-host') ?? requestHeaders.get('host') ?? '')
+    .split(',')[0]
+    ?.trim()
+    .toLowerCase();
+  const allowedHost =
+    host === 'localhost:3000' ||
+    host === 'getroventra.com' ||
+    host === 'www.getroventra.com' ||
+    host === 'beta.getroventra.com' ||
+    host.endsWith('.vercel.app');
+  if (!host || !allowedHost) throw new Error('A trusted application URL is required.');
+  return `${host.startsWith('localhost:') ? 'http' : 'https'}://${host}`;
 }
 
 export async function signIn(formData: FormData) {
@@ -68,8 +94,7 @@ export async function register(formData: FormData) {
     );
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (!appUrl) throw new Error('NEXT_PUBLIC_APP_URL is required.');
+  const appUrl = await getApplicationUrl();
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signUp({
     email: email.data,
@@ -100,8 +125,7 @@ export async function register(formData: FormData) {
 export async function requestPasswordReset(formData: FormData) {
   const email = emailSchema.safeParse(field(formData, 'email'));
   if (email.success) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-    if (!appUrl) throw new Error('NEXT_PUBLIC_APP_URL is required.');
+    const appUrl = await getApplicationUrl();
     const supabase = await createSupabaseServerClient();
     await supabase.auth.resetPasswordForEmail(email.data, {
       redirectTo: `${appUrl}/auth/callback?next=/auth/update-password`,
