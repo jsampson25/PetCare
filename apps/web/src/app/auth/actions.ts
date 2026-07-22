@@ -22,6 +22,12 @@ function messageUrl(path: string, kind: 'error' | 'notice', message: string) {
   return `${path}?${parameters.toString()}`;
 }
 
+function registrationMessageUrl(message: string, plan: string, trialDays: number, next: string) {
+  const parameters = new URLSearchParams({ error: message, next, plan });
+  if (trialDays > 0) parameters.set('trial', String(trialDays));
+  return `/auth/register?${parameters.toString()}`;
+}
+
 async function getApplicationUrl() {
   const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
   if (configuredUrl) {
@@ -78,18 +84,53 @@ export async function register(formData: FormData) {
   const requestedTrialDays =
     field(formData, 'trial') === '14' && requestedPlan !== 'scale' ? 14 : 0;
   const next = getSafeRedirect(field(formData, 'next'), '/auth/verified');
-  if (
-    !email.success ||
-    !password.success ||
-    !displayName.success ||
-    !legalAccepted ||
-    password.data !== confirmation
-  ) {
+  if (!displayName.success) {
     redirect(
-      messageUrl(
-        '/auth/register',
-        'error',
-        'Check your details, accept the Terms and Privacy Policy, and use matching passwords of at least 12 characters.',
+      registrationMessageUrl(
+        'Enter your name to continue.',
+        requestedPlan,
+        requestedTrialDays,
+        next,
+      ),
+    );
+  }
+  if (!email.success) {
+    redirect(
+      registrationMessageUrl(
+        'Enter a valid email address.',
+        requestedPlan,
+        requestedTrialDays,
+        next,
+      ),
+    );
+  }
+  if (!password.success) {
+    redirect(
+      registrationMessageUrl(
+        'Your password must contain between 12 and 128 characters.',
+        requestedPlan,
+        requestedTrialDays,
+        next,
+      ),
+    );
+  }
+  if (password.data !== confirmation) {
+    redirect(
+      registrationMessageUrl(
+        'The passwords do not match. Enter the same password in both fields.',
+        requestedPlan,
+        requestedTrialDays,
+        next,
+      ),
+    );
+  }
+  if (!legalAccepted) {
+    redirect(
+      registrationMessageUrl(
+        'Accept the Terms of Service and acknowledge the Privacy Policy to continue.',
+        requestedPlan,
+        requestedTrialDays,
+        next,
       ),
     );
   }
