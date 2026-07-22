@@ -44,6 +44,7 @@ export async function register(formData: FormData) {
   const password = passwordSchema.safeParse(field(formData, 'password'));
   const confirmation = field(formData, 'passwordConfirmation');
   const displayName = z.string().min(1).max(120).safeParse(field(formData, 'displayName'));
+  const legalAccepted = formData.get('legalAccepted') === 'on';
   const requestedPlan = z
     .enum(['starter', 'growth', 'scale'])
     .catch('growth')
@@ -55,13 +56,14 @@ export async function register(formData: FormData) {
     !email.success ||
     !password.success ||
     !displayName.success ||
+    !legalAccepted ||
     password.data !== confirmation
   ) {
     redirect(
       messageUrl(
         '/auth/register',
         'error',
-        'Check your details. Passwords must match and contain at least 12 characters.',
+        'Check your details, accept the Terms and Privacy Policy, and use matching passwords of at least 12 characters.',
       ),
     );
   }
@@ -77,6 +79,7 @@ export async function register(formData: FormData) {
         display_name: displayName.data,
         requested_plan: requestedPlan,
         requested_trial_days: requestedTrialDays,
+        legal_accepted_at: new Date().toISOString(),
       },
       emailRedirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(next)}`,
     },

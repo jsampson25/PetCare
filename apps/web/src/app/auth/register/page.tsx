@@ -70,6 +70,25 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
           required
           type="password"
         />
+        <label className="flex items-start gap-3 text-sm leading-6 text-[#52627a]">
+          <input
+            className="mt-1 size-4 shrink-0 accent-[#2563eb]"
+            name="legalAccepted"
+            required
+            type="checkbox"
+          />
+          <span>
+            I agree to the Roventra{' '}
+            <Link className="font-bold text-[#1d4ed8] underline" href="/terms" target="_blank">
+              Terms of Service
+            </Link>{' '}
+            and acknowledge the{' '}
+            <Link className="font-bold text-[#1d4ed8] underline" href="/privacy" target="_blank">
+              Privacy Policy
+            </Link>
+            .
+          </span>
+        </label>
         <Button className="w-full" type="submit">
           Create account
         </Button>

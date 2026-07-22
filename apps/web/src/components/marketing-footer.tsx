@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CookieSettingsButton } from './cookie-consent';
 
 export function MarketingFooter() {
   return (
@@ -37,8 +38,16 @@ export function MarketingFooter() {
           <Link href="/auth/sign-in">Sign in</Link>
         </div>
       </div>
-      <div className="border-t border-[#e7eef8] px-6 py-5 text-center text-xs text-[#52627a]">
-        © 2026 Roventra. Built for exceptional pet care.
+      <div className="border-t border-[#e7eef8] px-6 py-5 text-xs text-[#52627a]">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 sm:flex-row">
+          <span>© 2026 Roventra. Built for exceptional pet care.</span>
+          <nav aria-label="Legal" className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/cookies">Cookies</Link>
+            <CookieSettingsButton />
+          </nav>
+        </div>
       </div>
     </footer>
   );
