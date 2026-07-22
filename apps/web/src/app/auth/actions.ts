@@ -87,6 +87,13 @@ function registrationErrorMessage(code: string | undefined, message: string, app
   ) {
     return 'The account database could not finish registration. The production database setup needs attention.';
   }
+  if (
+    normalizedMessage.includes('not valid json') ||
+    normalizedMessage.includes('unexpected token') ||
+    normalizedMessage.includes('<!doctype')
+  ) {
+    return 'The Supabase project URL configured for this deployment is not an API URL. Update NEXT_PUBLIC_SUPABASE_URL and redeploy the beta branch.';
+  }
 
   // Supabase Auth messages are already intended for its public client API. Showing the
   // message on the beta host gives testers an actionable diagnosis without exposing it
