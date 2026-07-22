@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import { RoventraLogo } from './roventra-logo';
+
 export function MarketingHeader() {
   const isPreview = process.env.VERCEL_ENV === 'preview';
 
@@ -11,11 +13,8 @@ export function MarketingHeader() {
         </div>
       ) : null}
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
-        <Link className="flex items-center gap-3" href="/" aria-label="Roventra home">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#2563eb] text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,0.25)]">
-            R
-          </span>
-          <span className="text-xl font-semibold tracking-[-0.035em]">Roventra</span>
+        <Link className="shrink-0" href="/" aria-label="Roventra home">
+          <RoventraLogo className="h-9 w-auto sm:h-10" priority />
         </Link>
         <nav
           className="hidden items-center gap-8 text-sm font-semibold text-[#40516a] md:flex"

@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 
+import { RoventraLogo } from '../../components/roventra-logo';
+
 export default function AuthLayout({ children }: { children: ReactNode }) {
   const benefits = [
     'Customize your website and booking flow',
@@ -77,11 +79,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
 function Brand() {
   return (
-    <Link className="flex items-center gap-3 text-xl font-semibold tracking-[-.035em]" href="/">
-      <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#2563eb] text-sm font-black text-white shadow-[0_8px_24px_rgba(37,99,235,.25)]">
-        R
-      </span>
-      Roventra
+    <Link className="inline-flex" href="/" aria-label="Roventra home">
+      <RoventraLogo className="h-11 w-auto" priority />
     </Link>
   );
 }

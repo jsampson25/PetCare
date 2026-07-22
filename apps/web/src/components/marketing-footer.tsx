@@ -1,16 +1,14 @@
 import Link from 'next/link';
 import { CookieSettingsButton } from './cookie-consent';
+import { RoventraLogo } from './roventra-logo';
 
 export function MarketingFooter() {
   return (
     <footer className="border-t border-[#dbe7f5] bg-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 lg:grid-cols-[1.2fr_repeat(3,.7fr)] lg:px-8">
         <div>
-          <Link className="flex items-center gap-3" href="/">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#2563eb] text-xs font-black text-white">
-              R
-            </span>
-            <span className="font-semibold">Roventra</span>
+          <Link className="inline-flex" href="/" aria-label="Roventra home">
+            <RoventraLogo className="h-9 w-auto" />
           </Link>
           <p className="mt-4 max-w-sm text-sm leading-6 text-[#52627a]">
             The connected website and operating platform for modern pet-care businesses.
