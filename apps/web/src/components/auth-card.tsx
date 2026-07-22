@@ -13,8 +13,8 @@ type AuthCardProps = {
 
 export function AuthCard({ children, description, error, footer, notice, title }: AuthCardProps) {
   return (
-    <Card className="rounded-[1.75rem] border-white/70 bg-white/95 p-6 shadow-[0_24px_70px_rgba(30,55,42,.13)] backdrop-blur sm:p-8">
-      <h1 className="text-2xl font-black tracking-tight">{title}</h1>
+    <Card className="rounded-[1.75rem] border-[#dbe7f5] bg-white/95 p-6 shadow-[0_28px_80px_rgba(30,64,175,.12)] backdrop-blur sm:p-8">
+      <h1 className="text-3xl font-semibold tracking-[-.04em] text-[#0b1f3a]">{title}</h1>
       {description ? (
         <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{description}</p>
       ) : null}
