@@ -10,7 +10,7 @@ import { businessContextCookie } from '../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../lib/supabase/server';
 
 const emailSchema = z.email().max(320);
-const passwordSchema = z.string().min(12).max(128);
+const passwordSchema = z.string().min(10).max(128);
 
 function field(formData: FormData, name: string) {
   const value = formData.get(name);
@@ -107,7 +107,7 @@ export async function register(formData: FormData) {
   if (!password.success) {
     redirect(
       registrationMessageUrl(
-        'Your password must contain between 12 and 128 characters.',
+        'Your password must contain between 10 and 128 characters.',
         requestedPlan,
         requestedTrialDays,
         next,
@@ -169,10 +169,26 @@ export async function register(formData: FormData) {
     });
     if (error) {
       console.error('Supabase rejected registration.', { code: error.code, status: error.status });
-      registrationError =
-        error.code === 'over_email_send_rate_limit'
-          ? 'Too many verification emails were requested. Wait a few minutes and try again.'
-          : 'Registration could not be completed. Try another email address or try again later.';
+      const errorCode = error.code ?? '';
+      if (['email_exists', 'identity_already_exists', 'user_already_exists'].includes(errorCode)) {
+        registrationError =
+          'An account already uses this email address. Sign in or reset your password.';
+      } else if (errorCode === 'weak_password') {
+        registrationError = 'This password does not meet the account security requirements.';
+      } else if (errorCode === 'email_address_invalid') {
+        registrationError = 'Enter a valid email address.';
+      } else if (errorCode === 'signup_disabled') {
+        registrationError = 'New account registration is currently disabled.';
+      } else if (errorCode === 'over_email_send_rate_limit') {
+        registrationError =
+          'Too many verification emails were requested. Wait a few minutes and try again.';
+      } else if (['database_error', 'unexpected_failure'].includes(errorCode)) {
+        registrationError =
+          'The account database could not finish registration. The production database setup needs attention.';
+      } else {
+        registrationError =
+          'Registration could not be completed. Try another email address or try again later.';
+      }
     }
   } catch (error) {
     console.error('Registration service is unavailable.', error);
@@ -211,7 +227,7 @@ export async function updatePassword(formData: FormData) {
       messageUrl(
         '/auth/update-password',
         'error',
-        'Passwords must match and contain at least 12 characters.',
+        'Passwords must match and contain at least 10 characters.',
       ),
     );
   }

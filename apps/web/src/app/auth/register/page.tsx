@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AuthCard } from '../../../components/auth-card';
 import { getSafeRedirect } from '../../../lib/auth/safe-redirect';
 import { register } from '../actions';
+import { PasswordField } from '../password-field';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 
@@ -53,23 +54,8 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
         ) : null}
         <Field autoComplete="name" label="Your name" name="displayName" required />
         <Field autoComplete="email" label="Email address" name="email" required type="email" />
-        <Field
-          autoComplete="new-password"
-          hint="Use at least 12 characters."
-          label="Password"
-          minLength={12}
-          name="password"
-          required
-          type="password"
-        />
-        <Field
-          autoComplete="new-password"
-          label="Confirm password"
-          minLength={12}
-          name="passwordConfirmation"
-          required
-          type="password"
-        />
+        <PasswordField />
+        <PasswordField confirm />
         <label className="flex items-start gap-3 text-sm leading-6 text-[#52627a]">
           <input
             className="mt-1 size-4 shrink-0 accent-[#2563eb]"
