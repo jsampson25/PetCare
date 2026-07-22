@@ -120,6 +120,29 @@ export async function createFirstBusiness(
     }
   }
 
+  const claimsResult = await supabase.auth.getClaims();
+  const metadata = claimsResult.data?.claims?.user_metadata;
+  const requestedPlan =
+    metadata && typeof metadata === 'object' && 'requested_plan' in metadata
+      ? metadata.requested_plan
+      : undefined;
+  const requestedTrialDays =
+    metadata && typeof metadata === 'object' && 'requested_trial_days' in metadata
+      ? metadata.requested_trial_days
+      : undefined;
+
+  if (requestedTrialDays === 14 && (requestedPlan === 'starter' || requestedPlan === 'growth')) {
+    const { error: trialError } = await supabase.schema('app').rpc('start_owner_saas_trial', {
+      requested_plan_key: requestedPlan,
+      target_business_id: businessId,
+    });
+    if (trialError) {
+      return {
+        error: 'Your business was created, but its free trial could not be started. Try again.',
+      };
+    }
+  }
+
   const cookieStore = await cookies();
   cookieStore.set(businessContextCookie, businessId, {
     httpOnly: true,
