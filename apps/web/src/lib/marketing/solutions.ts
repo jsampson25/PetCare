@@ -163,7 +163,7 @@ export const solutions: Solution[] = [
     eyebrow: 'Website and commerce',
     title: 'Give every business a website that belongs to them.',
     summary:
-      'Create a polished public site, booking journey, account experience, and customer portal from one shared brand system—without handing customers off to a mismatched widget.',
+      'Create a polished public site, booking journey, account experience, and customer portal from one shared brand system. Customers never get handed off to a mismatched widget.',
     outcomes: ['Own the first impression', 'Keep booking on-brand', 'Publish without developers'],
     capabilities: [
       {

@@ -47,8 +47,8 @@ export default function SecurityPage() {
             Security that follows every reservation, record, and role.
           </h1>
           <p className="mt-7 max-w-3xl text-lg leading-8 text-white/75">
-            Roventra is being built with security boundaries that match real pet-care work—not as a
-            checklist added after launch.
+            Roventra is being built with security boundaries that match real pet-care work. Security
+            is part of the foundation, not a checklist added after launch.
           </p>
         </div>
       </section>

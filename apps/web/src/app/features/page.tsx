@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const capabilityGroups = [
   {
     title: 'Website, brand, and conversion',
-    lead: 'A complete public presence—not a disconnected booking widget.',
+    lead: 'A complete public presence that goes far beyond a disconnected booking widget.',
     items: [
       'Theme and layout selection',
       'Visual sections and custom pages',

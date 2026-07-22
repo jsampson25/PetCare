@@ -198,8 +198,8 @@ export default function HomePage() {
               </span>
             </h1>
             <p className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-[#40516a] sm:text-xl">
-              Give customers a beautiful, customizable website—and give your team one calm workspace
-              for reservations, pet records, payments, and daily care.
+              Give customers a beautiful, customizable website while your team gets one calm
+              workspace for reservations, pet records, payments, and daily care.
             </p>
             <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
@@ -241,8 +241,8 @@ export default function HomePage() {
               Stop stitching together tools your customers can feel.
             </h2>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[#40516a]">
-              Every touchpoint—from your homepage to a pet’s report card—uses the same brand,
-              information, and thoughtful experience.
+              Every touchpoint uses the same brand, information, and thoughtful experience, from
+              your homepage to a pet’s report card.
             </p>
           </div>
           <div className="mt-14 grid gap-5 lg:grid-cols-3">
