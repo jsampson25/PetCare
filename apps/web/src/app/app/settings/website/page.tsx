@@ -6,13 +6,21 @@ import { Field } from '@petcare/ui/field';
 import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
-import { publishWebsite, requestCustomDomain, saveWebsiteDraft, unpublishWebsite } from './actions';
+import {
+  publishWebsite,
+  requestCustomDomain,
+  saveWebsiteDraft,
+  unpublishWebsite,
+  uploadWebsiteMedia,
+} from './actions';
 import {
   defaultWebsiteSections,
   WebsiteSectionEditor,
   type WebsiteSection,
 } from './website-section-editor';
 import { WebsiteCustomPagesEditor, type WebsiteCustomPage } from './website-custom-pages-editor';
+import { WebsiteMediaEditor, type WebsiteMedia } from './website-media-editor';
+import { WebsiteStylePicker } from './website-style-picker';
 type SP = Promise<Record<string, string | string[] | undefined>>;
 export default async function WebsiteSettingsPage({ searchParams }: { searchParams: SP }) {
   const context = await resolveBusinessContext();
@@ -25,6 +33,7 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
     { data: business },
     { data: readiness },
     { data: domains },
+    { data: media },
   ] = await Promise.all([
     supabase
       .from('tenant_websites')
@@ -43,6 +52,11 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
       .select('id,hostname,status,verification_token,last_checked_at,last_result')
       .eq('business_id', context.businessId)
       .order('requested_at', { ascending: false }),
+    supabase
+      .from('tenant_website_media')
+      .select('id,object_path,alt_text,caption,category')
+      .eq('business_id', context.businessId)
+      .order('created_at', { ascending: false }),
   ]);
   const c = (site?.draft_content ?? {}) as Record<string, unknown>;
   const b = (site?.brand_tokens ?? {}) as Record<string, unknown>;
@@ -51,6 +65,12 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
     ? (c.section_layout as WebsiteSection[])
     : defaultWebsiteSections;
   const customPages = Array.isArray(c.custom_pages) ? (c.custom_pages as WebsiteCustomPage[]) : [];
+  const heroMedia = c.hero_media as { id?: string } | undefined;
+  const mediaWithUrls: WebsiteMedia[] = (media ?? []).map((item) => ({
+    ...item,
+    publicUrl: supabase.storage.from('tenant-website-media').getPublicUrl(item.object_path).data
+      .publicUrl,
+  }));
   return (
     <div className="space-y-6">
       <header>
@@ -71,78 +91,60 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
           {q.error}
         </Alert>
       ) : null}
+      <Card
+        title="Media library"
+        description="Upload photos once, then drag or reuse them throughout your website."
+      >
+        <form
+          action={uploadWebsiteMedia}
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.1fr_1fr_.7fr_auto] lg:items-end"
+          encType="multipart/form-data"
+        >
+          <Field
+            accept="image/jpeg,image/png,image/webp"
+            label="Photo"
+            name="photo"
+            required
+            type="file"
+          />
+          <Field
+            hint="Describe what is visible for accessibility."
+            label="Alt text"
+            name="altText"
+            placeholder="Golden retriever playing outside"
+            required
+          />
+          <label className="text-sm font-bold">
+            Category
+            <select
+              className="mt-2 min-h-12 w-full rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-white px-3"
+              defaultValue="pets"
+              name="category"
+            >
+              <option value="pets">Pets</option>
+              <option value="family">Families</option>
+              <option value="staff">Staff</option>
+              <option value="facility">Facility</option>
+              <option value="grooming">Grooming</option>
+              <option value="brand">Brand</option>
+              <option value="general">General</option>
+            </select>
+          </label>
+          <input name="caption" type="hidden" value="" />
+          <Button type="submit">Upload photo</Button>
+        </form>
+        <p className="mt-3 text-xs text-[var(--text-secondary)]">
+          JPG, PNG, or WebP up to 10 MB. Use only images you have permission to publish.
+        </p>
+      </Card>
       <Card title="Draft content" description={`Live status: ${site?.status ?? 'not configured'}`}>
         <form action={saveWebsiteDraft} className="grid gap-4 sm:grid-cols-2">
-          <fieldset className="sm:col-span-2">
-            <legend className="text-sm font-black">Choose your site layout</legend>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              Each layout changes the logo, navigation, hero, and page composition. Your colors and
-              identity also carry into booking and the customer portal.
-            </p>
-            <div className="mt-4 grid gap-4 lg:grid-cols-3">
-              {[
-                {
-                  key: 'modern',
-                  name: 'Clean centered',
-                  description: 'Centered logo and an editorial, premium presentation.',
-                  preview: 'centered',
-                },
-                {
-                  key: 'classic',
-                  name: 'Classic left',
-                  description: 'Familiar left-aligned brand with clear navigation.',
-                  preview: 'left',
-                },
-                {
-                  key: 'warm',
-                  name: 'Modern split',
-                  description: 'Balanced brand, navigation, and booking action.',
-                  preview: 'split',
-                },
-              ].map((theme) => (
-                <label
-                  className="group cursor-pointer rounded-2xl border border-[var(--border-default)] bg-white p-3 has-[:checked]:border-[var(--action-primary)] has-[:checked]:ring-2 has-[:checked]:ring-[var(--action-primary)]/15"
-                  key={theme.key}
-                >
-                  <input
-                    className="sr-only"
-                    defaultChecked={(site?.theme_key ?? 'modern') === theme.key}
-                    name="theme"
-                    type="radio"
-                    value={theme.key}
-                  />
-                  <span className="block overflow-hidden rounded-xl border bg-[#fafafa]">
-                    <span
-                      className={`grid min-h-14 items-center gap-2 border-b bg-white px-3 ${theme.preview === 'centered' ? 'grid-cols-3' : 'grid-cols-[auto_1fr_auto]'}`}
-                    >
-                      {theme.preview === 'centered' ? (
-                        <span className="h-1 w-12 bg-slate-200" />
-                      ) : null}
-                      <span
-                        className={`${theme.preview === 'centered' ? 'justify-self-center' : ''} size-7 rounded-lg bg-[var(--action-primary)]`}
-                      />
-                      <span className="flex justify-end gap-1">
-                        <span className="h-1 w-6 bg-slate-200" />
-                        <span className="h-1 w-6 bg-slate-200" />
-                      </span>
-                    </span>
-                    <span className="grid min-h-28 place-items-center p-4 text-center">
-                      <span>
-                        <span className="mx-auto block h-2 w-28 rounded bg-slate-800" />
-                        <span className="mx-auto mt-2 block h-1.5 w-36 rounded bg-slate-200" />
-                        <span className="mx-auto mt-3 block h-6 w-16 rounded-md bg-[var(--action-primary)]" />
-                      </span>
-                    </span>
-                  </span>
-                  <span className="mt-3 block font-black">{theme.name}</span>
-                  <span className="mt-1 block text-sm leading-5 text-[var(--text-secondary)]">
-                    {theme.description}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <WebsiteStylePicker
+            initialStyle={site?.theme_key ?? 'modern'}
+            initialTemplate={String(c.template_key ?? 'studio-split')}
+          />
           <WebsiteSectionEditor initialSections={storedSections} />
+          <WebsiteMediaEditor initialHeroMediaId={heroMedia?.id ?? ''} media={mediaWithUrls} />
           <WebsiteCustomPagesEditor initialPages={customPages} />
           <Field
             defaultValue={String(b.primary ?? '#23664f')}

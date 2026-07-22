@@ -35,7 +35,14 @@ export default async function PreviewPage() {
 
   const site = data as DraftPreview;
   const content = site.content;
-  const centered = site.theme_key === 'modern';
+  const templateKey = String(content.template_key ?? 'studio-split');
+  const centered = ['centered-studio', 'neighborhood', 'lodge'].includes(templateKey);
+  const heroMedia = content.hero_media as
+    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  const heroImageUrl = heroMedia?.object_path
+    ? supabase.storage.from('tenant-website-media').getPublicUrl(heroMedia.object_path).data
+        .publicUrl
+    : null;
   const visibleSections = new Set(
     Array.isArray(content.section_layout)
       ? (content.section_layout as Array<{ id: string; visible: boolean }>)
@@ -173,17 +180,22 @@ export default async function PreviewPage() {
           </div>
           <div
             className={`relative min-h-[25rem] overflow-hidden rounded-[2rem] border border-white bg-white shadow-[0_30px_90px_rgba(25,25,35,.12)] ${centered ? 'mx-auto mt-16 max-w-5xl' : ''}`}
+            aria-label={heroImageUrl ? heroMedia?.alt_text : undefined}
+            role={heroImageUrl ? 'img' : undefined}
           >
             <div
               className="absolute inset-0 opacity-90"
               style={{
-                background:
-                  'linear-gradient(135deg, color-mix(in srgb, var(--tenant-primary) 12%, white), color-mix(in srgb, var(--tenant-accent) 22%, white))',
+                background: heroImageUrl
+                  ? `linear-gradient(0deg, rgba(0,0,0,.28), rgba(0,0,0,0)), url(${heroImageUrl}) center / cover`
+                  : 'linear-gradient(135deg, color-mix(in srgb, var(--tenant-primary) 12%, white), color-mix(in srgb, var(--tenant-accent) 22%, white))',
               }}
             />
-            <div className="absolute left-1/2 top-1/2 grid size-40 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/70 text-7xl shadow-xl backdrop-blur">
-              🐾
-            </div>
+            {!heroImageUrl ? (
+              <div className="absolute left-1/2 top-1/2 grid size-40 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/70 text-7xl shadow-xl backdrop-blur">
+                🐾
+              </div>
+            ) : null}
             <div className="absolute inset-x-6 bottom-6 grid grid-cols-3 gap-3 rounded-2xl bg-white/90 p-4 text-left shadow-xl backdrop-blur sm:inset-x-auto sm:right-6 sm:w-[24rem]">
               {[
                 ['8:00', 'Welcome'],

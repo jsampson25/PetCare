@@ -70,6 +70,14 @@ export default async function TenantSitePage({
   const customPages = Array.isArray(content.custom_pages)
     ? (content.custom_pages as CustomPage[])
     : [];
+  const templateKey = String(content.template_key ?? 'studio-split');
+  const heroMedia = content.hero_media as
+    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  const supabase = await createSupabaseServerClient();
+  const heroImageUrl = heroMedia?.object_path
+    ? supabase.storage.from('tenant-website-media').getPublicUrl(heroMedia.object_path).data
+        .publicUrl
+    : null;
   const sectionStyle = (id: SectionId): CSSProperties => ({
     display:
       sectionLayout.find((section) => section.id === id)?.visible === false ? 'none' : undefined,
@@ -78,8 +86,8 @@ export default async function TenantSitePage({
       sectionLayout.findIndex((section) => section.id === id),
     ),
   });
-  const centeredHeader = site.theme_key === 'modern';
-  const splitHeader = site.theme_key === 'warm';
+  const centeredHeader = ['centered-studio', 'neighborhood', 'lodge'].includes(templateKey);
+  const splitHeader = ['studio-split', 'happy-tails', 'heritage'].includes(templateKey);
   const logoMark = (
     <span
       className="grid size-10 place-items-center rounded-2xl text-sm font-black text-white"
@@ -202,7 +210,21 @@ export default async function TenantSitePage({
           </div>
           <div
             className={`relative min-h-[28rem] overflow-hidden rounded-[2.25rem] bg-[linear-gradient(145deg,color-mix(in_srgb,var(--tenant-accent)_18%,white),color-mix(in_srgb,var(--tenant-primary)_10%,white))] shadow-[0_28px_80px_rgba(30,55,42,.12)] ${centeredHeader ? 'mx-auto mt-2 w-full max-w-5xl' : ''}`}
+            aria-label={heroImageUrl ? heroMedia?.alt_text : undefined}
+            role={heroImageUrl ? 'img' : undefined}
+            style={
+              heroImageUrl
+                ? {
+                    backgroundImage: `url(${heroImageUrl})`,
+                    backgroundPosition: 'center',
+                    backgroundSize: 'cover',
+                  }
+                : undefined
+            }
           >
+            {heroImageUrl ? (
+              <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+            ) : null}
             <div className="absolute inset-x-8 bottom-8 rounded-3xl bg-white/90 p-5 shadow-xl backdrop-blur">
               <p
                 className="text-xs font-black uppercase tracking-[0.16em]"
