@@ -2,7 +2,9 @@ import { AppShell } from '@petcare/ui/app-shell';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 
+import { TrialBanner } from '../../components/trial-banner';
 import { resolveBusinessContext } from '../../lib/auth/tenant-context';
+import { createSupabaseServerClient } from '../../lib/supabase/server';
 
 const businessNavigation = [
   { href: '/app', label: 'Today' },
@@ -88,6 +90,18 @@ export default async function BusinessLayout({ children }: { children: ReactNode
   if (context.requiresMfa && context.sessionAssuranceLevel !== 'aal2') {
     redirect('/auth/mfa?next=/app');
   }
+  const supabase = await createSupabaseServerClient();
+  const { data: subscriptionRows } = await supabase
+    .schema('app')
+    .rpc('get_tenant_subscription_summary', { target_business_id: context.businessId });
+  const subscription = subscriptionRows?.[0] as
+    | {
+        plan_name: string;
+        subscription_status: string;
+        trial_days_remaining: number | null;
+        trial_ends_at: string | null;
+      }
+    | undefined;
   return (
     <AppShell
       contextLabel={context.businessName}
@@ -95,6 +109,15 @@ export default async function BusinessLayout({ children }: { children: ReactNode
       kind="business"
       permissions={context.permissions}
     >
+      {subscription?.subscription_status === 'trialing' &&
+      subscription.trial_ends_at &&
+      subscription.trial_days_remaining !== null ? (
+        <TrialBanner
+          planName={subscription.plan_name}
+          remainingDays={subscription.trial_days_remaining}
+          trialEndsAt={subscription.trial_ends_at}
+        />
+      ) : null}
       {children}
     </AppShell>
   );
