@@ -71,8 +71,12 @@ export function CookieConsent() {
               cookies stay off until you choose.
             </p>
             <div className="mt-2 flex gap-4 text-xs font-semibold text-[#1d4ed8]">
-              <Link href="/cookies">Cookie Policy</Link>
-              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/cookies" rel="noreferrer" target="_blank">
+                Cookie Policy
+              </Link>
+              <Link href="/privacy" rel="noreferrer" target="_blank">
+                Privacy Policy
+              </Link>
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row lg:shrink-0">

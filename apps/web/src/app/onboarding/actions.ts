@@ -151,7 +151,7 @@ export async function createFirstBusiness(
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   });
-  redirect('/auth/mfa?next=/onboarding/setup');
+  redirect('/onboarding/setup?notice=Business+created.+You+can+add+an+authenticator+later+from+Security+settings.');
 }
 
 function emailFromClaims(

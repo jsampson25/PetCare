@@ -4,6 +4,7 @@ import { Alert } from '@petcare/ui/alert';
 import { Button } from '@petcare/ui/button';
 import { Field } from '@petcare/ui/field';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useActionState } from 'react';
 
 import { beginMfaEnrollment, type MfaEnrollmentState, verifyMfaCode } from './actions';
@@ -25,9 +26,20 @@ export function MfaEnrollmentForm({ next }: { next: string }) {
           Use an authenticator app such as Microsoft Authenticator, Google Authenticator, or
           1Password.
         </p>
-        <Button loading={pending} type="submit">
-          Set up authenticator
-        </Button>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button loading={pending} type="submit">
+            Set up authenticator
+          </Button>
+          <Link
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--border-strong)] px-4 text-sm font-bold text-[var(--text-primary)] hover:bg-[var(--surface-subtle)]"
+            href={next}
+          >
+            Skip for now
+          </Link>
+        </div>
+        <p className="text-xs leading-5 text-[var(--text-secondary)]">
+          Optional. You can add an authenticator later from Security settings.
+        </p>
       </form>
     );
   }

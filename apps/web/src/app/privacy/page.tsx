@@ -55,7 +55,12 @@ export default function PrivacyPage() {
         page, pages and features used, dates and times, approximate location derived from IP,
         identifiers, logs, security events, crashes, and performance information. Optional analytics
         and advertising technologies are governed by your choices and our{' '}
-        <Link className="font-semibold text-[#1d4ed8]" href="/cookies">
+        <Link
+          className="font-semibold text-[#1d4ed8]"
+          href="/cookies"
+          rel="noreferrer"
+          target="_blank"
+        >
           Cookie Policy
         </Link>
         .

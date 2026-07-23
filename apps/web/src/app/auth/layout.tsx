@@ -57,15 +57,30 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             {children}
             <p className="mt-6 text-center text-xs leading-5 text-[#6b7b91]">
               Review our{' '}
-              <Link className="font-semibold text-[#1d4ed8] underline" href="/terms">
+              <Link
+                className="font-semibold text-[#1d4ed8] underline"
+                href="/terms"
+                rel="noreferrer"
+                target="_blank"
+              >
                 Terms
               </Link>
               ,{' '}
-              <Link className="font-semibold text-[#1d4ed8] underline" href="/privacy">
+              <Link
+                className="font-semibold text-[#1d4ed8] underline"
+                href="/privacy"
+                rel="noreferrer"
+                target="_blank"
+              >
                 Privacy Policy
               </Link>
               , and{' '}
-              <Link className="font-semibold text-[#1d4ed8] underline" href="/cookies">
+              <Link
+                className="font-semibold text-[#1d4ed8] underline"
+                href="/cookies"
+                rel="noreferrer"
+                target="_blank"
+              >
                 Cookie Policy
               </Link>
               .

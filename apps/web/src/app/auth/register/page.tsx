@@ -64,11 +64,21 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
           />
           <span>
             I agree to the Roventra{' '}
-            <Link className="font-bold text-[#1d4ed8] underline" href="/terms" target="_blank">
+            <Link
+              className="font-bold text-[#1d4ed8] underline"
+              href="/terms"
+              rel="noreferrer"
+              target="_blank"
+            >
               Terms of Service
             </Link>{' '}
             and acknowledge the{' '}
-            <Link className="font-bold text-[#1d4ed8] underline" href="/privacy" target="_blank">
+            <Link
+              className="font-bold text-[#1d4ed8] underline"
+              href="/privacy"
+              rel="noreferrer"
+              target="_blank"
+            >
               Privacy Policy
             </Link>
             .
