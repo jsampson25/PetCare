@@ -21,8 +21,10 @@ and save it.
 ## Requirements
 
 - Keep the Supabase template variables unchanged.
+- Link-based templates use Roventra's `/auth/callback` endpoint and
+  `{{ .TokenHash }}` so recipients do not see the Supabase project hostname.
+- Set the hosted Supabase Site URL to the canonical Roventra application URL.
 - Keep Resend click and open tracking disabled for authentication messages.
 - The logo must remain publicly available at the HTTPS URL used in the files.
 - Send a real test for every authentication flow after changing a template.
 - Review templates in desktop, mobile, light-mode, and dark-mode email clients.
-
