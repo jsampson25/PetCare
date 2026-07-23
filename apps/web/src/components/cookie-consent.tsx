@@ -1,7 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
+
+import { LegalModalLink } from './legal-modal-link';
 
 const consentKey = 'roventra-cookie-consent-v1';
 const consentCookie = 'roventra_cookie_consent';
@@ -23,6 +24,7 @@ export function CookieConsent() {
   const [marketing, setMarketing] = useState(false);
 
   useEffect(() => {
+    if (window.self !== window.top) return;
     const revealTimer = window.setTimeout(
       () => setVisible(!window.localStorage.getItem(consentKey)),
       0,
@@ -71,12 +73,12 @@ export function CookieConsent() {
               cookies stay off until you choose.
             </p>
             <div className="mt-2 flex gap-4 text-xs font-semibold text-[#1d4ed8]">
-              <Link href="/cookies" rel="noreferrer" target="_blank">
+              <LegalModalLink href="/cookies">
                 Cookie Policy
-              </Link>
-              <Link href="/privacy" rel="noreferrer" target="_blank">
+              </LegalModalLink>
+              <LegalModalLink href="/privacy">
                 Privacy Policy
-              </Link>
+              </LegalModalLink>
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row lg:shrink-0">

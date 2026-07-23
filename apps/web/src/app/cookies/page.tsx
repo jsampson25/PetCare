@@ -3,10 +3,16 @@ import { CookieSettingsButton } from '../../components/cookie-consent';
 import { LegalPage } from '../../components/legal-page';
 
 export const metadata: Metadata = { title: 'Cookie Policy' };
-export default function CookiesPage() {
+export default async function CookiesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const parameters = await searchParams;
   return (
     <LegalPage
       description="What cookies and similar technologies Roventra uses, why we use them, and the choices available to you."
+      embedded={parameters.embed === '1'}
       title="Cookie Policy"
     >
       <p>

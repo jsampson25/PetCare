@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { CookieSettingsButton } from './cookie-consent';
+import { LegalModalLink } from './legal-modal-link';
 import { RoventraLogo } from './roventra-logo';
 
 export function MarketingFooter() {
@@ -40,15 +41,15 @@ export function MarketingFooter() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 sm:flex-row">
           <span>© 2026 Roventra. Built for exceptional pet care.</span>
           <nav aria-label="Legal" className="flex flex-wrap justify-center gap-x-5 gap-y-2">
-            <Link href="/privacy" rel="noreferrer" target="_blank">
+            <LegalModalLink href="/privacy">
               Privacy
-            </Link>
-            <Link href="/terms" rel="noreferrer" target="_blank">
+            </LegalModalLink>
+            <LegalModalLink href="/terms">
               Terms
-            </Link>
-            <Link href="/cookies" rel="noreferrer" target="_blank">
+            </LegalModalLink>
+            <LegalModalLink href="/cookies">
               Cookies
-            </Link>
+            </LegalModalLink>
             <CookieSettingsButton />
           </nav>
         </div>

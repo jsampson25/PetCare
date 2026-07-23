@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 
 import { RoventraLogo } from '../../components/roventra-logo';
+import { LegalModalLink } from '../../components/legal-modal-link';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   const benefits = [
@@ -57,32 +58,26 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             {children}
             <p className="mt-6 text-center text-xs leading-5 text-[#6b7b91]">
               Review our{' '}
-              <Link
+              <LegalModalLink
                 className="font-semibold text-[#1d4ed8] underline"
                 href="/terms"
-                rel="noreferrer"
-                target="_blank"
               >
                 Terms
-              </Link>
+              </LegalModalLink>
               ,{' '}
-              <Link
+              <LegalModalLink
                 className="font-semibold text-[#1d4ed8] underline"
                 href="/privacy"
-                rel="noreferrer"
-                target="_blank"
               >
                 Privacy Policy
-              </Link>
+              </LegalModalLink>
               , and{' '}
-              <Link
+              <LegalModalLink
                 className="font-semibold text-[#1d4ed8] underline"
                 href="/cookies"
-                rel="noreferrer"
-                target="_blank"
               >
                 Cookie Policy
-              </Link>
+              </LegalModalLink>
               .
             </p>
           </div>

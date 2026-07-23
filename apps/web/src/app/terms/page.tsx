@@ -5,10 +5,16 @@ import { LegalPage } from '../../components/legal-page';
 
 export const metadata: Metadata = { title: 'Terms of Service' };
 
-export default function TermsPage() {
+export default async function TermsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const parameters = await searchParams;
   return (
     <LegalPage
       description="The terms that govern access to and use of the Roventra platform and related services."
+      embedded={parameters.embed === '1'}
       title="Terms of Service"
     >
       <p>

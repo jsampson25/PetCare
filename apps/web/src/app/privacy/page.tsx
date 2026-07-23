@@ -6,10 +6,16 @@ import { LegalPage } from '../../components/legal-page';
 
 export const metadata: Metadata = { title: 'Privacy Policy' };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const parameters = await searchParams;
   return (
     <LegalPage
       description="How Roventra collects, uses, shares, and protects personal information across our websites and services."
+      embedded={parameters.embed === '1'}
       title="Privacy Policy"
     >
       <p>

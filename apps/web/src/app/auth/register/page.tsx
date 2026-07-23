@@ -2,6 +2,7 @@ import { Field } from '@petcare/ui/field';
 import Link from 'next/link';
 
 import { AuthCard } from '../../../components/auth-card';
+import { LegalModalLink } from '../../../components/legal-modal-link';
 import { getSafeRedirect } from '../../../lib/auth/safe-redirect';
 import { register } from '../actions';
 import { PasswordFields } from '../password-field';
@@ -64,23 +65,19 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
           />
           <span>
             I agree to the Roventra{' '}
-            <Link
+            <LegalModalLink
               className="font-bold text-[#1d4ed8] underline"
               href="/terms"
-              rel="noreferrer"
-              target="_blank"
             >
               Terms of Service
-            </Link>{' '}
+            </LegalModalLink>{' '}
             and acknowledge the{' '}
-            <Link
+            <LegalModalLink
               className="font-bold text-[#1d4ed8] underline"
               href="/privacy"
-              rel="noreferrer"
-              target="_blank"
             >
               Privacy Policy
-            </Link>
+            </LegalModalLink>
             .
           </span>
         </label>
