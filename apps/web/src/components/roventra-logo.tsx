@@ -1,9 +1,9 @@
 import Image from 'next/image';
 
 const logoSources = {
-  brand: '/brand/roventra-logo-kit/roventra-unified-brand.png',
-  navy: '/brand/roventra-logo-kit/roventra-unified-navy.png',
-  white: '/brand/roventra-logo-kit/roventra-unified-white.png',
+  brand: '/brand/roventra-logo-kit/roventra-brand.svg',
+  navy: '/brand/roventra-logo-kit/roventra-navy.svg',
+  white: '/brand/roventra-logo-kit/roventra-white.svg',
 } as const;
 
 export function RoventraLogo({
