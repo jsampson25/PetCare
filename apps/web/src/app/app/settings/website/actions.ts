@@ -1,4 +1,5 @@
 'use server';
+import { validateTenantActionColor } from '@petcare/config/tenant-theme';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
@@ -140,6 +141,11 @@ export async function saveWebsiteDraft(formData: FormData) {
     .safeParse(raw);
   if (!parsed.success || !sectionLayout.success || !customPages.success)
     redirect('/app/settings/website?error=Complete+the+required+website+content.');
+  const primaryColor = validateTenantActionColor(parsed.data.primary);
+  if (!primaryColor.accepted)
+    redirect(
+      `/app/settings/website?error=${encodeURIComponent(`Primary color: ${primaryColor.reason}`)}`,
+    );
   const templatesByTheme = {
     modern: new Set(['studio-split', 'centered-studio', 'modern-editorial']),
     warm: new Set(['happy-tails', 'pet-parade', 'neighborhood']),
@@ -166,7 +172,11 @@ export async function saveWebsiteDraft(formData: FormData) {
   const { error } = await supabase.schema('app').rpc('save_tenant_website_draft', {
     target_business_id: context.businessId,
     theme_value: parsed.data.theme,
-    brand_value: { primary: parsed.data.primary, accent: parsed.data.accent },
+    brand_value: {
+      primary: primaryColor.actionColor,
+      primaryText: primaryColor.actionTextColor,
+      accent: parsed.data.accent.toLowerCase(),
+    },
     content_value: {
       hero_title: parsed.data.heroTitle,
       template_key: parsed.data.template,

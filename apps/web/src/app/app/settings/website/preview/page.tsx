@@ -1,3 +1,4 @@
+import { validateTenantActionColor } from '@petcare/config/tenant-theme';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { redirect } from 'next/navigation';
 import type { CSSProperties } from 'react';
@@ -10,7 +11,7 @@ export const metadata = { robots: { index: false, follow: false } };
 type DraftPreview = {
   business: { name: string; slug: string };
   theme_key: 'modern' | 'warm' | 'classic';
-  brand_tokens: { primary: string; accent: string };
+  brand_tokens: { primary: string; primaryText?: string; accent: string };
   content: Record<string, unknown>;
   services: Array<{ name: string; description: string | null; category: string }>;
 };
@@ -54,6 +55,13 @@ export default async function PreviewPage({
   const content = site.content;
   const templateKey = String(content.template_key ?? 'studio-split');
   const presentation = getWebsitePresentation(site.theme_key, templateKey);
+  const validatedPrimary = validateTenantActionColor(site.brand_tokens.primary);
+  const primaryTextColor =
+    typeof site.brand_tokens.primaryText === 'string'
+      ? site.brand_tokens.primaryText
+      : validatedPrimary.accepted
+        ? validatedPrimary.actionTextColor
+        : '#ffffff';
   const centered = presentation.centered;
   const heroMedia = content.hero_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
@@ -164,6 +172,7 @@ export default async function PreviewPage({
           '--tenant-primary': site.brand_tokens.primary,
           '--tenant-accent': site.brand_tokens.accent,
           '--action-primary': site.brand_tokens.primary,
+          '--action-primary-text': primaryTextColor,
         } as CSSProperties
       }
     >
@@ -197,8 +206,11 @@ export default async function PreviewPage({
             href="#top"
           >
             <span
-              className="grid size-11 place-items-center rounded-2xl text-xs font-black text-white shadow-sm"
-              style={{ background: 'var(--tenant-primary)' }}
+              className="grid size-11 place-items-center rounded-2xl text-xs font-black shadow-sm"
+              style={{
+                background: 'var(--tenant-primary)',
+                color: 'var(--action-primary-text)',
+              }}
             >
               HP
             </span>
@@ -221,8 +233,11 @@ export default async function PreviewPage({
               Sign in
             </span>
             <span
-              className="rounded-xl px-4 py-2.5 text-sm font-black text-white shadow-sm"
-              style={{ background: 'var(--tenant-primary)' }}
+              className="rounded-xl px-4 py-2.5 text-sm font-black shadow-sm"
+              style={{
+                background: 'var(--tenant-primary)',
+                color: 'var(--action-primary-text)',
+              }}
             >
               Book now
             </span>
@@ -254,8 +269,11 @@ export default async function PreviewPage({
             </p>
             <div className={`mt-9 flex flex-wrap gap-3 ${centered ? 'justify-center' : ''}`}>
               <span
-                className="rounded-xl px-6 py-3.5 font-black text-white shadow-lg"
-                style={{ background: 'var(--tenant-primary)' }}
+                className="rounded-xl px-6 py-3.5 font-black shadow-lg"
+                style={{
+                  background: 'var(--tenant-primary)',
+                  color: 'var(--action-primary-text)',
+                }}
               >
                 Book your pet&apos;s stay
               </span>
@@ -362,8 +380,11 @@ export default async function PreviewPage({
                   key={service.name}
                 >
                   <span
-                    className="grid size-11 place-items-center rounded-xl text-sm font-black text-white"
-                    style={{ background: 'var(--tenant-primary)' }}
+                    className="grid size-11 place-items-center rounded-xl text-sm font-black"
+                    style={{
+                      background: 'var(--tenant-primary)',
+                      color: 'var(--action-primary-text)',
+                    }}
                   >
                     0{index + 1}
                   </span>

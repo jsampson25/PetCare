@@ -1,6 +1,7 @@
 import { Button } from '@petcare/ui/button';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Field } from '@petcare/ui/field';
+import { validateTenantActionColor } from '@petcare/config/tenant-theme';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { CSSProperties } from 'react';
@@ -11,7 +12,7 @@ import { submitInquiry } from './actions';
 type Site = {
   business: { name: string; slug: string };
   theme_key: 'modern' | 'warm' | 'classic';
-  brand_tokens: { primary: string; accent: string };
+  brand_tokens: { primary: string; primaryText?: string; accent: string };
   content: Record<string, unknown>;
   services: Array<{ name: string; description: string | null; category: string }>;
   locations: Array<{ name: string; time_zone: string }>;
@@ -79,6 +80,13 @@ export default async function TenantSitePage({
     : [];
   const templateKey = String(content.template_key ?? 'studio-split');
   const presentation = getWebsitePresentation(site.theme_key, templateKey);
+  const validatedPrimary = validateTenantActionColor(site.brand_tokens.primary);
+  const primaryTextColor =
+    typeof site.brand_tokens.primaryText === 'string'
+      ? site.brand_tokens.primaryText
+      : validatedPrimary.accepted
+        ? validatedPrimary.actionTextColor
+        : '#ffffff';
   const heroMedia = content.hero_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
   const servicesMedia = content.services_media as
@@ -105,8 +113,11 @@ export default async function TenantSitePage({
   const splitHeader = presentation.layout === 'split';
   const logoMark = (
     <span
-      className="grid size-10 place-items-center rounded-2xl text-sm font-black text-white"
-      style={{ background: 'var(--tenant-primary)' }}
+      className="grid size-10 place-items-center rounded-2xl text-sm font-black"
+      style={{
+        background: 'var(--tenant-primary)',
+        color: 'var(--action-primary-text)',
+      }}
       aria-hidden="true"
     >
       HP
@@ -174,9 +185,12 @@ export default async function TenantSitePage({
           Customer sign in
         </a>
         <a
-          className="rounded-xl px-4 py-3 text-white"
+          className="rounded-xl px-4 py-3"
           href={`/book?tenant=${site.business.slug}`}
-          style={{ backgroundColor: 'var(--tenant-primary)' }}
+          style={{
+            backgroundColor: 'var(--tenant-primary)',
+            color: 'var(--action-primary-text)',
+          }}
         >
           Book now
         </a>
@@ -191,6 +205,7 @@ export default async function TenantSitePage({
           '--tenant-primary': site.brand_tokens.primary,
           '--tenant-accent': site.brand_tokens.accent,
           '--action-primary': site.brand_tokens.primary,
+          '--action-primary-text': primaryTextColor,
         } as CSSProperties
       }
     >
