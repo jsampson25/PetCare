@@ -73,11 +73,18 @@ export default async function TenantSitePage({
   const templateKey = String(content.template_key ?? 'studio-split');
   const heroMedia = content.hero_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  const servicesMedia = content.services_media as
+    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  const aboutMedia = content.about_media as
+    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
   const supabase = await createSupabaseServerClient();
-  const heroImageUrl = heroMedia?.object_path
-    ? supabase.storage.from('tenant-website-media').getPublicUrl(heroMedia.object_path).data
-        .publicUrl
-    : null;
+  const mediaUrl = (objectPath?: string) =>
+    objectPath
+      ? supabase.storage.from('tenant-website-media').getPublicUrl(objectPath).data.publicUrl
+      : null;
+  const heroImageUrl = mediaUrl(heroMedia?.object_path);
+  const servicesImageUrl = mediaUrl(servicesMedia?.object_path);
+  const aboutImageUrl = mediaUrl(aboutMedia?.object_path);
   const sectionStyle = (id: SectionId): CSSProperties => ({
     display:
       sectionLayout.find((section) => section.id === id)?.visible === false ? 'none' : undefined,
@@ -276,6 +283,14 @@ export default async function TenantSitePage({
                 Choose a service built around comfort, safety, and a simple experience for you.
               </p>
             </div>
+            {servicesImageUrl ? (
+              <div
+                aria-label={servicesMedia?.alt_text}
+                className="mt-10 min-h-64 rounded-[2rem] bg-cover bg-center shadow-lg"
+                role="img"
+                style={{ backgroundImage: `url(${servicesImageUrl})` }}
+              />
+            ) : null}
             <div className="mt-10 grid gap-5 md:grid-cols-3">
               {site.services.map((service, index) => (
                 <article
@@ -306,6 +321,14 @@ export default async function TenantSitePage({
           </div>
         </section>
         <section className="px-6 py-20" id="about" style={sectionStyle('about')}>
+          {aboutImageUrl ? (
+            <div
+              aria-label={aboutMedia?.alt_text}
+              className="mx-auto mb-5 min-h-72 max-w-7xl rounded-[2rem] bg-cover bg-center shadow-lg"
+              role="img"
+              style={{ backgroundImage: `url(${aboutImageUrl})` }}
+            />
+          ) : null}
           <div className="mx-auto max-w-7xl rounded-[2rem] bg-[#173f30] p-8 text-white sm:p-10">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
               Why families choose us

@@ -66,6 +66,8 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
     : defaultWebsiteSections;
   const customPages = Array.isArray(c.custom_pages) ? (c.custom_pages as WebsiteCustomPage[]) : [];
   const heroMedia = c.hero_media as { id?: string } | undefined;
+  const servicesMedia = c.services_media as { id?: string } | undefined;
+  const aboutMedia = c.about_media as { id?: string } | undefined;
   const mediaWithUrls: WebsiteMedia[] = (media ?? []).map((item) => ({
     ...item,
     publicUrl: supabase.storage.from('tenant-website-media').getPublicUrl(item.object_path).data
@@ -144,7 +146,12 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
             initialTemplate={String(c.template_key ?? 'studio-split')}
           />
           <WebsiteSectionEditor initialSections={storedSections} />
-          <WebsiteMediaEditor initialHeroMediaId={heroMedia?.id ?? ''} media={mediaWithUrls} />
+          <WebsiteMediaEditor
+            initialAboutMediaId={aboutMedia?.id ?? ''}
+            initialHeroMediaId={heroMedia?.id ?? ''}
+            initialServicesMediaId={servicesMedia?.id ?? ''}
+            media={mediaWithUrls}
+          />
           <WebsiteCustomPagesEditor initialPages={customPages} />
           <Field
             defaultValue={String(b.primary ?? '#23664f')}

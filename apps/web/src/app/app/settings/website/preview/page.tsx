@@ -39,10 +39,17 @@ export default async function PreviewPage() {
   const centered = ['centered-studio', 'neighborhood', 'lodge'].includes(templateKey);
   const heroMedia = content.hero_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
-  const heroImageUrl = heroMedia?.object_path
-    ? supabase.storage.from('tenant-website-media').getPublicUrl(heroMedia.object_path).data
-        .publicUrl
-    : null;
+  const servicesMedia = content.services_media as
+    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  const aboutMedia = content.about_media as
+    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  const mediaUrl = (objectPath?: string) =>
+    objectPath
+      ? supabase.storage.from('tenant-website-media').getPublicUrl(objectPath).data.publicUrl
+      : null;
+  const heroImageUrl = mediaUrl(heroMedia?.object_path);
+  const servicesImageUrl = mediaUrl(servicesMedia?.object_path);
+  const aboutImageUrl = mediaUrl(aboutMedia?.object_path);
   const visibleSections = new Set(
     Array.isArray(content.section_layout)
       ? (content.section_layout as Array<{ id: string; visible: boolean }>)
@@ -232,6 +239,14 @@ export default async function PreviewPage() {
                 pickup.
               </p>
             </div>
+            {servicesImageUrl ? (
+              <div
+                aria-label={servicesMedia?.alt_text}
+                className="mt-10 min-h-64 rounded-[2rem] bg-cover bg-center shadow-lg"
+                role="img"
+                style={{ backgroundImage: `url(${servicesImageUrl})` }}
+              />
+            ) : null}
             <div className="mt-12 grid gap-5 md:grid-cols-3">
               {(site.services.length
                 ? site.services
@@ -279,10 +294,13 @@ export default async function PreviewPage() {
         <section className="px-6 py-20" id="about">
           <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[2rem] bg-slate-950 text-white lg:grid-cols-[0.9fr_1.1fr]">
             <div
+              aria-label={aboutImageUrl ? aboutMedia?.alt_text : undefined}
               className="min-h-72"
+              role={aboutImageUrl ? 'img' : undefined}
               style={{
-                background:
-                  'linear-gradient(145deg, color-mix(in srgb, var(--tenant-primary) 75%, #101827), color-mix(in srgb, var(--tenant-accent) 35%, #101827))',
+                background: aboutImageUrl
+                  ? `url(${aboutImageUrl}) center / cover`
+                  : 'linear-gradient(145deg, color-mix(in srgb, var(--tenant-primary) 75%, #101827), color-mix(in srgb, var(--tenant-accent) 35%, #101827))',
               }}
             />
             <div className="p-8 sm:p-12">

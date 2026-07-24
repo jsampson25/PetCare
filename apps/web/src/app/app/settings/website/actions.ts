@@ -134,6 +134,8 @@ export async function saveWebsiteDraft(formData: FormData) {
       seoTitle: z.string().trim().max(70),
       seoDescription: z.string().trim().max(170),
       heroMediaId: z.union([z.literal(''), z.uuid()]),
+      servicesMediaId: z.union([z.literal(''), z.uuid()]),
+      aboutMediaId: z.union([z.literal(''), z.uuid()]),
     })
     .safeParse(raw);
   if (!parsed.success || !sectionLayout.success || !customPages.success)
@@ -146,16 +148,21 @@ export async function saveWebsiteDraft(formData: FormData) {
   if (!templatesByTheme[parsed.data.theme].has(parsed.data.template))
     redirect('/app/settings/website?error=Choose+a+template+from+the+selected+style.');
   const supabase = await createSupabaseServerClient();
-  const heroMedia = parsed.data.heroMediaId
+  const selectedMediaIds = [
+    parsed.data.heroMediaId,
+    parsed.data.servicesMediaId,
+    parsed.data.aboutMediaId,
+  ].filter(Boolean);
+  const selectedMedia = selectedMediaIds.length
     ? await supabase
         .from('tenant_website_media')
         .select('id,object_path,alt_text,caption')
         .eq('business_id', context.businessId)
-        .eq('id', parsed.data.heroMediaId)
-        .maybeSingle()
-    : { data: null, error: null };
-  if (heroMedia.error || (parsed.data.heroMediaId && !heroMedia.data))
+        .in('id', selectedMediaIds)
+    : { data: [], error: null };
+  if (selectedMedia.error || selectedMedia.data?.length !== new Set(selectedMediaIds).size)
     redirect('/app/settings/website?error=Choose+a+photo+from+your+website+media+library.');
+  const mediaById = new Map((selectedMedia.data ?? []).map((item) => [item.id, item]));
   const { error } = await supabase.schema('app').rpc('save_tenant_website_draft', {
     target_business_id: context.businessId,
     theme_value: parsed.data.theme,
@@ -173,7 +180,13 @@ export async function saveWebsiteDraft(formData: FormData) {
       seo_description: parsed.data.seoDescription,
       section_layout: sectionLayout.data,
       custom_pages: customPages.data,
-      hero_media: heroMedia.data,
+      hero_media: parsed.data.heroMediaId ? (mediaById.get(parsed.data.heroMediaId) ?? null) : null,
+      services_media: parsed.data.servicesMediaId
+        ? (mediaById.get(parsed.data.servicesMediaId) ?? null)
+        : null,
+      about_media: parsed.data.aboutMediaId
+        ? (mediaById.get(parsed.data.aboutMediaId) ?? null)
+        : null,
     },
   });
   if (error) redirect('/app/settings/website?error=Website+draft+could+not+be+saved.');
