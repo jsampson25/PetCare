@@ -2,6 +2,7 @@ import { Alert } from '@petcare/ui/alert';
 import { Button } from '@petcare/ui/button';
 import { Card } from '@petcare/ui/card';
 import { Field } from '@petcare/ui/field';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -12,6 +13,7 @@ import {
   saveLocationCustomerWindows,
   saveOnboardingSetup,
 } from '../actions';
+import { AddressAutocomplete } from './address-autocomplete';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 
@@ -34,6 +36,7 @@ export default async function OnboardingSetupPage({
     { data: readinessRows },
     { data: customerWindows },
     { data: closures },
+    { data: claimsData },
   ] = await Promise.all([
     supabase
       .from('businesses')
@@ -63,6 +66,7 @@ export default async function OnboardingSetupPage({
       .gte('closure_date', new Date().toISOString().slice(0, 10))
       .order('closure_date')
       .limit(12),
+    supabase.auth.getClaims(),
   ]);
   const location = locations?.[0];
   if (!business || !location) redirect('/denied');
@@ -74,6 +78,10 @@ export default async function OnboardingSetupPage({
     (window) => window.location_id === location.id && window.window_type === 'pickup',
   );
   const locationClosures = closures?.filter((closure) => closure.location_id === location.id) ?? [];
+  const registeredEmail =
+    typeof claimsData?.claims?.email === 'string' ? claimsData.claims.email : '';
+  const rawCompletion = readiness?.completion_percent ?? 0;
+  const setupProgress = Math.min(100, Math.max(15, Math.round(15 + rawCompletion * 0.85)));
 
   return (
     <div className="space-y-6">
@@ -101,16 +109,19 @@ export default async function OnboardingSetupPage({
       ) : null}
       <Card
         className="overflow-hidden border-[#dbe7f5]"
-        title={`Foundation readiness: ${readiness?.completion_percent ?? 0}%`}
-        description={`${readiness?.completed_steps ?? 0} of ${readiness?.total_steps ?? 3} initial sections complete.`}
+        title={`Setup progress: ${setupProgress}%`}
+        description="Your account is ready. Complete the business, location, and hours details below."
       >
         <div className="mb-5 h-2 overflow-hidden rounded-full bg-[var(--surface-subtle)]">
           <div
             className="h-full rounded-full bg-[var(--action-primary)]"
-            style={{ width: `${readiness?.completion_percent ?? 0}%` }}
+            style={{ width: `${setupProgress}%` }}
           />
         </div>
-        <ul className="grid gap-3 text-sm sm:grid-cols-3">
+        <ul className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          <li className="rounded-xl bg-[#e8f7ef] p-3 font-bold text-[#12643f]">
+            ✓ Account created
+          </li>
           <li className="rounded-xl bg-[var(--surface-subtle)] p-3 font-bold">
             {readiness?.business_profile_complete ? '✓' : '○'} Business profile
           </li>
@@ -135,7 +146,7 @@ export default async function OnboardingSetupPage({
             />
             <Field
               autoComplete="email"
-              defaultValue={business.customer_email ?? ''}
+              defaultValue={business.customer_email || registeredEmail}
               label="Customer email"
               name="customerEmail"
               required
@@ -179,6 +190,7 @@ export default async function OnboardingSetupPage({
           </fieldset>
           <fieldset className="grid gap-5 sm:grid-cols-2">
             <legend className="col-span-full text-lg font-bold">{location.name}</legend>
+            <AddressAutocomplete apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY} />
             <Field
               autoComplete="address-line1"
               className="sm:col-span-2"
@@ -220,7 +232,7 @@ export default async function OnboardingSetupPage({
           <fieldset className="grid gap-5 sm:grid-cols-2">
             <legend className="col-span-full text-lg font-bold">Regular hours</legend>
             <p className="col-span-full text-sm text-[var(--text-secondary)]">
-              This first slice uses one Monday–Friday schedule with Saturday and Sunday closed.
+              This first slice uses one Monday-Friday schedule with Saturday and Sunday closed.
               Detailed daily editing comes with calendar configuration.
             </p>
             <Field
@@ -351,6 +363,20 @@ export default async function OnboardingSetupPage({
           )}
         </div>
       </Card>
+      <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-[#c9dcf7] bg-[#f5f9ff] p-5 sm:flex-row sm:items-center">
+        <div>
+          <p className="font-bold text-[#0b1f3a]">Ready for the next step?</p>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            Continue to add the services customers can book and the prices they will see.
+          </p>
+        </div>
+        <Link
+          className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-md)] bg-[var(--action-primary)] px-5 py-2.5 text-sm font-bold text-[var(--action-primary-text)] transition hover:bg-[var(--action-primary-hover)] active:translate-y-px active:scale-[0.99]"
+          href="/app/settings/services"
+        >
+          Continue to services and pricing →
+        </Link>
+      </div>
     </div>
   );
 }
