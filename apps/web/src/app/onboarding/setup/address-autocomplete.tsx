@@ -22,9 +22,7 @@ type PlaceSelectEvent = Event & {
 };
 
 type PlacesLibrary = {
-  PlaceAutocompleteElement: new (options?: {
-    includedRegionCodes?: string[];
-  }) => HTMLElement;
+  PlaceAutocompleteElement: new (options?: { includedRegionCodes?: string[] }) => HTMLElement;
 };
 
 declare global {

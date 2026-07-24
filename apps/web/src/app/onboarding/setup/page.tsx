@@ -372,7 +372,7 @@ export default async function OnboardingSetupPage({
         </div>
         <Link
           className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-md)] bg-[var(--action-primary)] px-5 py-2.5 text-sm font-bold text-[var(--action-primary-text)] transition hover:bg-[var(--action-primary-hover)] active:translate-y-px active:scale-[0.99]"
-          href="/app/settings/services"
+          href="/app/settings/services?onboarding=1"
         >
           Continue to services and pricing →
         </Link>

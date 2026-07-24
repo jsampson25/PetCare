@@ -22,6 +22,95 @@ const serviceSchema = z.object({
   ]),
 });
 
+const starterServiceSchema = z.object({
+  starterServices: z.array(z.enum(['boarding', 'daycare', 'grooming', 'assessment'])).min(1),
+});
+
+const starterServiceDefaults = {
+  assessment: {
+    confirmationMode: 'staff_approval',
+    customerName: 'Meet & Greet',
+    durationMinutes: 30,
+    internalName: 'Meet & Greet',
+    shortDescription: 'A short introduction and care assessment before the first visit.',
+    timeModel: 'fixed_appointment',
+  },
+  boarding: {
+    confirmationMode: 'instant',
+    customerName: 'Overnight Boarding',
+    durationMinutes: null,
+    internalName: 'Overnight Boarding',
+    shortDescription: 'Safe overnight care with daily attention and updates.',
+    timeModel: 'overnight_date_range',
+  },
+  daycare: {
+    confirmationMode: 'instant',
+    customerName: 'Dog Daycare',
+    durationMinutes: null,
+    internalName: 'Dog Daycare',
+    shortDescription: 'A full day of supervised play, rest, and care.',
+    timeModel: 'attendance_day',
+  },
+  grooming: {
+    confirmationMode: 'staff_approval',
+    customerName: 'Full Groom',
+    durationMinutes: 120,
+    internalName: 'Full Groom',
+    shortDescription: 'A complete grooming appointment tailored to each pet.',
+    timeModel: 'fixed_appointment',
+  },
+} as const;
+
+export async function createStarterServices(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('services.manage')) redirect('/denied');
+  const parsed = starterServiceSchema.safeParse({
+    starterServices: formData.getAll('starterServices'),
+  });
+  if (!parsed.success) {
+    redirect('/app/settings/services?onboarding=1&error=Choose+at+least+one+service.');
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data: existingServices, error: existingError } = await supabase
+    .from('services')
+    .select('category')
+    .eq('business_id', context.businessId);
+  if (existingError) {
+    redirect('/app/settings/services?onboarding=1&error=Services+could+not+be+checked.');
+  }
+
+  const existingCategories = new Set((existingServices ?? []).map((service) => service.category));
+  let createdCount = 0;
+
+  for (const category of parsed.data.starterServices) {
+    if (existingCategories.has(category)) continue;
+    const defaults = starterServiceDefaults[category];
+    const { error } = await supabase.rpc('create_service_draft', {
+      category_value: category,
+      confirmation_mode_value: defaults.confirmationMode,
+      customer_name_value: defaults.customerName,
+      duration_minutes: defaults.durationMinutes,
+      internal_name_value: defaults.internalName,
+      short_description_value: defaults.shortDescription,
+      target_business_id: context.businessId,
+      time_model_value: defaults.timeModel,
+    });
+    if (error) {
+      redirect(
+        '/app/settings/services?onboarding=1&error=One+or+more+services+could+not+be+created.',
+      );
+    }
+    createdCount += 1;
+  }
+
+  const notice =
+    createdCount > 0
+      ? `${createdCount}+starter+service${createdCount === 1 ? '' : 's'}+created.`
+      : 'Your+selected+service+types+already+exist.';
+  redirect(`/app/settings/services?onboarding=1&notice=${notice}`);
+}
+
 export async function createServiceDraft(formData: FormData) {
   const context = await resolveBusinessContext();
   if (!context || !context.permissions.has('services.manage')) redirect('/denied');

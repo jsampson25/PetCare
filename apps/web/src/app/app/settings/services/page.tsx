@@ -2,6 +2,7 @@ import { Alert } from '@petcare/ui/alert';
 import { Button } from '@petcare/ui/button';
 import { Card } from '@petcare/ui/card';
 import { Field } from '@petcare/ui/field';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
@@ -15,6 +16,7 @@ import {
   createCapacityPool,
   createServiceDraft,
   createServiceRevision,
+  createStarterServices,
   publishService,
   saveCapacityOverride,
 } from './actions';
@@ -25,6 +27,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
   const context = await resolveBusinessContext();
   if (!context || !context.permissions.has('services.view')) redirect('/denied');
   const parameters = await searchParams;
+  const isOnboarding = parameters.onboarding === '1';
   const supabase = await createSupabaseServerClient();
   const [
     { data: services },
@@ -83,6 +86,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
   const canManage = context.permissions.has('services.manage');
   const canManageCapacity = context.permissions.has('capacity.manage');
   const draftVersions = (versions ?? []).filter((version) => version.status === 'draft');
+  const existingCategories = new Set((services ?? []).map((service) => service.category));
 
   return (
     <div className="space-y-6">
@@ -104,10 +108,128 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
           {parameters.notice}
         </Alert>
       ) : null}
+      {isOnboarding && canManage ? (
+        <section className="overflow-hidden rounded-[2rem] border border-[#c9dcf7] bg-white shadow-[0_22px_65px_rgba(37,99,235,.1)]">
+          <div className="border-b border-[#dbe7f5] bg-gradient-to-r from-[#eff6ff] via-white to-[#e8f5ff] p-6 sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2563eb]">
+                  Guided setup · Step 2
+                </p>
+                <h2 className="mt-2 text-2xl font-black tracking-[-.03em] text-[#0b1f3a]">
+                  What does your business offer?
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[#48617f]">
+                  Choose your main services. We will create sensible drafts that you can customize
+                  before anything appears to customers.
+                </p>
+              </div>
+              <div className="min-w-40">
+                <div className="flex items-center justify-between text-xs font-bold text-[#48617f]">
+                  <span>Setup progress</span>
+                  <span>45%</span>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#dbeafe]">
+                  <div className="h-full w-[45%] rounded-full bg-[#2563eb]" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <form action={createStarterServices} className="p-6 sm:p-8">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {[
+                {
+                  category: 'boarding',
+                  description: 'Overnight stays with arrival and pickup windows.',
+                  icon: '☾',
+                  title: 'Boarding',
+                },
+                {
+                  category: 'daycare',
+                  description: 'Day visits with attendance and capacity tracking.',
+                  icon: '☀',
+                  title: 'Daycare',
+                },
+                {
+                  category: 'grooming',
+                  description: 'Scheduled grooming appointments and service work.',
+                  icon: '✦',
+                  title: 'Grooming',
+                },
+                {
+                  category: 'assessment',
+                  description: 'Meet and greets or evaluations before care begins.',
+                  icon: '✓',
+                  title: 'Assessments',
+                },
+              ].map((option) => {
+                const alreadyExists = existingCategories.has(option.category);
+                return (
+                  <label
+                    className={`relative flex min-h-48 cursor-pointer flex-col rounded-2xl border p-5 transition ${
+                      alreadyExists
+                        ? 'border-[#b9e3cf] bg-[#f0fbf6]'
+                        : 'border-[#c9dcf7] bg-white hover:-translate-y-0.5 hover:border-[#6ca4f8] hover:shadow-lg'
+                    }`}
+                    key={option.category}
+                  >
+                    <input
+                      className="absolute right-4 top-4 size-5 accent-[#2563eb]"
+                      defaultChecked={alreadyExists}
+                      disabled={alreadyExists}
+                      name="starterServices"
+                      type="checkbox"
+                      value={option.category}
+                    />
+                    {alreadyExists ? (
+                      <input name="starterServices" type="hidden" value={option.category} />
+                    ) : null}
+                    <span className="flex size-11 items-center justify-center rounded-xl bg-[#e8f1ff] text-xl font-black text-[#2563eb]">
+                      {option.icon}
+                    </span>
+                    <span className="mt-5 text-lg font-black text-[#0b1f3a]">{option.title}</span>
+                    <span className="mt-2 text-sm leading-6 text-[#526984]">
+                      {option.description}
+                    </span>
+                    {alreadyExists ? (
+                      <span className="mt-auto pt-4 text-xs font-bold uppercase tracking-[.12em] text-[#14724a]">
+                        Already added
+                      </span>
+                    ) : null}
+                  </label>
+                );
+              })}
+            </div>
+            <div className="mt-6 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-[#dbe7f5] pt-6 sm:flex-row sm:items-center">
+              <Link
+                className="inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-sm font-bold text-[#35506f] hover:bg-[#f1f6fd]"
+                href="/onboarding/setup"
+              >
+                ← Back to business details
+              </Link>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                {(services ?? []).length ? (
+                  <Link
+                    className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#b9cce6] bg-white px-5 text-sm font-bold text-[#0b1f3a] hover:bg-[#f5f9ff]"
+                    href="/app/settings/pricing"
+                  >
+                    Continue to pricing
+                  </Link>
+                ) : null}
+                <Button type="submit">Create selected service drafts</Button>
+              </div>
+            </div>
+          </form>
+        </section>
+      ) : null}
       {canManage ? (
         <Card
-          title="Create a service draft"
-          description="Drafts remain internal until you publish them for a location and channel."
+          title={isOnboarding ? 'Advanced service setup' : 'Create a service draft'}
+          description={
+            isOnboarding
+              ? 'Use this when a service needs different scheduling or confirmation behavior.'
+              : 'Drafts remain internal until you publish them for a location and channel.'
+          }
         >
           <form action={createServiceDraft} className="grid gap-4 md:grid-cols-2">
             <Field label="Internal name" name="internalName" required />
