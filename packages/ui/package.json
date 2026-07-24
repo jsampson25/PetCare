@@ -14,6 +14,7 @@
     "./field": "./src/field.tsx",
     "./form-error-summary": "./src/form-error-summary.tsx",
     "./navigation": "./src/navigation.ts",
+    "./shell-navigation": "./src/shell-navigation.tsx",
     "./state-panel": "./src/state-panel.tsx",
     "./tabs": "./src/tabs.tsx",
     "./upload-field": "./src/upload-field.tsx"

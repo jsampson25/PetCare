@@ -1,5 +1,7 @@
 export type NavigationItem = {
+  group?: string;
   href: string;
+  icon?: string;
   label: string;
   requiredPermissions?: readonly string[];
 };
