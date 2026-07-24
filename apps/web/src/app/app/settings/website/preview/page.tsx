@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import type { CSSProperties } from 'react';
 import { resolveBusinessContext } from '../../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../../lib/supabase/server';
+import { getWebsitePresentation } from '../../../../../lib/websites/presentation';
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -36,7 +37,8 @@ export default async function PreviewPage() {
   const site = data as DraftPreview;
   const content = site.content;
   const templateKey = String(content.template_key ?? 'studio-split');
-  const centered = ['centered-studio', 'neighborhood', 'lodge'].includes(templateKey);
+  const presentation = getWebsitePresentation(site.theme_key, templateKey);
+  const centered = presentation.centered;
   const heroMedia = content.hero_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
   const servicesMedia = content.services_media as
@@ -67,7 +69,7 @@ export default async function PreviewPage() {
 
   return (
     <main
-      className="min-h-screen bg-[#fcfcfd] text-[#17171b]"
+      className={`min-h-screen ${presentation.canvas} ${presentation.font}`}
       style={
         {
           '--tenant-primary': site.brand_tokens.primary,
@@ -147,18 +149,18 @@ export default async function PreviewPage() {
       <section className="relative overflow-hidden" id="top">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_18%,color-mix(in_srgb,var(--tenant-accent)_16%,transparent),transparent_28rem)]" />
         <div
-          className={`relative mx-auto max-w-7xl px-6 py-20 sm:py-28 ${
-            centered ? 'text-center' : 'grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center'
-          }`}
+          className={`relative mx-auto grid max-w-7xl gap-14 px-6 py-20 sm:py-28 ${presentation.heroGrid}`}
         >
-          <div className={centered ? 'mx-auto max-w-4xl' : ''}>
+          <div className={presentation.heroText}>
             <p
               className="text-xs font-black uppercase tracking-[0.24em]"
               style={{ color: 'var(--tenant-primary)' }}
             >
               A happier stay starts here
             </p>
-            <h1 className="mt-5 text-5xl font-black leading-[0.98] tracking-[-0.055em] sm:text-7xl">
+            <h1
+              className={`mt-5 text-5xl font-black leading-[0.98] sm:text-7xl ${presentation.heading}`}
+            >
               {String(content.hero_title ?? 'Exceptional care for every pet')}
             </h1>
             <p
@@ -186,7 +188,7 @@ export default async function PreviewPage() {
             </div>
           </div>
           <div
-            className={`relative min-h-[25rem] overflow-hidden rounded-[2rem] border border-white bg-white shadow-[0_30px_90px_rgba(25,25,35,.12)] ${centered ? 'mx-auto mt-16 max-w-5xl' : ''}`}
+            className={`relative min-h-[25rem] overflow-hidden border border-white bg-white shadow-[0_30px_90px_rgba(25,25,35,.12)] ${presentation.image} ${presentation.heroImage}`}
             aria-label={heroImageUrl ? heroMedia?.alt_text : undefined}
             role={heroImageUrl ? 'img' : undefined}
           >
@@ -220,7 +222,10 @@ export default async function PreviewPage() {
       </section>
 
       {visibleSections.has('services') ? (
-        <section className="border-y border-slate-200/70 bg-white py-20" id="services">
+        <section
+          className={`border-y border-slate-200/70 bg-white ${presentation.section}`}
+          id="services"
+        >
           <div className="mx-auto max-w-7xl px-6">
             <div className="flex flex-wrap items-end justify-between gap-6">
               <div className="max-w-2xl">
@@ -247,7 +252,7 @@ export default async function PreviewPage() {
                 style={{ backgroundImage: `url(${servicesImageUrl})` }}
               />
             ) : null}
-            <div className="mt-12 grid gap-5 md:grid-cols-3">
+            <div className={`mt-12 grid gap-5 ${presentation.serviceGrid}`}>
               {(site.services.length
                 ? site.services
                 : [
@@ -269,7 +274,7 @@ export default async function PreviewPage() {
                   ]
               ).map((service, index) => (
                 <article
-                  className="rounded-2xl border border-slate-200 bg-[#fcfcfd] p-6 transition hover:-translate-y-1 hover:shadow-xl"
+                  className={`p-6 transition hover:-translate-y-1 hover:shadow-xl ${presentation.card}`}
                   key={service.name}
                 >
                   <span
@@ -291,8 +296,10 @@ export default async function PreviewPage() {
       ) : null}
 
       {visibleSections.has('about') ? (
-        <section className="px-6 py-20" id="about">
-          <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[2rem] bg-slate-950 text-white lg:grid-cols-[0.9fr_1.1fr]">
+        <section className={`px-6 ${presentation.section}`} id="about">
+          <div
+            className={`mx-auto grid max-w-7xl overflow-hidden ${presentation.about} ${presentation.aboutGrid}`}
+          >
             <div
               aria-label={aboutImageUrl ? aboutMedia?.alt_text : undefined}
               className="min-h-72"
@@ -304,11 +311,15 @@ export default async function PreviewPage() {
               }}
             />
             <div className="p-8 sm:p-12">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-white/60">
+              <p
+                className={`text-xs font-black uppercase tracking-[0.2em] ${presentation.aboutEyebrow}`}
+              >
                 Why families choose us
               </p>
               <h2 className="mt-4 text-4xl font-black tracking-tight">Care that feels personal</h2>
-              <p className="mt-6 text-lg leading-8 text-white/70">{String(content.about ?? '')}</p>
+              <p className={`mt-6 text-lg leading-8 ${presentation.aboutMuted}`}>
+                {String(content.about ?? '')}
+              </p>
             </div>
           </div>
         </section>

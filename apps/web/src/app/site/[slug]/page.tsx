@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { CSSProperties } from 'react';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
+import { getWebsitePresentation } from '../../../lib/websites/presentation';
 import { submitInquiry } from './actions';
 
 type Site = {
@@ -71,6 +72,7 @@ export default async function TenantSitePage({
     ? (content.custom_pages as CustomPage[])
     : [];
   const templateKey = String(content.template_key ?? 'studio-split');
+  const presentation = getWebsitePresentation(site.theme_key, templateKey);
   const heroMedia = content.hero_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
   const servicesMedia = content.services_media as
@@ -93,8 +95,8 @@ export default async function TenantSitePage({
       sectionLayout.findIndex((section) => section.id === id),
     ),
   });
-  const centeredHeader = ['centered-studio', 'neighborhood', 'lodge'].includes(templateKey);
-  const splitHeader = ['studio-split', 'happy-tails', 'heritage'].includes(templateKey);
+  const centeredHeader = presentation.centered;
+  const splitHeader = presentation.layout === 'split';
   const logoMark = (
     <span
       className="grid size-10 place-items-center rounded-2xl text-sm font-black text-white"
@@ -141,7 +143,7 @@ export default async function TenantSitePage({
   );
   return (
     <main
-      className="min-h-screen bg-[#fbfcfa] text-[#17211b]"
+      className={`min-h-screen ${presentation.canvas} ${presentation.font}`}
       style={
         {
           '--tenant-primary': site.brand_tokens.primary,
@@ -180,9 +182,9 @@ export default async function TenantSitePage({
       </header>
       <section className="relative overflow-hidden" id="top">
         <div
-          className={`mx-auto grid max-w-7xl gap-12 px-6 py-16 lg:items-center lg:py-24 ${centeredHeader ? 'text-center' : 'lg:grid-cols-[1.05fr_0.95fr]'}`}
+          className={`mx-auto grid max-w-7xl gap-12 px-6 py-16 lg:py-24 ${presentation.heroGrid}`}
         >
-          <div className={centeredHeader ? 'mx-auto max-w-4xl' : ''}>
+          <div className={presentation.heroText}>
             <p
               className="text-xs font-black uppercase tracking-[0.22em]"
               style={{ color: 'var(--tenant-primary)' }}
@@ -190,7 +192,7 @@ export default async function TenantSitePage({
               Thoughtful care. Happy pets.
             </p>
             <h1
-              className={`mt-5 max-w-3xl text-5xl font-black leading-[1.02] tracking-[-0.05em] sm:text-6xl ${centeredHeader ? 'mx-auto' : ''}`}
+              className={`mt-5 max-w-3xl text-5xl font-black leading-[1.02] sm:text-6xl ${presentation.heading} ${centeredHeader ? 'mx-auto' : ''}`}
             >
               {String(content.hero_title)}
             </h1>
@@ -216,7 +218,7 @@ export default async function TenantSitePage({
             </div>
           </div>
           <div
-            className={`relative min-h-[28rem] overflow-hidden rounded-[2.25rem] bg-[linear-gradient(145deg,color-mix(in_srgb,var(--tenant-accent)_18%,white),color-mix(in_srgb,var(--tenant-primary)_10%,white))] shadow-[0_28px_80px_rgba(30,55,42,.12)] ${centeredHeader ? 'mx-auto mt-2 w-full max-w-5xl' : ''}`}
+            className={`relative min-h-[28rem] overflow-hidden bg-[linear-gradient(145deg,color-mix(in_srgb,var(--tenant-accent)_18%,white),color-mix(in_srgb,var(--tenant-primary)_10%,white))] shadow-[0_28px_80px_rgba(30,55,42,.12)] ${presentation.image} ${presentation.heroImage}`}
             aria-label={heroImageUrl ? heroMedia?.alt_text : undefined}
             role={heroImageUrl ? 'img' : undefined}
             style={
@@ -266,7 +268,7 @@ export default async function TenantSitePage({
       </section>
       <div className="flex flex-col">
         <section
-          className="border-y border-black/5 bg-white py-20"
+          className={`border-y border-black/5 bg-white ${presentation.section}`}
           id="services"
           style={sectionStyle('services')}
         >
@@ -291,10 +293,10 @@ export default async function TenantSitePage({
                 style={{ backgroundImage: `url(${servicesImageUrl})` }}
               />
             ) : null}
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
+            <div className={`mt-10 grid gap-5 ${presentation.serviceGrid}`}>
               {site.services.map((service, index) => (
                 <article
-                  className="group rounded-3xl border border-black/10 bg-[#fbfcfa] p-6 transition hover:-translate-y-1 hover:shadow-xl"
+                  className={`group p-6 transition hover:-translate-y-1 hover:shadow-xl ${presentation.card}`}
                   key={service.name}
                 >
                   <span
@@ -320,21 +322,29 @@ export default async function TenantSitePage({
             </div>
           </div>
         </section>
-        <section className="px-6 py-20" id="about" style={sectionStyle('about')}>
+        <section
+          className={`px-6 ${presentation.section}`}
+          id="about"
+          style={sectionStyle('about')}
+        >
           {aboutImageUrl ? (
             <div
               aria-label={aboutMedia?.alt_text}
-              className="mx-auto mb-5 min-h-72 max-w-7xl rounded-[2rem] bg-cover bg-center shadow-lg"
+              className={`mx-auto mb-5 min-h-72 max-w-7xl bg-cover bg-center shadow-lg ${presentation.image}`}
               role="img"
               style={{ backgroundImage: `url(${aboutImageUrl})` }}
             />
           ) : null}
-          <div className="mx-auto max-w-7xl rounded-[2rem] bg-[#173f30] p-8 text-white sm:p-10">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
+          <div className={`mx-auto max-w-7xl p-8 sm:p-10 ${presentation.about}`}>
+            <p
+              className={`text-xs font-black uppercase tracking-[0.18em] ${presentation.aboutEyebrow}`}
+            >
               Why families choose us
             </p>
             <h2 className="mt-3 text-4xl font-black tracking-tight">Care that feels personal</h2>
-            <p className="mt-5 text-lg leading-8 text-emerald-50/80">{String(content.about)}</p>
+            <p className={`mt-5 text-lg leading-8 ${presentation.aboutMuted}`}>
+              {String(content.about)}
+            </p>
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               {[
                 'Individual care notes',
@@ -343,7 +353,7 @@ export default async function TenantSitePage({
                 'Consistent routines',
               ].map((item) => (
                 <div
-                  className="rounded-xl border border-white/15 bg-white/5 p-3 text-sm font-bold"
+                  className={`rounded-xl border p-3 text-sm font-bold ${presentation.aboutItem}`}
                   key={item}
                 >
                   ✓ {item}
