@@ -36,16 +36,20 @@ export default async function PreviewPage({
   const device: PreviewDevice =
     requestedDevice === 'tablet' || requestedDevice === 'mobile' ? requestedDevice : 'desktop';
   const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.rpc('get_tenant_website_draft_preview', {
+  const { data } = await supabase.schema('app').rpc('get_tenant_website_draft_preview', {
     target_business_id: context.businessId,
   });
   if (!data) {
     return (
-      <div className="mx-auto max-w-xl rounded-2xl border bg-white p-8 text-center shadow-sm">
-        <h1 className="text-2xl font-black">Your website draft is empty</h1>
-        <p className="mt-3 text-slate-600">Save the website editor before opening preview.</p>
-        <div className="mt-6">
-          <ButtonLink href="/app/settings/website">Return to editor</ButtonLink>
+      <div
+        className={`${query.frame === '1' ? 'fixed inset-0 z-[100] grid place-items-center bg-slate-100 p-6' : ''}`}
+      >
+        <div className="w-full max-w-xl rounded-2xl border bg-white p-8 text-center shadow-sm">
+          <h1 className="text-2xl font-black">Your website draft is empty</h1>
+          <p className="mt-3 text-slate-600">Save the website editor before opening preview.</p>
+          <div className="mt-6">
+            <ButtonLink href="/app/settings/website">Return to editor</ButtonLink>
+          </div>
         </div>
       </div>
     );
@@ -169,7 +173,7 @@ export default async function PreviewPage({
 
   return (
     <main
-      className={`min-h-screen ${presentation.canvas} ${presentation.font}`}
+      className={`${query.frame === '1' ? 'fixed inset-0 z-[100] overflow-auto' : ''} min-h-screen ${presentation.canvas} ${presentation.font}`}
       style={
         {
           '--tenant-primary': site.brand_tokens.primary,

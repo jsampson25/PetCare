@@ -174,12 +174,9 @@ export function WebsiteStylePicker({
       </div>
       <div className="mt-5 grid gap-5 xl:grid-cols-3">
         {availableTemplates.map((template) => (
-          <button
-            aria-pressed={selectedTemplate === template.key}
+          <article
             className={`group relative overflow-hidden rounded-[1.35rem] border bg-white p-2.5 text-left transition hover:-translate-y-1 hover:shadow-xl ${selectedTemplate === template.key ? 'border-blue-600 ring-2 ring-blue-600/15' : 'border-slate-200 hover:border-slate-300'}`}
             key={template.key}
-            onClick={() => setTemplateByStyle((current) => ({ ...current, [style]: template.key }))}
-            type="button"
           >
             <TemplatePreview layout={template.layout} styleKey={style} />
             <span className="block px-2 pb-2 pt-3">
@@ -189,17 +186,37 @@ export function WebsiteStylePicker({
                   <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-wide text-blue-700">
                     Selected
                   </span>
-                ) : (
-                  <span className="text-xs font-bold text-blue-600 opacity-0 transition group-hover:opacity-100">
-                    Select
-                  </span>
-                )}
+                ) : null}
               </span>
               <span className="mt-1.5 block min-h-10 text-sm leading-5 text-[var(--text-secondary)]">
                 {template.description}
               </span>
+              <span className="mt-3 grid grid-cols-2 gap-2">
+                <a
+                  className="grid min-h-10 place-items-center rounded-xl border border-slate-300 px-3 text-xs font-black text-[#0b1f3a] transition hover:border-blue-400 hover:bg-blue-50"
+                  href={`/theme-demo/${template.key}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Preview demo ↗
+                </a>
+                <button
+                  aria-pressed={selectedTemplate === template.key}
+                  className={`min-h-10 rounded-xl px-3 text-xs font-black transition ${
+                    selectedTemplate === template.key
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                  onClick={() =>
+                    setTemplateByStyle((current) => ({ ...current, [style]: template.key }))
+                  }
+                  type="button"
+                >
+                  {selectedTemplate === template.key ? 'Theme selected' : 'Use this theme'}
+                </button>
+              </span>
             </span>
-          </button>
+          </article>
         ))}
       </div>
     </fieldset>

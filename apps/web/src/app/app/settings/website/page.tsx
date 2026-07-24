@@ -46,7 +46,9 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
       .eq('business_id', context.businessId)
       .order('publication_number', { ascending: false }),
     supabase.from('businesses').select('public_slug').eq('id', context.businessId).single(),
-    supabase.rpc('get_tenant_website_readiness', { target_business_id: context.businessId }),
+    supabase
+      .schema('app')
+      .rpc('get_tenant_website_readiness', { target_business_id: context.businessId }),
     supabase
       .from('tenant_domain_bindings')
       .select('id,hostname,status,verification_token,last_checked_at,last_result')
