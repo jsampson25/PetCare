@@ -15,9 +15,25 @@ type DraftPreview = {
   services: Array<{ name: string; description: string | null; category: string }>;
 };
 
-export default async function PreviewPage() {
+type PreviewDevice = 'desktop' | 'tablet' | 'mobile';
+
+const previewFrames: Record<PreviewDevice, { label: string; width: string }> = {
+  desktop: { label: 'Desktop', width: 'min(100%, 1440px)' },
+  tablet: { label: 'Tablet', width: '768px' },
+  mobile: { label: 'Mobile', width: '390px' },
+};
+
+export default async function PreviewPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('website.edit')) redirect('/denied');
+  const query = await searchParams;
+  const requestedDevice = typeof query.device === 'string' ? query.device : 'desktop';
+  const device: PreviewDevice =
+    requestedDevice === 'tablet' || requestedDevice === 'mobile' ? requestedDevice : 'desktop';
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.rpc('get_tenant_website_draft_preview', {
     target_business_id: context.businessId,
@@ -85,6 +101,60 @@ export default async function PreviewPage() {
       .slice(0, 4)
       .map((page) => ({ id: page.id, label: page.title })),
   ];
+
+  if (query.frame !== '1') {
+    return (
+      <main className="min-h-screen bg-slate-950 text-white">
+        <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/95 px-4 py-3 backdrop-blur">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-black">Website preview</p>
+              <p className="text-xs text-slate-400">Private draft · {site.business.name}</p>
+            </div>
+            <nav
+              aria-label="Preview device"
+              className="flex rounded-xl border border-white/10 bg-white/5 p-1"
+            >
+              {(
+                Object.entries(previewFrames) as Array<
+                  [PreviewDevice, (typeof previewFrames)[PreviewDevice]]
+                >
+              ).map(([key, frame]) => (
+                <a
+                  aria-current={device === key ? 'page' : undefined}
+                  className={`rounded-lg px-4 py-2 text-sm font-bold transition ${
+                    device === key ? 'bg-white text-slate-950' : 'text-slate-300 hover:bg-white/10'
+                  }`}
+                  href={`/app/settings/website/preview?device=${key}`}
+                  key={key}
+                >
+                  {frame.label}
+                </a>
+              ))}
+            </nav>
+            <a
+              className="rounded-xl border border-white/15 px-4 py-2 text-sm font-bold hover:bg-white/10"
+              href="/app/settings/website"
+            >
+              Back to editor
+            </a>
+          </div>
+        </header>
+        <div className="flex min-h-[calc(100vh-73px)] justify-center overflow-auto p-4 sm:p-6">
+          <div
+            className="h-[calc(100vh-7rem)] min-h-[640px] max-w-full overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-white/15 transition-[width]"
+            style={{ width: previewFrames[device].width }}
+          >
+            <iframe
+              className="size-full border-0"
+              src="/app/settings/website/preview?frame=1"
+              title={`${site.business.name} ${previewFrames[device].label.toLowerCase()} website preview`}
+            />
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main
