@@ -94,6 +94,40 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
           {q.error}
         </Alert>
       ) : null}
+      <section className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,31,58,.08)]">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 sm:px-6">
+          <div>
+            <p className="font-black text-[#0b1f3a]">Your saved draft</p>
+            <p className="mt-1 text-sm text-slate-500">
+              See the latest saved version here. Open the preview studio to check tablet and mobile
+              layouts.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <ButtonLink href="/app/settings/website/preview" variant="secondary">
+              Open preview studio
+            </ButtonLink>
+            {site?.status === 'published' && business?.public_slug ? (
+              <ButtonLink href={`/site/${business.public_slug}`} variant="secondary">
+                View live website
+              </ButtonLink>
+            ) : (
+              <span className="inline-flex min-h-11 items-center rounded-xl bg-amber-50 px-4 text-sm font-bold text-amber-800">
+                Not published yet
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="bg-slate-100 p-3 sm:p-5">
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <iframe
+              className="h-[30rem] w-full"
+              src="/app/settings/website/preview?frame=1"
+              title="Saved website draft"
+            />
+          </div>
+        </div>
+      </section>
       <Card
         title="Media library"
         description="Upload photos once, then drag or reuse them throughout your website."
@@ -273,9 +307,11 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
           <ButtonLink href="/app/settings/website/preview" variant="secondary">
             Preview draft
           </ButtonLink>
-          <ButtonLink href={`/site/${business?.public_slug ?? ''}`} variant="secondary">
-            View live site
-          </ButtonLink>
+          {site?.status === 'published' && business?.public_slug ? (
+            <ButtonLink href={`/site/${business.public_slug}`} variant="secondary">
+              View live site
+            </ButtonLink>
+          ) : null}
           {context.permissions.has('website.publish') ? (
             <form action={publishWebsite}>
               <input name="sourcePublicationId" type="hidden" value="" />
