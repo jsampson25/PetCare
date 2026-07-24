@@ -230,7 +230,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
               {allStarterCapacityConfigured ? (
                 <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#2563eb] px-5 text-sm font-bold text-white transition hover:bg-[#1d4ed8]"
-                  href="/app/settings/services?onboarding=review"
+                  href="/onboarding/review"
                 >
                   Review and publish →
                 </Link>
