@@ -19,6 +19,7 @@ export function AppShell({
   permissions = new Set<string>(),
   brandName = 'PetCare',
   brandLogoAlt,
+  brandLogoMode = 'mark',
   brandLogoUrl,
   brandTokens,
 }: {
@@ -29,6 +30,7 @@ export function AppShell({
   permissions?: ReadonlySet<string>;
   brandName?: string;
   brandLogoAlt?: string;
+  brandLogoMode?: 'lockup' | 'mark';
   brandLogoUrl?: string;
   brandTokens?: { primary?: string; primaryText?: string; accent?: string };
 }) {
@@ -48,13 +50,16 @@ export function AppShell({
       <aside className="border-b border-slate-800 bg-[#0b1f3a] px-4 py-4 text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:border-b-0 lg:border-r lg:px-4 lg:py-5">
         <div className="flex items-center justify-between lg:block">
           <div>
-            <a className="flex items-center gap-3 text-lg font-extrabold tracking-tight" href="/">
+            <a
+              className="flex min-h-10 items-center gap-3 text-lg font-extrabold tracking-tight"
+              href="/"
+            >
               <span
                 aria-label={brandLogoUrl ? brandLogoAlt || `${brandName} logo` : undefined}
-                className={`grid size-10 place-items-center text-base font-black ${
+                className={`grid place-items-center text-base font-black ${
                   brandLogoUrl
-                    ? 'bg-contain bg-center bg-no-repeat'
-                    : 'rounded-2xl bg-[var(--action-primary)] text-[var(--action-primary-text)] shadow-sm'
+                    ? `bg-contain bg-left bg-no-repeat ${brandLogoMode === 'lockup' ? 'h-10 w-36' : 'size-10'}`
+                    : 'size-10 rounded-2xl bg-[var(--action-primary)] text-[var(--action-primary-text)] shadow-sm'
                 }`}
                 aria-hidden={brandLogoUrl ? undefined : 'true'}
                 role={brandLogoUrl ? 'img' : undefined}
@@ -62,9 +67,13 @@ export function AppShell({
               >
                 {brandLogoUrl ? null : brandName.slice(0, 2).toUpperCase()}
               </span>
-              <span className="text-white">{brandName}</span>
+              {brandLogoUrl && brandLogoMode === 'lockup' ? null : (
+                <span className="text-white">{brandName}</span>
+              )}
             </a>
-            <p className="ml-[3.25rem] mt-[-0.35rem] text-[0.65rem] font-bold uppercase tracking-[0.16em] text-slate-400">
+            <p
+              className={`${brandLogoUrl && brandLogoMode === 'lockup' ? 'ml-0 mt-1' : 'ml-[3.25rem] mt-[-0.35rem]'} text-[0.65rem] font-bold uppercase tracking-[0.16em] text-slate-400`}
+            >
               {shellNames[kind]}
             </p>
           </div>

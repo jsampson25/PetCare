@@ -62,7 +62,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
         <ButtonLink href="/app/bookings/new">New booking</ButtonLink>
       </header>
       <Card
-        className="border-emerald-100 bg-[linear-gradient(135deg,#f1f8f3,#fff)]"
+        className="border-blue-100 bg-[linear-gradient(135deg,#f2f7ff,#fff)]"
         title="Choose week"
       >
         <form className="flex flex-wrap items-end gap-3" method="get">

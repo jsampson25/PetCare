@@ -81,11 +81,11 @@ export default async function ServiceBoardPage({
   return (
     <div className="space-y-6">
       <header className="rounded-[2rem] bg-[#173f30] p-7 text-white shadow-[var(--elevation-2)] sm:p-9">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-200">
           Daily operations
         </p>
         <h1 className="mt-2 text-3xl font-black tracking-tight">Service boards</h1>
-        <p className="mt-2 text-emerald-50/75">
+        <p className="mt-2 text-blue-50/80">
           Boarding, daycare, and grooming keep distinct operational stages and one shared visit
           timeline.
         </p>
@@ -102,7 +102,7 @@ export default async function ServiceBoardPage({
       ) : null}
       {unstarted.length ? (
         <Card
-          className="border-emerald-100 bg-[linear-gradient(135deg,#f1f8f3,#fff)]"
+          className="border-blue-100 bg-[linear-gradient(135deg,#f2f7ff,#fff)]"
           title="Ready to start"
           description="Custody handoff is complete; initialize the category-specific workflow."
         >

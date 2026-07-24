@@ -81,6 +81,27 @@ body {
   --shell-hover: #2a3745;
 }
 
+.shell-business {
+  --surface-canvas: #f5f8fd;
+  --surface-subtle: #edf3fc;
+  --text-primary: #0b1f3a;
+  --text-secondary: #465a78;
+  --text-muted: #64748b;
+  --border-default: #d7e2f2;
+  --border-strong: #acc0dd;
+  --action-primary: #2864ed;
+  --action-primary-hover: #1f55cf;
+  --action-primary-active: #1946ad;
+  --action-primary-text: #ffffff;
+  --focus-ring: #60a5fa;
+  --link-default: #1f55cf;
+  --elevation-1: 0 1px 2px rgb(11 31 58 / 0.05), 0 12px 32px rgb(38 82 145 / 0.06);
+  --elevation-2: 0 20px 60px rgb(38 82 145 / 0.13);
+  background:
+    radial-gradient(circle at 88% 2%, rgb(219 234 254 / 0.7), transparent 30rem),
+    var(--surface-canvas);
+}
+
 .shell-customer {
   --shell-background: #f5faf6;
   --shell-foreground: #153c2d;

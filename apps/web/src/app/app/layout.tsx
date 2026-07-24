@@ -220,6 +220,11 @@ export default async function BusinessLayout({ children }: { children: ReactNode
     | undefined;
   return (
     <AppShell
+      brandLogoAlt="Roventra"
+      brandLogoMode="lockup"
+      brandLogoUrl="/brand/roventra-logo-kit/roventra-unified-white.png"
+      brandName="Roventra"
+      brandTokens={{ accent: '#60a5fa', primary: '#2864ed', primaryText: '#ffffff' }}
       contextLabel={context.businessName}
       items={businessNavigation}
       kind="business"

@@ -77,16 +77,16 @@ export default async function BusinessHomePage() {
   const openAlerts = alertResult.count ?? 0;
   return (
     <div className="space-y-6">
-      <header className="relative overflow-hidden rounded-[2rem] bg-[#173f30] p-7 text-white shadow-[var(--elevation-2)] sm:p-9">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
+      <header className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(125deg,#0b1f3a_0%,#12376a_58%,#2864ed_145%)] p-7 text-white shadow-[var(--elevation-2)] sm:p-9">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-200">
           {new Intl.DateTimeFormat('en-US', { dateStyle: 'full' }).format(new Date())}
         </p>
         <h1 className="mt-2 text-4xl font-black tracking-tight">Today&apos;s command center</h1>
-        <p className="mt-2 text-emerald-50/75">
+        <p className="mt-2 text-blue-50/80">
           Live work, pets in care, and exceptions needing attention now.
         </p>
         <div
-          className="absolute -bottom-20 -right-16 size-60 rounded-full bg-emerald-300/10"
+          className="absolute -bottom-20 -right-16 size-60 rounded-full bg-blue-300/15"
           aria-hidden="true"
         />
       </header>
