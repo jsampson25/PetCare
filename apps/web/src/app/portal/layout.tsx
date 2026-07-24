@@ -1,3 +1,4 @@
+import { validateTenantActionColor } from '@petcare/config/tenant-theme';
 import { AppShell } from '@petcare/ui/app-shell';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -23,13 +24,34 @@ export default async function CustomerPortalLayout({ children }: { children: Rea
   const { data: brand } = await supabase.rpc('get_customer_portal_brand', {
     target_business_id: dashboard.business.id,
   });
+  const logoMedia = brand?.logo_media as
+    { object_path?: string; alt_text?: string } | null | undefined;
+  const logoUrl = logoMedia?.object_path
+    ? supabase.storage.from('tenant-website-media').getPublicUrl(logoMedia.object_path).data
+        .publicUrl
+    : undefined;
+  const brandTokens = brand?.brand_tokens as
+    { primary?: string; primaryText?: string; accent?: string } | undefined;
+  const validatedPrimary = brandTokens?.primary
+    ? validateTenantActionColor(brandTokens.primary)
+    : null;
+  const accessibleBrandTokens = brandTokens
+    ? {
+        ...brandTokens,
+        primaryText:
+          brandTokens.primaryText ??
+          (validatedPrimary?.accepted ? validatedPrimary.actionTextColor : undefined),
+      }
+    : undefined;
   return (
     <AppShell
+      brandLogoAlt={logoMedia?.alt_text}
+      brandLogoUrl={logoUrl}
       contextLabel={`${dashboard.business.name} · ${dashboard.household.display_name}`}
       items={customerNavigation}
       kind="customer"
       brandName={brand?.business_name ?? dashboard.business.name}
-      brandTokens={brand?.brand_tokens ?? undefined}
+      brandTokens={accessibleBrandTokens}
     >
       {children}
     </AppShell>

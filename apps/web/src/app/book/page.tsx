@@ -1,3 +1,4 @@
+import { validateTenantActionColor } from '@petcare/config/tenant-theme';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import type { CSSProperties } from 'react';
@@ -26,16 +27,44 @@ export default async function BookPage({ searchParams }: { searchParams: SearchP
         </Card>
       </main>
     );
+  const logoMedia = site.content.logo_media as
+    { object_path?: string; alt_text?: string } | null | undefined;
+  const logoUrl = logoMedia?.object_path
+    ? supabase.storage.from('tenant-website-media').getPublicUrl(logoMedia.object_path).data
+        .publicUrl
+    : null;
+  const validatedPrimary = validateTenantActionColor(site.brand_tokens.primary);
+  const primaryTextColor =
+    typeof site.brand_tokens.primaryText === 'string'
+      ? site.brand_tokens.primaryText
+      : validatedPrimary.accepted
+        ? validatedPrimary.actionTextColor
+        : '#ffffff';
   return (
     <main
       className="min-h-screen bg-[linear-gradient(135deg,#f4f8f5,#fff)] text-slate-950"
-      style={{ '--action-primary': site.brand_tokens.primary } as CSSProperties}
+      style={
+        {
+          '--action-primary': site.brand_tokens.primary,
+          '--action-primary-text': primaryTextColor,
+        } as CSSProperties
+      }
     >
       <header className="border-b border-black/5 bg-white/85 backdrop-blur">
         <div className="mx-auto flex min-h-20 max-w-6xl items-center justify-between px-6">
           <a className="flex items-center gap-3 font-black" href={`/site/${site.business.slug}`}>
-            <span className="grid size-10 place-items-center rounded-2xl bg-[var(--action-primary)] text-white">
-              P
+            <span
+              aria-label={logoUrl ? logoMedia?.alt_text : undefined}
+              aria-hidden={logoUrl ? undefined : 'true'}
+              className={`grid size-10 place-items-center font-black ${
+                logoUrl
+                  ? 'bg-contain bg-center bg-no-repeat'
+                  : 'rounded-2xl bg-[var(--action-primary)] text-[var(--action-primary-text)]'
+              }`}
+              role={logoUrl ? 'img' : undefined}
+              style={{ backgroundImage: logoUrl ? `url(${logoUrl})` : undefined }}
+            >
+              {logoUrl ? null : site.business.name.slice(0, 2).toUpperCase()}
             </span>
             {site.business.name}
           </a>
@@ -65,7 +94,7 @@ export default async function BookPage({ searchParams }: { searchParams: SearchP
             ].map((label, index) => (
               <li className="flex items-center gap-3 text-sm font-bold" key={label}>
                 <span
-                  className={`grid size-8 place-items-center rounded-full ${index === 0 ? 'bg-[var(--action-primary)] text-white' : 'border border-slate-300 bg-white text-slate-500'}`}
+                  className={`grid size-8 place-items-center rounded-full ${index === 0 ? 'bg-[var(--action-primary)] text-[var(--action-primary-text)]' : 'border border-slate-300 bg-white text-slate-500'}`}
                 >
                   {index + 1}
                 </span>

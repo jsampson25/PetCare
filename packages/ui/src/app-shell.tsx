@@ -17,6 +17,8 @@ export function AppShell({
   kind,
   permissions = new Set<string>(),
   brandName = 'PetCare',
+  brandLogoAlt,
+  brandLogoUrl,
   brandTokens,
 }: {
   children: ReactNode;
@@ -25,7 +27,9 @@ export function AppShell({
   kind: ShellKind;
   permissions?: ReadonlySet<string>;
   brandName?: string;
-  brandTokens?: { primary?: string; accent?: string };
+  brandLogoAlt?: string;
+  brandLogoUrl?: string;
+  brandTokens?: { primary?: string; primaryText?: string; accent?: string };
 }) {
   const navigation = visibleNavigation(items, permissions);
 
@@ -35,6 +39,7 @@ export function AppShell({
       style={
         {
           '--action-primary': brandTokens?.primary,
+          '--action-primary-text': brandTokens?.primaryText,
           '--focus-ring': brandTokens?.accent,
         } as CSSProperties
       }
@@ -44,10 +49,17 @@ export function AppShell({
           <div>
             <a className="flex items-center gap-3 text-lg font-extrabold tracking-tight" href="/">
               <span
-                className="grid size-10 place-items-center rounded-2xl bg-[var(--action-primary)] text-base text-white shadow-sm"
-                aria-hidden="true"
+                aria-label={brandLogoUrl ? brandLogoAlt || `${brandName} logo` : undefined}
+                className={`grid size-10 place-items-center text-base font-black ${
+                  brandLogoUrl
+                    ? 'bg-contain bg-center bg-no-repeat'
+                    : 'rounded-2xl bg-[var(--action-primary)] text-[var(--action-primary-text)] shadow-sm'
+                }`}
+                aria-hidden={brandLogoUrl ? undefined : 'true'}
+                role={brandLogoUrl ? 'img' : undefined}
+                style={{ backgroundImage: brandLogoUrl ? `url(${brandLogoUrl})` : undefined }}
               >
-                P
+                {brandLogoUrl ? null : brandName.slice(0, 2).toUpperCase()}
               </span>
               <span>{brandName}</span>
             </a>
