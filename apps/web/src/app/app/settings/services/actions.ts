@@ -297,6 +297,85 @@ export async function createCapacityPool(formData: FormData) {
   redirect('/app/settings/services?notice=Capacity+pool+created.');
 }
 
+const starterCapacityEntrySchema = z.object({
+  capacity: z.coerce.number().int().positive().max(10000),
+  serviceId: z.uuid(),
+});
+
+export async function saveStarterCapacity(formData: FormData) {
+  const context = await resolveBusinessContext();
+  if (!context || !context.permissions.has('capacity.manage')) redirect('/denied');
+  const locationId = z.uuid().safeParse(formData.get('locationId'));
+  const submitted = [...formData.entries()]
+    .filter(([name]) => name.startsWith('capacity:'))
+    .map(([name, value]) => ({
+      capacity: value,
+      serviceId: name.slice('capacity:'.length),
+    }));
+  const entries = z.array(starterCapacityEntrySchema).min(1).safeParse(submitted);
+  if (!locationId.success || !entries.success) {
+    redirect('/app/settings/services?onboarding=capacity&error=Check+the+capacity+details.');
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const serviceIds = entries.data.map((entry) => entry.serviceId);
+  const [
+    { data: allowedServices, error: serviceError },
+    { data: existingPools, error: poolError },
+  ] = await Promise.all([
+    supabase
+      .from('services')
+      .select('id,category,internal_name')
+      .eq('business_id', context.businessId)
+      .in('id', serviceIds),
+    supabase
+      .from('capacity_pools')
+      .select('service_id')
+      .eq('business_id', context.businessId)
+      .eq('location_id', locationId.data)
+      .eq('status', 'active')
+      .in('service_id', serviceIds),
+  ]);
+  if (serviceError || poolError || allowedServices?.length !== new Set(serviceIds).size) {
+    redirect('/app/settings/services?onboarding=capacity&error=Capacity+could+not+be+prepared.');
+  }
+
+  const servicesById = new Map((allowedServices ?? []).map((service) => [service.id, service]));
+  const configuredServiceIds = new Set((existingPools ?? []).map((pool) => pool.service_id));
+  let createdCount = 0;
+
+  for (const entry of entries.data) {
+    if (configuredServiceIds.has(entry.serviceId)) continue;
+    const service = servicesById.get(entry.serviceId);
+    if (!service) continue;
+    const model =
+      service.category === 'boarding' || service.category === 'daycare'
+        ? 'pet_count'
+        : 'service_unit';
+    const { error } = await supabase.rpc('configure_capacity_pool', {
+      configured_limit: entry.capacity,
+      model_value: model,
+      physical_limit: entry.capacity,
+      pool_name: `${service.internal_name} capacity`,
+      target_business_id: context.businessId,
+      target_location_id: locationId.data,
+      target_service_id: entry.serviceId,
+    });
+    if (error) {
+      redirect(
+        '/app/settings/services?onboarding=capacity&error=One+or+more+capacity+limits+could+not+be+saved.',
+      );
+    }
+    createdCount += 1;
+  }
+
+  const notice =
+    createdCount > 0
+      ? `${createdCount}+capacity+limit${createdCount === 1 ? '' : 's'}+saved.`
+      : 'Capacity+is+already+configured+for+these+services.';
+  redirect(`/app/settings/services?onboarding=capacity&notice=${notice}`);
+}
+
 const overrideSchema = z.object({
   capacity: z.coerce.number().int().nonnegative(),
   endsOn: z.string().date(),

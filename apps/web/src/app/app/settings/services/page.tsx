@@ -19,6 +19,7 @@ import {
   createStarterServices,
   publishService,
   saveCapacityOverride,
+  saveStarterCapacity,
 } from './actions';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
@@ -28,6 +29,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
   if (!context || !context.permissions.has('services.view')) redirect('/denied');
   const parameters = await searchParams;
   const isOnboarding = parameters.onboarding === '1';
+  const isCapacityOnboarding = parameters.onboarding === 'capacity';
   const supabase = await createSupabaseServerClient();
   const [
     { data: services },
@@ -87,6 +89,12 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
   const canManageCapacity = context.permissions.has('capacity.manage');
   const draftVersions = (versions ?? []).filter((version) => version.status === 'draft');
   const existingCategories = new Set((services ?? []).map((service) => service.category));
+  const configuredCapacityServiceIds = new Set(
+    (pools ?? []).filter((pool) => pool.status === 'active').map((pool) => pool.service_id),
+  );
+  const allStarterCapacityConfigured =
+    Boolean(services?.length) &&
+    (services ?? []).every((service) => configuredCapacityServiceIds.has(service.id));
 
   return (
     <div className="space-y-6">
@@ -107,6 +115,131 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
         <Alert title="Service catalog updated" tone="success">
           {parameters.notice}
         </Alert>
+      ) : null}
+      {isCapacityOnboarding && canManageCapacity && locations?.length && services?.length ? (
+        <section className="overflow-hidden rounded-[2rem] border border-[#c9dcf7] bg-white shadow-[0_22px_65px_rgba(37,99,235,.1)]">
+          <div className="border-b border-[#dbe7f5] bg-gradient-to-r from-[#eff6ff] via-white to-[#e8f5ff] p-6 sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2563eb]">
+                  Guided setup · Step 4
+                </p>
+                <h2 className="mt-2 text-2xl font-black tracking-[-.03em] text-[#0b1f3a]">
+                  How many pets can you safely serve?
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[#48617f]">
+                  Set a safe starting limit for each service. You can lower capacity for staffing,
+                  maintenance, or special dates later.
+                </p>
+              </div>
+              <div className="min-w-40">
+                <div className="flex items-center justify-between text-xs font-bold text-[#48617f]">
+                  <span>Setup progress</span>
+                  <span>80%</span>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#dbeafe]">
+                  <div className="h-full w-[80%] rounded-full bg-[#2563eb]" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <form action={saveStarterCapacity} className="p-6 sm:p-8">
+            <input name="locationId" type="hidden" value={locations[0].id} />
+            <div className="grid gap-4 md:grid-cols-2">
+              {services.map((service) => {
+                const configuredPool = (pools ?? []).find(
+                  (pool) => pool.service_id === service.id && pool.status === 'active',
+                );
+                const wording =
+                  service.category === 'boarding'
+                    ? {
+                        hint: 'Maximum pets staying overnight at one time.',
+                        label: 'Overnight pet capacity',
+                      }
+                    : service.category === 'daycare'
+                      ? {
+                          hint: 'Maximum daycare pets attending on the same day.',
+                          label: 'Daily daycare capacity',
+                        }
+                      : service.category === 'grooming'
+                        ? {
+                            hint: 'Maximum grooming appointments available each day.',
+                            label: 'Daily grooming appointments',
+                          }
+                        : {
+                            hint: 'Maximum assessment appointments available each day.',
+                            label: 'Daily assessment appointments',
+                          };
+                return (
+                  <div
+                    className={`rounded-2xl border p-5 ${
+                      configuredPool
+                        ? 'border-[#b9e3cf] bg-[#f0fbf6]'
+                        : 'border-[#c9dcf7] bg-[#f8fbff]'
+                    }`}
+                    key={service.id}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-lg font-black text-[#0b1f3a]">
+                          {latestByService.get(service.id)?.customer_name ?? service.internal_name}
+                        </p>
+                        <p className="mt-1 text-sm leading-6 text-[#526984]">{wording.hint}</p>
+                      </div>
+                      {configuredPool ? (
+                        <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-bold text-[#14724a] shadow-sm">
+                          {configuredPool.configured_capacity} saved
+                        </span>
+                      ) : null}
+                    </div>
+                    {configuredPool ? null : (
+                      <div className="mt-4">
+                        <label
+                          className="block text-sm font-bold text-[#0b1f3a]"
+                          htmlFor={`capacity-${service.id}`}
+                        >
+                          {wording.label}
+                        </label>
+                        <input
+                          className="mt-2 min-h-12 w-full rounded-xl border border-[#9dbce5] bg-white px-4 text-lg font-bold outline-none focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]"
+                          id={`capacity-${service.id}`}
+                          max="10000"
+                          min="1"
+                          name={`capacity:${service.id}`}
+                          placeholder="Enter a safe limit"
+                          required
+                          type="number"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-6 rounded-2xl border border-[#f2d8a7] bg-[#fff9ed] p-4 text-sm leading-6 text-[#6d4b13]">
+              <strong>Start conservatively.</strong> This limit controls what the booking system may
+              sell. It should reflect the lower of your physical space and safe staffing capacity.
+            </div>
+            <div className="mt-6 flex flex-col-reverse justify-between gap-3 border-t border-[#dbe7f5] pt-6 sm:flex-row sm:items-center">
+              <Link
+                className="inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-sm font-bold text-[#35506f] hover:bg-[#f1f6fd]"
+                href="/app/settings/pricing?onboarding=1"
+              >
+                ← Back to pricing
+              </Link>
+              {allStarterCapacityConfigured ? (
+                <Link
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#2563eb] px-5 text-sm font-bold text-white transition hover:bg-[#1d4ed8]"
+                  href="/app/settings/services?onboarding=review"
+                >
+                  Review and publish →
+                </Link>
+              ) : (
+                <Button type="submit">Save capacity limits</Button>
+              )}
+            </div>
+          </form>
+        </section>
       ) : null}
       {isOnboarding && canManage ? (
         <section className="overflow-hidden rounded-[2rem] border border-[#c9dcf7] bg-white shadow-[0_22px_65px_rgba(37,99,235,.1)]">
@@ -224,9 +357,13 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
       ) : null}
       {canManage ? (
         <Card
-          title={isOnboarding ? 'Advanced service setup' : 'Create a service draft'}
+          title={
+            isOnboarding || isCapacityOnboarding
+              ? 'Advanced service setup'
+              : 'Create a service draft'
+          }
           description={
-            isOnboarding
+            isOnboarding || isCapacityOnboarding
               ? 'Use this when a service needs different scheduling or confirmation behavior.'
               : 'Drafts remain internal until you publish them for a location and channel.'
           }

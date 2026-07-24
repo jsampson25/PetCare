@@ -290,7 +290,7 @@ export default async function PricingSettingsPage({
                 ) : (
                   <Link
                     className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#2563eb] px-5 text-sm font-bold text-white transition hover:bg-[#1d4ed8]"
-                    href="/app/settings/services?onboarding=1"
+                    href="/app/settings/services?onboarding=capacity"
                   >
                     Continue to capacity setup →
                   </Link>
