@@ -134,6 +134,7 @@ export async function saveWebsiteDraft(formData: FormData) {
       contactPhone: z.string().trim().min(7).max(30),
       seoTitle: z.string().trim().max(70),
       seoDescription: z.string().trim().max(170),
+      logoMediaId: z.union([z.literal(''), z.uuid()]),
       heroMediaId: z.union([z.literal(''), z.uuid()]),
       servicesMediaId: z.union([z.literal(''), z.uuid()]),
       aboutMediaId: z.union([z.literal(''), z.uuid()]),
@@ -155,6 +156,7 @@ export async function saveWebsiteDraft(formData: FormData) {
     redirect('/app/settings/website?error=Choose+a+template+from+the+selected+style.');
   const supabase = await createSupabaseServerClient();
   const selectedMediaIds = [
+    parsed.data.logoMediaId,
     parsed.data.heroMediaId,
     parsed.data.servicesMediaId,
     parsed.data.aboutMediaId,
@@ -190,6 +192,7 @@ export async function saveWebsiteDraft(formData: FormData) {
       seo_description: parsed.data.seoDescription,
       section_layout: sectionLayout.data,
       custom_pages: customPages.data,
+      logo_media: parsed.data.logoMediaId ? (mediaById.get(parsed.data.logoMediaId) ?? null) : null,
       hero_media: parsed.data.heroMediaId ? (mediaById.get(parsed.data.heroMediaId) ?? null) : null,
       services_media: parsed.data.servicesMediaId
         ? (mediaById.get(parsed.data.servicesMediaId) ?? null)

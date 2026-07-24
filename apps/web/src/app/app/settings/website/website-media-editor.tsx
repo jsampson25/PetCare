@@ -11,9 +11,10 @@ export type WebsiteMedia = {
   publicUrl: string;
 };
 
-type Slot = 'hero' | 'services' | 'about';
+type Slot = 'logo' | 'hero' | 'services' | 'about';
 
 const slots: Array<{ id: Slot; name: string; hint: string }> = [
+  { id: 'logo', name: 'Business logo', hint: 'A transparent PNG works best' },
   { id: 'hero', name: 'Hero image', hint: 'Wide, welcoming first impression' },
   { id: 'services', name: 'Services image', hint: 'Care, play, grooming, or rooms' },
   { id: 'about', name: 'About image', hint: 'Your team, family, or facility' },
@@ -22,15 +23,18 @@ const slots: Array<{ id: Slot; name: string; hint: string }> = [
 export function WebsiteMediaEditor({
   initialAboutMediaId,
   initialHeroMediaId,
+  initialLogoMediaId,
   initialServicesMediaId,
   media,
 }: {
   initialAboutMediaId: string;
   initialHeroMediaId: string;
+  initialLogoMediaId: string;
   initialServicesMediaId: string;
   media: WebsiteMedia[];
 }) {
   const [selection, setSelection] = useState<Record<Slot, string>>({
+    logo: initialLogoMediaId,
     hero: initialHeroMediaId,
     services: initialServicesMediaId,
     about: initialAboutMediaId,
@@ -44,11 +48,12 @@ export function WebsiteMediaEditor({
         Drag photos into each section or use the placement buttons. Images stay available when you
         change styles and templates.
       </p>
+      <input name="logoMediaId" type="hidden" value={selection.logo} />
       <input name="heroMediaId" type="hidden" value={selection.hero} />
       <input name="servicesMediaId" type="hidden" value={selection.services} />
       <input name="aboutMediaId" type="hidden" value={selection.about} />
       <div className="mt-4 grid gap-4 xl:grid-cols-[1.2fr_.8fr]">
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           {slots.map((slot) => {
             const selected = media.find((item) => item.id === selection[slot.id]);
             return (
@@ -71,7 +76,9 @@ export function WebsiteMediaEditor({
                   <>
                     <div
                       aria-label={selected.alt_text}
-                      className="absolute inset-0 bg-cover bg-center"
+                      className={`absolute inset-0 bg-center ${
+                        slot.id === 'logo' ? 'bg-contain bg-no-repeat p-6' : 'bg-cover'
+                      }`}
                       role="img"
                       style={{ backgroundImage: `url(${selected.publicUrl})` }}
                     />

@@ -66,6 +66,7 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
     : defaultWebsiteSections;
   const customPages = Array.isArray(c.custom_pages) ? (c.custom_pages as WebsiteCustomPage[]) : [];
   const heroMedia = c.hero_media as { id?: string } | undefined;
+  const logoMedia = c.logo_media as { id?: string } | undefined;
   const servicesMedia = c.services_media as { id?: string } | undefined;
   const aboutMedia = c.about_media as { id?: string } | undefined;
   const mediaWithUrls: WebsiteMedia[] = (media ?? []).map((item) => ({
@@ -149,6 +150,7 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
           <WebsiteMediaEditor
             initialAboutMediaId={aboutMedia?.id ?? ''}
             initialHeroMediaId={heroMedia?.id ?? ''}
+            initialLogoMediaId={logoMedia?.id ?? ''}
             initialServicesMediaId={servicesMedia?.id ?? ''}
             media={mediaWithUrls}
           />

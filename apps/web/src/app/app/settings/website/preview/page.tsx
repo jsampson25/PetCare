@@ -65,6 +65,8 @@ export default async function PreviewPage({
   const centered = presentation.centered;
   const heroMedia = content.hero_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  const logoMedia = content.logo_media as
+    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
   const servicesMedia = content.services_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
   const aboutMedia = content.about_media as
@@ -74,6 +76,7 @@ export default async function PreviewPage({
       ? supabase.storage.from('tenant-website-media').getPublicUrl(objectPath).data.publicUrl
       : null;
   const heroImageUrl = mediaUrl(heroMedia?.object_path);
+  const logoImageUrl = mediaUrl(logoMedia?.object_path);
   const servicesImageUrl = mediaUrl(servicesMedia?.object_path);
   const aboutImageUrl = mediaUrl(aboutMedia?.object_path);
   const sectionLayout = Array.isArray(content.section_layout)
@@ -206,13 +209,18 @@ export default async function PreviewPage({
             href="#top"
           >
             <span
-              className="grid size-11 place-items-center rounded-2xl text-xs font-black shadow-sm"
+              aria-label={logoImageUrl ? logoMedia?.alt_text : undefined}
+              className={`grid size-11 place-items-center text-xs font-black ${
+                logoImageUrl ? 'bg-contain bg-center bg-no-repeat' : 'rounded-2xl shadow-sm'
+              }`}
+              role={logoImageUrl ? 'img' : undefined}
               style={{
-                background: 'var(--tenant-primary)',
-                color: 'var(--action-primary-text)',
+                backgroundColor: logoImageUrl ? 'transparent' : 'var(--tenant-primary)',
+                backgroundImage: logoImageUrl ? `url(${logoImageUrl})` : undefined,
+                color: logoImageUrl ? 'transparent' : 'var(--action-primary-text)',
               }}
             >
-              HP
+              {logoImageUrl ? null : site.business.name.slice(0, 2).toUpperCase()}
             </span>
             <span>
               <span className="block text-lg font-black tracking-tight">{site.business.name}</span>

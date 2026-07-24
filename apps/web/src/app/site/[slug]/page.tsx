@@ -89,6 +89,8 @@ export default async function TenantSitePage({
         : '#ffffff';
   const heroMedia = content.hero_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  const logoMedia = content.logo_media as
+    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
   const servicesMedia = content.services_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
   const aboutMedia = content.about_media as
@@ -99,6 +101,7 @@ export default async function TenantSitePage({
       ? supabase.storage.from('tenant-website-media').getPublicUrl(objectPath).data.publicUrl
       : null;
   const heroImageUrl = mediaUrl(heroMedia?.object_path);
+  const logoImageUrl = mediaUrl(logoMedia?.object_path);
   const servicesImageUrl = mediaUrl(servicesMedia?.object_path);
   const aboutImageUrl = mediaUrl(aboutMedia?.object_path);
   const sectionStyle = (id: SectionId): CSSProperties => ({
@@ -113,14 +116,19 @@ export default async function TenantSitePage({
   const splitHeader = presentation.layout === 'split';
   const logoMark = (
     <span
-      className="grid size-10 place-items-center rounded-2xl text-sm font-black"
+      aria-label={logoImageUrl ? logoMedia?.alt_text : undefined}
+      className={`grid size-10 place-items-center text-sm font-black ${
+        logoImageUrl ? 'bg-contain bg-center bg-no-repeat' : 'rounded-2xl'
+      }`}
       style={{
-        background: 'var(--tenant-primary)',
-        color: 'var(--action-primary-text)',
+        backgroundColor: logoImageUrl ? 'transparent' : 'var(--tenant-primary)',
+        backgroundImage: logoImageUrl ? `url(${logoImageUrl})` : undefined,
+        color: logoImageUrl ? 'transparent' : 'var(--action-primary-text)',
       }}
-      aria-hidden="true"
+      aria-hidden={logoImageUrl ? undefined : 'true'}
+      role={logoImageUrl ? 'img' : undefined}
     >
-      HP
+      {logoImageUrl ? null : site.business.name.slice(0, 2).toUpperCase()}
     </span>
   );
   const brand = (

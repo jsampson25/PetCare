@@ -1,3 +1,4 @@
+import { validateTenantActionColor } from '@petcare/config/tenant-theme';
 import { ButtonLink } from '@petcare/ui/button-link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -15,8 +16,11 @@ type CustomPage = {
 type Site = {
   business: { name: string; slug: string };
   theme_key: 'modern' | 'warm' | 'classic';
-  brand_tokens: { primary: string; accent: string };
-  content: { custom_pages?: CustomPage[] };
+  brand_tokens: { primary: string; primaryText?: string; accent: string };
+  content: {
+    custom_pages?: CustomPage[];
+    logo_media?: { object_path?: string; alt_text?: string };
+  };
 };
 
 async function getPage(slug: string, pageSlug: string) {
@@ -49,6 +53,19 @@ export default async function TenantCustomPage({
   if (!result) notFound();
   const { site, page } = result;
   const centeredHeader = site.theme_key === 'modern';
+  const supabase = await createSupabaseServerClient();
+  const logoMedia = site.content.logo_media;
+  const logoImageUrl = logoMedia?.object_path
+    ? supabase.storage.from('tenant-website-media').getPublicUrl(logoMedia.object_path).data
+        .publicUrl
+    : null;
+  const validatedPrimary = validateTenantActionColor(site.brand_tokens.primary);
+  const primaryTextColor =
+    typeof site.brand_tokens.primaryText === 'string'
+      ? site.brand_tokens.primaryText
+      : validatedPrimary.accepted
+        ? validatedPrimary.actionTextColor
+        : '#ffffff';
 
   return (
     <main
@@ -58,6 +75,7 @@ export default async function TenantCustomPage({
           '--tenant-primary': site.brand_tokens.primary,
           '--tenant-accent': site.brand_tokens.accent,
           '--action-primary': site.brand_tokens.primary,
+          '--action-primary-text': primaryTextColor,
         } as CSSProperties
       }
     >
@@ -79,10 +97,18 @@ export default async function TenantCustomPage({
             href={`/site/${site.business.slug}`}
           >
             <span
-              className="grid size-10 place-items-center rounded-2xl text-xs text-white"
-              style={{ background: 'var(--tenant-primary)' }}
+              aria-label={logoImageUrl ? logoMedia?.alt_text : undefined}
+              className={`grid size-10 place-items-center text-xs font-black ${
+                logoImageUrl ? 'bg-contain bg-center bg-no-repeat' : 'rounded-2xl'
+              }`}
+              role={logoImageUrl ? 'img' : undefined}
+              style={{
+                backgroundColor: logoImageUrl ? 'transparent' : 'var(--tenant-primary)',
+                backgroundImage: logoImageUrl ? `url(${logoImageUrl})` : undefined,
+                color: logoImageUrl ? 'transparent' : 'var(--action-primary-text)',
+              }}
             >
-              HP
+              {logoImageUrl ? null : site.business.name.slice(0, 2).toUpperCase()}
             </span>
             <span>
               <span className="block">{site.business.name}</span>
