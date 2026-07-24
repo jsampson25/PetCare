@@ -1,8 +1,11 @@
 import { Field } from '@petcare/ui/field';
 import Link from 'next/link';
+import type { CSSProperties } from 'react';
 
 import { AuthCard } from '../../../components/auth-card';
 import { LegalModalLink } from '../../../components/legal-modal-link';
+import { TenantAuthBrand } from '../../../components/tenant-auth-brand';
+import { getTenantSlug, loadPublicTenantBrand } from '../../../lib/auth/public-tenant-brand';
 import { getSafeRedirect } from '../../../lib/auth/safe-redirect';
 import { register } from '../actions';
 import { PasswordFields } from '../password-field';
@@ -22,7 +25,11 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
     typeof parameters.next === 'string' ? parameters.next : undefined,
     '/onboarding',
   );
-  return (
+  const tenant = getTenantSlug(parameters.tenant);
+  const tenantBrand = await loadPublicTenantBrand(tenant);
+  const signInQuery = new URLSearchParams({ next });
+  if (tenant) signInQuery.set('tenant', tenant);
+  const content = (
     <AuthCard
       description={
         startsWithTrial
@@ -33,15 +40,17 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
       footer={
         <>
           Already registered?{' '}
-          <Link className="font-bold underline" href="/auth/sign-in">
+          <Link className="font-bold underline" href={`/auth/sign-in?${signInQuery.toString()}`}>
             Sign in
           </Link>
         </>
       }
       title={startsWithTrial ? 'Start your free trial' : 'Start your pet-care business'}
     >
+      {tenantBrand ? <TenantAuthBrand brand={tenantBrand} /> : null}
       <form action={register} className="space-y-5">
         <input name="next" type="hidden" value={next} />
+        <input name="tenant" type="hidden" value={tenant} />
         <input name="plan" type="hidden" value={requestedPlan} />
         <input name="trial" type="hidden" value={startsWithTrial ? '14' : ''} />
         {startsWithTrial ? (
@@ -65,17 +74,11 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
           />
           <span>
             I agree to the Roventra{' '}
-            <LegalModalLink
-              className="font-bold text-[#1d4ed8] underline"
-              href="/terms"
-            >
+            <LegalModalLink className="font-bold text-[#1d4ed8] underline" href="/terms">
               Terms of Service
             </LegalModalLink>{' '}
             and acknowledge the{' '}
-            <LegalModalLink
-              className="font-bold text-[#1d4ed8] underline"
-              href="/privacy"
-            >
+            <LegalModalLink className="font-bold text-[#1d4ed8] underline" href="/privacy">
               Privacy Policy
             </LegalModalLink>
             .
@@ -84,5 +87,22 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
         <RegistrationSubmitButton />
       </form>
     </AuthCard>
+  );
+
+  return tenantBrand ? (
+    <div
+      style={
+        {
+          '--action-primary': tenantBrand.primary,
+          '--action-primary-text': tenantBrand.primaryText,
+          '--focus-ring': tenantBrand.primary,
+          '--link-default': tenantBrand.primary,
+        } as CSSProperties
+      }
+    >
+      {content}
+    </div>
+  ) : (
+    content
   );
 }

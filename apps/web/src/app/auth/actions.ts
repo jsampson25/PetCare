@@ -17,14 +17,29 @@ function field(formData: FormData, name: string) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-function messageUrl(path: string, kind: 'error' | 'notice', message: string) {
+function messageUrl(
+  path: string,
+  kind: 'error' | 'notice',
+  message: string,
+  preserved?: Record<string, string>,
+) {
   const parameters = new URLSearchParams({ [kind]: message });
+  for (const [key, value] of Object.entries(preserved ?? {})) {
+    if (value) parameters.set(key, value);
+  }
   return `${path}?${parameters.toString()}`;
 }
 
-function registrationMessageUrl(message: string, plan: string, trialDays: number, next: string) {
+function registrationMessageUrl(
+  message: string,
+  plan: string,
+  trialDays: number,
+  next: string,
+  tenant = '',
+) {
   const parameters = new URLSearchParams({ error: message, next, plan });
   if (trialDays > 0) parameters.set('trial', String(trialDays));
+  if (tenant) parameters.set('tenant', tenant);
   return `/auth/register?${parameters.toString()}`;
 }
 
@@ -109,8 +124,11 @@ export async function signIn(formData: FormData) {
   const email = emailSchema.safeParse(field(formData, 'email'));
   const password = z.string().min(1).safeParse(field(formData, 'password'));
   const next = getSafeRedirect(field(formData, 'next'));
+  const tenant = field(formData, 'tenant');
   if (!email.success || !password.success) {
-    redirect(messageUrl('/auth/sign-in', 'error', 'Enter a valid email and password.'));
+    redirect(
+      messageUrl('/auth/sign-in', 'error', 'Enter a valid email and password.', { next, tenant }),
+    );
   }
 
   const supabase = await createSupabaseServerClient();
@@ -119,7 +137,12 @@ export async function signIn(formData: FormData) {
     password: password.data,
   });
   if (error)
-    redirect(messageUrl('/auth/sign-in', 'error', 'Email or password was not recognized.'));
+    redirect(
+      messageUrl('/auth/sign-in', 'error', 'Email or password was not recognized.', {
+        next,
+        tenant,
+      }),
+    );
   redirect(next);
 }
 
@@ -129,6 +152,7 @@ export async function register(formData: FormData) {
   const confirmation = field(formData, 'passwordConfirmation');
   const displayName = z.string().min(1).max(120).safeParse(field(formData, 'displayName'));
   const legalAccepted = formData.get('legalAccepted') === 'on';
+  const tenant = field(formData, 'tenant');
   const requestedPlan = z
     .enum(['starter', 'growth', 'scale'])
     .catch('growth')
@@ -143,6 +167,7 @@ export async function register(formData: FormData) {
         requestedPlan,
         requestedTrialDays,
         next,
+        tenant,
       ),
     );
   }
@@ -153,6 +178,7 @@ export async function register(formData: FormData) {
         requestedPlan,
         requestedTrialDays,
         next,
+        tenant,
       ),
     );
   }
@@ -163,6 +189,7 @@ export async function register(formData: FormData) {
         requestedPlan,
         requestedTrialDays,
         next,
+        tenant,
       ),
     );
   }
@@ -173,6 +200,7 @@ export async function register(formData: FormData) {
         requestedPlan,
         requestedTrialDays,
         next,
+        tenant,
       ),
     );
   }
@@ -183,6 +211,7 @@ export async function register(formData: FormData) {
         requestedPlan,
         requestedTrialDays,
         next,
+        tenant,
       ),
     );
   }
@@ -197,6 +226,7 @@ export async function register(formData: FormData) {
         '/auth/register',
         'error',
         'Registration is not configured for this website address yet.',
+        { next, tenant },
       ),
     );
   }
@@ -233,7 +263,9 @@ export async function register(formData: FormData) {
       'The registration service is not configured correctly. Check the beta deployment settings.';
   }
   if (registrationError) {
-    redirect(messageUrl('/auth/register', 'error', registrationError));
+    redirect(
+      registrationMessageUrl(registrationError, requestedPlan, requestedTrialDays, next, tenant),
+    );
   }
   redirect(messageUrl('/auth/check-email', 'notice', 'Check your email to verify your account.'));
 }

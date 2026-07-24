@@ -140,7 +140,7 @@ export default async function BookPage({ searchParams }: { searchParams: SearchP
                   <h3 className="mt-6 text-xl font-black">{service.name}</h3>
                   <p className="mt-2 flex-1 leading-7 text-slate-600">{service.description}</p>
                   <ButtonLink
-                    href={`/auth/sign-in?next=${encodeURIComponent('/portal/reservations')}`}
+                    href={`/auth/sign-in?tenant=${encodeURIComponent(site.business.slug)}&next=${encodeURIComponent('/portal/reservations')}`}
                   >
                     Choose {service.name}
                   </ButtonLink>
