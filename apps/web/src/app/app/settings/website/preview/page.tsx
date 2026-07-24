@@ -52,13 +52,23 @@ export default async function PreviewPage() {
   const heroImageUrl = mediaUrl(heroMedia?.object_path);
   const servicesImageUrl = mediaUrl(servicesMedia?.object_path);
   const aboutImageUrl = mediaUrl(aboutMedia?.object_path);
+  const sectionLayout = Array.isArray(content.section_layout)
+    ? (content.section_layout as Array<{ id: string; visible: boolean }>)
+    : [
+        { id: 'services', visible: true },
+        { id: 'about', visible: true },
+        { id: 'faq', visible: true },
+        { id: 'contact', visible: true },
+      ];
   const visibleSections = new Set(
-    Array.isArray(content.section_layout)
-      ? (content.section_layout as Array<{ id: string; visible: boolean }>)
-          .filter((section) => section.visible)
-          .map((section) => section.id)
-      : ['services', 'about', 'faq', 'contact'],
+    sectionLayout.filter((section) => section.visible).map((section) => section.id),
   );
+  const sectionLabels: Record<string, string> = {
+    services: 'Services',
+    about: 'About',
+    faq: 'FAQ',
+    contact: 'Contact',
+  };
   const customPages = Array.isArray(content.custom_pages)
     ? (content.custom_pages as Array<{
         id: string;
@@ -66,6 +76,15 @@ export default async function PreviewPage() {
         showInNavigation: boolean;
       }>)
     : [];
+  const previewNavigationItems = [
+    ...sectionLayout
+      .filter((section) => section.visible)
+      .map((section) => ({ id: section.id, label: sectionLabels[section.id] })),
+    ...customPages
+      .filter((page) => page.showInNavigation)
+      .slice(0, 4)
+      .map((page) => ({ id: page.id, label: page.title })),
+  ];
 
   return (
     <main
@@ -98,9 +117,9 @@ export default async function PreviewPage() {
         >
           {centered ? (
             <nav className="hidden gap-6 text-sm font-semibold lg:flex">
-              <a href="#services">Services</a>
-              <a href="#about">About</a>
-              <a href="#contact">Contact</a>
+              {previewNavigationItems.slice(0, 4).map((item) => (
+                <span key={item.id}>{item.label}</span>
+              ))}
             </nav>
           ) : null}
           <a
@@ -123,14 +142,9 @@ export default async function PreviewPage() {
           <div className={`flex items-center gap-3 ${centered ? 'justify-self-end' : ''}`}>
             {!centered ? (
               <nav className="mr-4 hidden gap-6 text-sm font-semibold lg:flex">
-                <a href="#services">Services</a>
-                <a href="#about">About</a>
-                {customPages
-                  .filter((page) => page.showInNavigation)
-                  .slice(0, 1)
-                  .map((page) => (
-                    <span key={page.id}>{page.title}</span>
-                  ))}
+                {previewNavigationItems.slice(0, 5).map((item) => (
+                  <span key={item.id}>{item.label}</span>
+                ))}
               </nav>
             ) : null}
             <span className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold">

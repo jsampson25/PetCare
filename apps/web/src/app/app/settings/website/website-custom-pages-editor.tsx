@@ -27,6 +27,16 @@ export function WebsiteCustomPagesEditor({ initialPages }: { initialPages: Websi
     setPages((current) => current.map((page) => (page.id === id ? { ...page, ...values } : page)));
   }
 
+  function movePage(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= pages.length) return;
+    setPages((current) => {
+      const next = [...current];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  }
+
   return (
     <fieldset className="sm:col-span-2">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -57,13 +67,35 @@ export function WebsiteCustomPagesEditor({ initialPages }: { initialPages: Websi
           <article className="rounded-2xl border bg-white p-4" key={page.id}>
             <div className="flex items-center justify-between gap-4">
               <p className="font-black">Custom page {index + 1}</p>
-              <button
-                className="text-sm font-bold text-red-700"
-                onClick={() => setPages((current) => current.filter((item) => item.id !== page.id))}
-                type="button"
-              >
-                Remove
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  aria-label={`Move ${page.title} up`}
+                  className="grid size-9 place-items-center rounded-lg border font-black disabled:opacity-30"
+                  disabled={index === 0}
+                  onClick={() => movePage(index, -1)}
+                  type="button"
+                >
+                  ↑
+                </button>
+                <button
+                  aria-label={`Move ${page.title} down`}
+                  className="grid size-9 place-items-center rounded-lg border font-black disabled:opacity-30"
+                  disabled={index === pages.length - 1}
+                  onClick={() => movePage(index, 1)}
+                  type="button"
+                >
+                  ↓
+                </button>
+                <button
+                  className="min-h-9 rounded-lg px-2 text-sm font-bold text-red-700"
+                  onClick={() =>
+                    setPages((current) => current.filter((item) => item.id !== page.id))
+                  }
+                  type="button"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-bold">

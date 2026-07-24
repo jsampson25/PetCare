@@ -31,6 +31,12 @@ const defaultSectionLayout: Array<{ id: SectionId; visible: boolean }> = [
   { id: 'faq', visible: true },
   { id: 'contact', visible: true },
 ];
+const sectionLabels: Record<SectionId, string> = {
+  services: 'Services',
+  about: 'About',
+  faq: 'FAQ',
+  contact: 'Contact',
+};
 async function getSite(slug: string) {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.rpc('get_public_tenant_website', { public_slug_value: slug });
@@ -122,24 +128,60 @@ export default async function TenantSitePage({
       </span>
     </a>
   );
+  const standardNavigationItems = sectionLayout
+    .filter((section) => section.visible)
+    .map((section) => ({
+      href: `#${section.id}`,
+      id: section.id,
+      label: sectionLabels[section.id],
+    }));
+  const customNavigationItems = customPages
+    .filter((page) => page.showInNavigation)
+    .slice(0, 4)
+    .map((page) => ({
+      href: `/site/${site.business.slug}/pages/${page.slug}`,
+      id: page.id,
+      label: page.title,
+    }));
+  const navigationItems = [...standardNavigationItems, ...customNavigationItems];
   const navigation = (
     <nav
       className="hidden items-center gap-7 text-sm font-bold md:flex"
       aria-label="Business website"
     >
-      <a href="#services">Services</a>
-      <a href="#about">About</a>
-      <a href="#faq">FAQ</a>
-      <a href="#contact">Contact</a>
-      {customPages
-        .filter((page) => page.showInNavigation)
-        .slice(0, 2)
-        .map((page) => (
-          <a href={`/site/${site.business.slug}/pages/${page.slug}`} key={page.id}>
-            {page.title}
+      {navigationItems.map((item) => (
+        <a href={item.href} key={item.id}>
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  );
+  const mobileNavigation = (
+    <details className="relative md:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-black shadow-sm">
+        Menu
+      </summary>
+      <nav
+        aria-label="Mobile business website"
+        className="absolute right-0 top-14 z-40 grid min-w-64 gap-1 rounded-2xl border border-slate-200 bg-white p-3 text-sm font-bold shadow-xl"
+      >
+        {navigationItems.map((item) => (
+          <a className="rounded-xl px-4 py-3 hover:bg-slate-50" href={item.href} key={item.id}>
+            {item.label}
           </a>
         ))}
-    </nav>
+        <a className="rounded-xl px-4 py-3 hover:bg-slate-50" href="/portal">
+          Customer sign in
+        </a>
+        <a
+          className="rounded-xl px-4 py-3 text-white"
+          href={`/book?tenant=${site.business.slug}`}
+          style={{ backgroundColor: 'var(--tenant-primary)' }}
+        >
+          Book now
+        </a>
+      </nav>
+    </details>
   );
   return (
     <main
@@ -159,10 +201,13 @@ export default async function TenantSitePage({
               <div className="hidden md:flex">{navigation}</div>
               {brand}
               <div className="flex justify-end gap-3">
-                <ButtonLink href="/portal" variant="secondary">
-                  Sign in
-                </ButtonLink>
-                <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
+                <div className="hidden gap-3 md:flex">
+                  <ButtonLink href="/portal" variant="secondary">
+                    Sign in
+                  </ButtonLink>
+                  <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
+                </div>
+                {mobileNavigation}
               </div>
             </div>
           </div>
@@ -170,13 +215,19 @@ export default async function TenantSitePage({
           <div className="mx-auto grid min-h-24 max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-8 px-6">
             {brand}
             <div className="justify-self-center">{navigation}</div>
-            <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
+            <div className="hidden md:block">
+              <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
+            </div>
+            {mobileNavigation}
           </div>
         ) : (
           <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-6 px-6">
             {brand}
             <div className="ml-auto">{navigation}</div>
-            <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
+            <div className="hidden md:block">
+              <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
+            </div>
+            {mobileNavigation}
           </div>
         )}
       </header>
