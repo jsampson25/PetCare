@@ -2,6 +2,7 @@ import { Alert } from '@petcare/ui/alert';
 import { Button } from '@petcare/ui/button';
 import { Card } from '@petcare/ui/card';
 import { Field } from '@petcare/ui/field';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
@@ -11,7 +12,9 @@ import {
   addPriceRate,
   createPricingBundle,
   createPricingRevision,
+  createStarterPricingBundle,
   publishPricingBundle,
+  saveStarterRates,
 } from './actions';
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 export default async function PricingSettingsPage({
@@ -22,14 +25,16 @@ export default async function PricingSettingsPage({
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('pricing.view')) redirect('/denied');
   const parameters = await searchParams;
+  const isOnboarding = parameters.onboarding === '1';
   const supabase = await createSupabaseServerClient();
   const [
     { data: locations },
     { data: priceBooks },
     { data: priceVersions },
     { data: policies },
-    { data: serviceVersions },
+    { data: allServiceVersions },
     { data: rates },
+    { data: services },
   ] = await Promise.all([
     supabase
       .from('locations')
@@ -57,13 +62,34 @@ export default async function PricingSettingsPage({
       .from('service_versions')
       .select('id,service_id,customer_name,version_number,status')
       .eq('business_id', context.businessId)
-      .eq('status', 'published'),
+      .in('status', ['draft', 'published'])
+      .order('version_number', { ascending: false }),
     supabase
       .from('price_rate_rules')
       .select('id,price_book_version_id,service_version_id,charge_unit,amount_minor,label')
       .eq('business_id', context.businessId),
+    supabase
+      .from('services')
+      .select('id,category,internal_name,status')
+      .eq('business_id', context.businessId)
+      .order('display_order'),
   ]);
   const canManage = context.permissions.has('pricing.manage');
+  const serviceVersions = (allServiceVersions ?? []).filter(
+    (version) => version.status === 'published',
+  );
+  const latestVersionByService = new Map<string, NonNullable<typeof allServiceVersions>[number]>();
+  for (const version of allServiceVersions ?? []) {
+    if (!latestVersionByService.has(version.service_id)) {
+      latestVersionByService.set(version.service_id, version);
+    }
+  }
+  const starterServices = (services ?? [])
+    .map((service) => ({
+      ...service,
+      version: latestVersionByService.get(service.id),
+    }))
+    .filter((service) => service.version);
   const drafts = priceVersions?.filter((item) => item.status === 'draft') ?? [];
   const draftPolicies = policies?.filter((item) => item.status === 'draft') ?? [];
   const publishedPrices = priceVersions?.filter((item) => item.status === 'published') ?? [];
@@ -88,10 +114,202 @@ export default async function PricingSettingsPage({
           {parameters.notice}
         </Alert>
       ) : null}
+      {isOnboarding && canManage ? (
+        <section className="overflow-hidden rounded-[2rem] border border-[#c9dcf7] bg-white shadow-[0_22px_65px_rgba(37,99,235,.1)]">
+          <div className="border-b border-[#dbe7f5] bg-gradient-to-r from-[#eff6ff] via-white to-[#e8f5ff] p-6 sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2563eb]">
+                  Guided setup · Step 3
+                </p>
+                <h2 className="mt-2 text-2xl font-black tracking-[-.03em] text-[#0b1f3a]">
+                  Set your starting prices
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[#48617f]">
+                  Enter the prices customers understand. Roventra handles cents, percentages, and
+                  calculation rules behind the scenes.
+                </p>
+              </div>
+              <div className="min-w-40">
+                <div className="flex items-center justify-between text-xs font-bold text-[#48617f]">
+                  <span>Setup progress</span>
+                  <span>65%</span>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#dbeafe]">
+                  <div className="h-full w-[65%] rounded-full bg-[#2563eb]" />
+                </div>
+              </div>
+            </div>
+          </div>
+          {!drafts.length && locations?.length ? (
+            <form action={createStarterPricingBundle} className="p-6 sm:p-8">
+              <input name="locationId" type="hidden" value={locations[0].id} />
+              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                <Field
+                  defaultValue="25"
+                  hint="Enter 0 if no deposit is required."
+                  label="Booking deposit (%)"
+                  max="100"
+                  min="0"
+                  name="depositPercent"
+                  required
+                  step="0.01"
+                  type="number"
+                />
+                <Field
+                  defaultValue="24"
+                  hint="How far ahead customers must cancel."
+                  label="Cancellation notice (hours)"
+                  max="720"
+                  min="0"
+                  name="cancellationHours"
+                  required
+                  type="number"
+                />
+                <Field
+                  defaultValue="25.00"
+                  label="Late cancellation fee ($)"
+                  min="0"
+                  name="cancellationFee"
+                  required
+                  step="0.01"
+                  type="number"
+                />
+                <Field
+                  defaultValue="50.00"
+                  label="No-show fee ($)"
+                  min="0"
+                  name="noShowFee"
+                  required
+                  step="0.01"
+                  type="number"
+                />
+                <Field
+                  defaultValue="0"
+                  hint="Confirm the correct rate with your tax professional."
+                  label="Sales tax (%)"
+                  max="25"
+                  min="0"
+                  name="taxPercent"
+                  required
+                  step="0.01"
+                  type="number"
+                />
+              </div>
+              <div className="mt-6 flex flex-col-reverse justify-between gap-3 border-t border-[#dbe7f5] pt-6 sm:flex-row sm:items-center">
+                <Link
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-sm font-bold text-[#35506f] hover:bg-[#f1f6fd]"
+                  href="/app/settings/services?onboarding=1"
+                >
+                  ← Back to services
+                </Link>
+                <Button type="submit">Save policy and continue</Button>
+              </div>
+            </form>
+          ) : null}
+          {drafts.length && locations?.length && starterServices.length ? (
+            <form action={saveStarterRates} className="p-6 sm:p-8">
+              <input name="locationId" type="hidden" value={locations[0].id} />
+              <input name="priceVersionId" type="hidden" value={drafts[0].id} />
+              <div className="grid gap-4 md:grid-cols-2">
+                {starterServices.map((service) => {
+                  const unit =
+                    service.category === 'boarding'
+                      ? 'night'
+                      : service.category === 'daycare'
+                        ? 'day'
+                        : 'appointment';
+                  const existingRate = rates?.find(
+                    (rate) =>
+                      rate.price_book_version_id === drafts[0].id &&
+                      rate.service_version_id === service.version?.id,
+                  );
+                  return (
+                    <div
+                      className="rounded-2xl border border-[#c9dcf7] bg-[#f8fbff] p-5"
+                      key={service.id}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-lg font-black text-[#0b1f3a]">
+                            {service.version?.customer_name}
+                          </p>
+                          <p className="mt-1 text-sm capitalize text-[#526984]">per {unit}</p>
+                        </div>
+                        {existingRate ? (
+                          <span className="rounded-full bg-[#e4f7ed] px-3 py-1 text-xs font-bold text-[#14724a]">
+                            ${(existingRate.amount_minor / 100).toFixed(2)} saved
+                          </span>
+                        ) : null}
+                      </div>
+                      {existingRate ? null : (
+                        <div className="mt-4">
+                          <label
+                            className="block text-sm font-bold text-[#0b1f3a]"
+                            htmlFor={`rate-${service.version?.id}`}
+                          >
+                            Price ($)
+                          </label>
+                          <div className="relative mt-2">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-[#526984]">
+                              $
+                            </span>
+                            <input
+                              className="min-h-12 w-full rounded-xl border border-[#9dbce5] bg-white pl-8 pr-4 text-lg font-bold outline-none focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]"
+                              id={`rate-${service.version?.id}`}
+                              min="0"
+                              name={`rate:${service.version?.id}:${unit}`}
+                              placeholder="0.00"
+                              required
+                              step="0.01"
+                              type="number"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-6 flex flex-col-reverse justify-between gap-3 border-t border-[#dbe7f5] pt-6 sm:flex-row sm:items-center">
+                <Link
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-sm font-bold text-[#35506f] hover:bg-[#f1f6fd]"
+                  href="/app/settings/services?onboarding=1"
+                >
+                  ← Back to services
+                </Link>
+                {starterServices.some(
+                  (service) =>
+                    !rates?.some(
+                      (rate) =>
+                        rate.price_book_version_id === drafts[0].id &&
+                        rate.service_version_id === service.version?.id,
+                    ),
+                ) ? (
+                  <Button type="submit">Save service prices</Button>
+                ) : (
+                  <Link
+                    className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#2563eb] px-5 text-sm font-bold text-white transition hover:bg-[#1d4ed8]"
+                    href="/app/settings/services?onboarding=1"
+                  >
+                    Continue to capacity setup →
+                  </Link>
+                )}
+              </div>
+            </form>
+          ) : null}
+        </section>
+      ) : null}
       {canManage && locations?.length ? (
         <Card
-          title="Create a draft pricing bundle"
-          description="Creates a price-book version and matching location policy/agreement version."
+          title={
+            isOnboarding ? 'Advanced pricing and policy setup' : 'Create a draft pricing bundle'
+          }
+          description={
+            isOnboarding
+              ? 'Use these controls when your policies need more detailed configuration.'
+              : 'Creates a price-book version and matching location policy/agreement version.'
+          }
         >
           <form action={createPricingBundle} className="grid gap-4 md:grid-cols-3">
             <label className="text-sm font-bold">

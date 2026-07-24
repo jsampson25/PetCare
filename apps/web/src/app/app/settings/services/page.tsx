@@ -211,7 +211,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
                 {(services ?? []).length ? (
                   <Link
                     className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#b9cce6] bg-white px-5 text-sm font-bold text-[#0b1f3a] hover:bg-[#f5f9ff]"
-                    href="/app/settings/pricing"
+                    href="/app/settings/pricing?onboarding=1"
                   >
                     Continue to pricing
                   </Link>
