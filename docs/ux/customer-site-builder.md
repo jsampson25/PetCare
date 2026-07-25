@@ -160,3 +160,14 @@ Draft changes appear only in authenticated preview. Publication is atomic: the w
 4. Build the structured section editor with preview, publish, and rollback.
 5. Add custom pages and navigation management.
 6. Add additional layout families using the same section and token contracts.
+
+## Current editor behavior
+
+- Theme discovery lives on a dedicated theme-library route rather than inside the long content form.
+- Every catalog card includes a large composition preview, a full standalone demo, recommended
+  business types, style attributes, and included sections.
+- **Try theme** returns to the editor with an unsaved trial selection. It does not update the tenant
+  website record, the draft preview, or the published website until the owner explicitly saves the
+  website draft.
+- The editor clearly identifies saved selections and unsaved trials and retains content-safe theme
+  switching.

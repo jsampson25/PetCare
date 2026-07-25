@@ -21,6 +21,7 @@ import {
 import { WebsiteCustomPagesEditor, type WebsiteCustomPage } from './website-custom-pages-editor';
 import { WebsiteMediaEditor, type WebsiteMedia } from './website-media-editor';
 import { WebsiteStylePicker } from './website-style-picker';
+import { resolveWebsiteThemeSelection, type WebsiteStyleKey } from './website-theme-catalog';
 type SP = Promise<Record<string, string | string[] | undefined>>;
 export default async function WebsiteSettingsPage({ searchParams }: { searchParams: SP }) {
   const context = await resolveBusinessContext();
@@ -62,6 +63,12 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
   ]);
   const c = (site?.draft_content ?? {}) as Record<string, unknown>;
   const b = (site?.brand_tokens ?? {}) as Record<string, unknown>;
+  const themeSelection = resolveWebsiteThemeSelection(
+    typeof q.theme === 'string' ? q.theme : undefined,
+    typeof q.template === 'string' ? q.template : undefined,
+    (site?.theme_key ?? 'modern') as WebsiteStyleKey,
+    String(c.template_key ?? 'studio-split'),
+  );
   const faq = Array.isArray(c.faqs) ? (c.faqs[0] as Record<string, string> | undefined) : undefined;
   const storedSections = Array.isArray(c.section_layout)
     ? (c.section_layout as WebsiteSection[])
@@ -177,10 +184,12 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
         </p>
       </Card>
       <Card title="Draft content" description={`Live status: ${site?.status ?? 'not configured'}`}>
+        <div id="draft-content" />
         <form action={saveWebsiteDraft} className="grid gap-4 sm:grid-cols-2">
           <WebsiteStylePicker
-            initialStyle={site?.theme_key ?? 'modern'}
-            initialTemplate={String(c.template_key ?? 'studio-split')}
+            isTrial={themeSelection.isTrial}
+            style={themeSelection.style}
+            template={themeSelection.template}
           />
           <WebsiteSectionEditor initialSections={storedSections} />
           <WebsiteMediaEditor
