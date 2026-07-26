@@ -260,7 +260,14 @@ export default async function PreviewPage({
         </div>
       </header>
 
-      <section className="relative overflow-hidden" id="top">
+      <section
+        aria-label="Edit homepage hero section"
+        className="relative cursor-pointer overflow-hidden outline-none transition-shadow focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-500 data-[preview-selected=true]:ring-4 data-[preview-selected=true]:ring-inset data-[preview-selected=true]:ring-blue-500"
+        data-preview-section="hero"
+        id="top"
+        role="button"
+        tabIndex={0}
+      >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_18%,color-mix(in_srgb,var(--tenant-accent)_16%,transparent),transparent_28rem)]" />
         <div
           className={`relative mx-auto grid max-w-7xl gap-14 px-6 py-20 sm:py-28 ${presentation.heroGrid}`}
@@ -342,8 +349,12 @@ export default async function PreviewPage({
 
       {visibleSections.has('services') ? (
         <section
-          className={`border-y border-slate-200/70 bg-white ${presentation.section}`}
+          aria-label="Edit services section"
+          className={`cursor-pointer border-y border-slate-200/70 bg-white outline-none transition-shadow focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-500 data-[preview-selected=true]:ring-4 data-[preview-selected=true]:ring-inset data-[preview-selected=true]:ring-blue-500 ${presentation.section}`}
+          data-preview-section="services"
           id="services"
+          role="button"
+          tabIndex={0}
         >
           <div className="mx-auto max-w-7xl px-6">
             <div className="flex flex-wrap items-end justify-between gap-6">
@@ -418,7 +429,14 @@ export default async function PreviewPage({
       ) : null}
 
       {visibleSections.has('about') ? (
-        <section className={`px-6 ${presentation.section}`} id="about">
+        <section
+          aria-label="Edit about section"
+          className={`cursor-pointer px-6 outline-none transition-shadow focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-500 data-[preview-selected=true]:ring-4 data-[preview-selected=true]:ring-inset data-[preview-selected=true]:ring-blue-500 ${presentation.section}`}
+          data-preview-section="about"
+          id="about"
+          role="button"
+          tabIndex={0}
+        >
           <div
             className={`mx-auto grid max-w-7xl overflow-hidden ${presentation.about} ${presentation.aboutGrid}`}
           >
@@ -450,7 +468,13 @@ export default async function PreviewPage({
         </section>
       ) : null}
 
-      <footer className="border-t bg-white py-10">
+      <footer
+        aria-label="Edit contact section"
+        className="cursor-pointer border-t bg-white py-10 outline-none transition-shadow focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-500 data-[preview-selected=true]:ring-4 data-[preview-selected=true]:ring-inset data-[preview-selected=true]:ring-blue-500"
+        data-preview-section="contact"
+        role="button"
+        tabIndex={0}
+      >
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-6">
           <p className="font-black">{site.business.name}</p>
           <p className="text-sm text-slate-500">

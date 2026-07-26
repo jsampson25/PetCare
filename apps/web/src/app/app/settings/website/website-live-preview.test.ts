@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   createWebsiteLivePreviewMessage,
+  createWebsitePreviewSectionMessage,
   parseWebsiteLivePreviewMessage,
+  parseWebsitePreviewSectionMessage,
   WEBSITE_PREVIEW_MESSAGE_TYPE,
 } from './website-live-preview';
 
@@ -38,6 +40,18 @@ describe('website live preview messages', () => {
       parseWebsiteLivePreviewMessage({
         ...valid,
         payload: { ...valid.payload, primary: 'red' },
+      }),
+    ).toBeNull();
+  });
+
+  it('accepts only approved preview section selections', () => {
+    expect(parseWebsitePreviewSectionMessage(createWebsitePreviewSectionMessage('about'))).toEqual(
+      createWebsitePreviewSectionMessage('about'),
+    );
+    expect(
+      parseWebsitePreviewSectionMessage({
+        type: 'petcare.website-preview.section',
+        payload: { section: 'billing' },
       }),
     ).toBeNull();
   });

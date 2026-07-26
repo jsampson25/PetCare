@@ -3,8 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   createWebsiteLivePreviewMessage,
+  createWebsitePreviewSectionMessage,
+  parseWebsitePreviewSectionMessage,
   type WebsiteLivePreviewMessage,
   WEBSITE_PREVIEW_READY_MESSAGE_TYPE,
+  type WebsitePreviewSection,
 } from './website-live-preview';
 
 type PreviewDevice = 'desktop' | 'tablet' | 'mobile';
@@ -25,13 +28,41 @@ export function WebsiteEditorCanvas({
   const [device, setDevice] = useState<PreviewDevice>('desktop');
   const [refreshKey, setRefreshKey] = useState(0);
   const [hasUnsavedPreview, setHasUnsavedPreview] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<WebsitePreviewSection | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const latestMessageRef = useRef<WebsiteLivePreviewMessage | null>(null);
+  const selectedSectionRef = useRef<WebsitePreviewSection | null>(null);
   const selectedDevice = previewDevices.find((item) => item.key === device) ?? previewDevices[0];
 
   function sendLatestPreview() {
     if (!latestMessageRef.current) return;
     iframeRef.current?.contentWindow?.postMessage(latestMessageRef.current, window.location.origin);
+  }
+
+  function sendSelectedSection(section = selectedSectionRef.current) {
+    if (!section) return;
+    iframeRef.current?.contentWindow?.postMessage(
+      createWebsitePreviewSectionMessage(section),
+      window.location.origin,
+    );
+  }
+
+  function focusEditorSection(section: WebsitePreviewSection) {
+    selectedSectionRef.current = section;
+    setSelectedSection(section);
+    document.querySelectorAll<HTMLElement>('[data-editor-section]').forEach((element) => {
+      if (element.dataset.editorSection === section) {
+        element.dataset.editorSelected = 'true';
+      } else {
+        delete element.dataset.editorSelected;
+      }
+    });
+
+    const target = document.querySelector<HTMLElement>(`[data-editor-section="${section}"]`);
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target
+      ?.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, select, button')
+      ?.focus({ preventScroll: true });
   }
 
   useEffect(() => {
@@ -54,6 +85,17 @@ export function WebsiteEditorCanvas({
 
     function receivePreviewReady(event: MessageEvent) {
       if (
+        event.origin === window.location.origin &&
+        event.source === iframeRef.current?.contentWindow
+      ) {
+        const sectionMessage = parseWebsitePreviewSectionMessage(event.data);
+        if (sectionMessage) {
+          focusEditorSection(sectionMessage.payload.section);
+          return;
+        }
+      }
+
+      if (
         event.origin !== window.location.origin ||
         event.source !== iframeRef.current?.contentWindow ||
         !event.data ||
@@ -63,6 +105,7 @@ export function WebsiteEditorCanvas({
         return;
       }
       sendLatestPreview();
+      sendSelectedSection();
     }
 
     document.addEventListener('input', scheduleSync);
@@ -90,6 +133,9 @@ export function WebsiteEditorCanvas({
               </div>
               <p className="mt-1 text-xs leading-5 text-slate-400">
                 Text and brand colors update as you type. Save to keep changes and refresh layouts.
+              </p>
+              <p className="mt-1 text-xs font-bold text-blue-300">
+                Click a website section to edit its matching controls.
               </p>
             </div>
             <button
@@ -153,6 +199,11 @@ export function WebsiteEditorCanvas({
           <span>
             {selectedDevice.label} · {hasUnsavedPreview ? 'unsaved preview' : 'saved draft'}
           </span>
+          {selectedSection ? (
+            <span className="rounded-full bg-blue-400/15 px-2.5 py-1 font-black text-blue-200">
+              Editing {selectedSection}
+            </span>
+          ) : null}
           {siteStatus === 'published' && publicSlug ? (
             <a
               className="font-black text-blue-300 hover:text-blue-200"

@@ -178,3 +178,6 @@ Draft changes appear only in authenticated preview. Publication is atomic: the w
   before saving through a same-origin, allowlisted message contract. Unsaved values are never
   written to the tenant website record. Structural changes such as theme selection, section order,
   visibility, and media placement still require saving and refreshing the server-rendered preview.
+- Hero, services, about, and contact preview regions are keyboard selectable. Selection is
+  synchronized through the same allowlisted message boundary, highlighted in both surfaces, and
+  moves focus to the matching grouped editor controls.

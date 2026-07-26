@@ -1,5 +1,8 @@
 export const WEBSITE_PREVIEW_MESSAGE_TYPE = 'petcare.website-preview.update';
 export const WEBSITE_PREVIEW_READY_MESSAGE_TYPE = 'petcare.website-preview.ready';
+export const WEBSITE_PREVIEW_SECTION_MESSAGE_TYPE = 'petcare.website-preview.section';
+
+export type WebsitePreviewSection = 'hero' | 'services' | 'about' | 'contact';
 
 export type WebsiteLivePreviewDraft = {
   about: string;
@@ -16,7 +19,13 @@ export type WebsiteLivePreviewMessage = {
   payload: WebsiteLivePreviewDraft;
 };
 
+export type WebsitePreviewSectionMessage = {
+  type: typeof WEBSITE_PREVIEW_SECTION_MESSAGE_TYPE;
+  payload: { section: WebsitePreviewSection };
+};
+
 const colorPattern = /^#[0-9a-f]{6}$/i;
+const previewSections: WebsitePreviewSection[] = ['hero', 'services', 'about', 'contact'];
 
 function stringValue(formData: FormData, name: string) {
   const value = formData.get(name);
@@ -60,4 +69,22 @@ export function parseWebsiteLivePreviewMessage(value: unknown): WebsiteLivePrevi
   if (typeof payload.accent !== 'string' || !colorPattern.test(payload.accent)) return null;
 
   return candidate as WebsiteLivePreviewMessage;
+}
+
+export function createWebsitePreviewSectionMessage(
+  section: WebsitePreviewSection,
+): WebsitePreviewSectionMessage {
+  return { type: WEBSITE_PREVIEW_SECTION_MESSAGE_TYPE, payload: { section } };
+}
+
+export function parseWebsitePreviewSectionMessage(
+  value: unknown,
+): WebsitePreviewSectionMessage | null {
+  if (!value || typeof value !== 'object') return null;
+  const candidate = value as Partial<WebsitePreviewSectionMessage>;
+  if (candidate.type !== WEBSITE_PREVIEW_SECTION_MESSAGE_TYPE || !candidate.payload) return null;
+  const section = (candidate.payload as { section?: unknown }).section;
+  return typeof section === 'string' && previewSections.includes(section as WebsitePreviewSection)
+    ? (candidate as WebsitePreviewSectionMessage)
+    : null;
 }

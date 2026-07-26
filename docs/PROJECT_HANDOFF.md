@@ -183,7 +183,7 @@ visual, guided experience:
 - [x] Add a persistent saved-draft canvas beside the editing controls
 - [x] Stream unsaved text and brand-color changes into the canvas before saving
 - [ ] Stream structural changes such as theme, section order, visibility, and media placement
-- Select a section directly from the canvas
+- [x] Select a section directly from the canvas and focus its matching editor group
 - Replace long stacked forms with a focused inspector panel
 - Add undo, redo, autosave status, saved state, and unsaved-change protection
 - Add true drag-and-drop section ordering on desktop and accessible keyboard reordering

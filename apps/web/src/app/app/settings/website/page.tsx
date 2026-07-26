@@ -24,6 +24,8 @@ import { WebsiteMediaEditor, type WebsiteMedia } from './website-media-editor';
 import { WebsiteStylePicker } from './website-style-picker';
 import { resolveWebsiteThemeSelection, type WebsiteStyleKey } from './website-theme-catalog';
 type SP = Promise<Record<string, string | string[] | undefined>>;
+const editorSectionClass =
+  'scroll-mt-6 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 transition sm:col-span-2 data-[editor-selected=true]:border-blue-500 data-[editor-selected=true]:bg-blue-50/60 data-[editor-selected=true]:ring-4 data-[editor-selected=true]:ring-blue-100';
 export default async function WebsiteSettingsPage({ searchParams }: { searchParams: SP }) {
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('website.edit')) redirect('/denied');
@@ -166,7 +168,12 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
               style={themeSelection.style}
               template={themeSelection.template}
             />
-            <WebsiteSectionEditor initialSections={storedSections} />
+            <div className={editorSectionClass} data-editor-section="services">
+              <WebsiteSectionEditor initialSections={storedSections} />
+              <p className="mt-3 text-xs text-[var(--text-secondary)]">
+                Service names and descriptions come from Business settings → Services.
+              </p>
+            </div>
             <WebsiteMediaEditor
               initialAboutMediaId={aboutMedia?.id ?? ''}
               initialHeroMediaId={heroMedia?.id ?? ''}
@@ -175,77 +182,112 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
               media={mediaWithUrls}
             />
             <WebsiteCustomPagesEditor initialPages={customPages} />
-            <Field
-              defaultValue={String(b.primary ?? '#23664f')}
-              label="Primary color"
-              name="primary"
-              type="color"
-            />
-            <Field
-              defaultValue={String(b.accent ?? '#d97745')}
-              label="Accent color"
-              name="accent"
-              type="color"
-            />
-            <Field
-              defaultValue={String(c.hero_title ?? '')}
-              label="Homepage headline"
-              name="heroTitle"
-              required
-            />
-            <label className="text-sm font-bold sm:col-span-2">
-              Homepage introduction
-              <textarea
-                className="mt-2 min-h-24 w-full rounded-lg border p-3"
-                defaultValue={String(c.hero_body ?? '')}
-                name="heroBody"
-                required
+            <div className={editorSectionClass} data-editor-section="hero">
+              <h3 className="text-base font-black text-[#0b1f3a]">Homepage hero</h3>
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                Set the first message and brand colors customers see.
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <Field
+                  defaultValue={String(b.primary ?? '#23664f')}
+                  label="Primary color"
+                  name="primary"
+                  type="color"
+                />
+                <Field
+                  defaultValue={String(b.accent ?? '#d97745')}
+                  label="Accent color"
+                  name="accent"
+                  type="color"
+                />
+                <Field
+                  defaultValue={String(c.hero_title ?? '')}
+                  label="Homepage headline"
+                  name="heroTitle"
+                  required
+                />
+                <label className="text-sm font-bold sm:col-span-2">
+                  Homepage introduction
+                  <textarea
+                    className="mt-2 min-h-24 w-full rounded-lg border p-3"
+                    defaultValue={String(c.hero_body ?? '')}
+                    name="heroBody"
+                    required
+                  />
+                </label>
+              </div>
+            </div>
+            <div className={editorSectionClass} data-editor-section="about">
+              <h3 className="text-base font-black text-[#0b1f3a]">About section</h3>
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                Explain your care philosophy and why families should trust your team.
+              </p>
+              <label className="mt-4 block text-sm font-bold">
+                About us
+                <textarea
+                  className="mt-2 min-h-32 w-full rounded-lg border p-3"
+                  defaultValue={String(c.about ?? '')}
+                  name="about"
+                  required
+                />
+              </label>
+            </div>
+            <div className={editorSectionClass} data-editor-section="contact">
+              <h3 className="text-base font-black text-[#0b1f3a]">Contact, FAQ, and policies</h3>
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                Give customers clear answers and a reliable way to reach the business.
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <Field
+                  defaultValue={faq?.question ?? ''}
+                  label="FAQ question"
+                  name="faqQuestion"
+                  required
+                />
+                <Field
+                  defaultValue={faq?.answer ?? ''}
+                  label="FAQ answer"
+                  name="faqAnswer"
+                  required
+                />
+                <label className="text-sm font-bold sm:col-span-2">
+                  Policies summary
+                  <textarea
+                    className="mt-2 min-h-24 w-full rounded-lg border p-3"
+                    defaultValue={String(c.policies ?? '')}
+                    name="policies"
+                    required
+                  />
+                </label>
+                <Field
+                  defaultValue={String(c.contact_email ?? '')}
+                  label="Public email"
+                  name="contactEmail"
+                  required
+                  type="email"
+                />
+                <Field
+                  defaultValue={String(c.contact_phone ?? '')}
+                  label="Public phone"
+                  name="contactPhone"
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid gap-4 rounded-2xl border border-slate-200 p-4 sm:col-span-2 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <h3 className="text-base font-black text-[#0b1f3a]">Search preview</h3>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                  Control how the homepage can appear in search results.
+                </p>
+              </div>
+              <Field defaultValue={String(c.seo_title ?? '')} label="SEO title" name="seoTitle" />
+              <Field
+                defaultValue={String(c.seo_description ?? '')}
+                label="SEO description"
+                name="seoDescription"
               />
-            </label>
-            <label className="text-sm font-bold sm:col-span-2">
-              About us
-              <textarea
-                className="mt-2 min-h-32 w-full rounded-lg border p-3"
-                defaultValue={String(c.about ?? '')}
-                name="about"
-                required
-              />
-            </label>
-            <Field
-              defaultValue={faq?.question ?? ''}
-              label="FAQ question"
-              name="faqQuestion"
-              required
-            />
-            <Field defaultValue={faq?.answer ?? ''} label="FAQ answer" name="faqAnswer" required />
-            <label className="text-sm font-bold sm:col-span-2">
-              Policies summary
-              <textarea
-                className="mt-2 min-h-24 w-full rounded-lg border p-3"
-                defaultValue={String(c.policies ?? '')}
-                name="policies"
-                required
-              />
-            </label>
-            <Field
-              defaultValue={String(c.contact_email ?? '')}
-              label="Public email"
-              name="contactEmail"
-              required
-              type="email"
-            />
-            <Field
-              defaultValue={String(c.contact_phone ?? '')}
-              label="Public phone"
-              name="contactPhone"
-              required
-            />
-            <Field defaultValue={String(c.seo_title ?? '')} label="SEO title" name="seoTitle" />
-            <Field
-              defaultValue={String(c.seo_description ?? '')}
-              label="SEO description"
-              name="seoDescription"
-            />
+            </div>
             <div className="sm:col-span-2">
               <Button type="submit">Save website draft</Button>
             </div>
