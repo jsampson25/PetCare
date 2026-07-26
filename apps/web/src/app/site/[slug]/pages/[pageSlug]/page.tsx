@@ -52,6 +52,9 @@ export default async function TenantCustomPage({
   const result = await getPage(slug, pageSlug);
   if (!result) notFound();
   const { site, page } = result;
+  const navigationPages = (site.content.custom_pages ?? [])
+    .filter((candidate) => candidate.showInNavigation)
+    .slice(0, 4);
   const centeredHeader = site.theme_key === 'modern';
   const supabase = await createSupabaseServerClient();
   const logoMedia = site.content.logo_media;
@@ -87,11 +90,7 @@ export default async function TenantCustomPage({
               : 'flex min-h-20 items-center justify-between'
           }`}
         >
-          {centeredHeader ? (
-            <a className="hidden font-bold md:block" href={`/site/${site.business.slug}`}>
-              Home
-            </a>
-          ) : null}
+          {centeredHeader ? <span aria-hidden="true" className="hidden md:block" /> : null}
           <a
             className={`flex items-center gap-3 font-black ${centeredHeader ? 'flex-col gap-1 text-center' : ''}`}
             href={`/site/${site.business.slug}`}
@@ -128,6 +127,29 @@ export default async function TenantCustomPage({
             <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
           </div>
         </div>
+        <nav
+          aria-label="Business website"
+          className="mx-auto flex max-w-6xl gap-2 overflow-x-auto border-t px-6 py-2 text-sm font-bold"
+        >
+          <a
+            className="shrink-0 rounded-lg px-3 py-2 hover:bg-slate-50"
+            href={`/site/${site.business.slug}`}
+          >
+            Home
+          </a>
+          {navigationPages.map((navigationPage) => (
+            <a
+              aria-current={navigationPage.id === page.id ? 'page' : undefined}
+              className={`shrink-0 rounded-lg px-3 py-2 hover:bg-slate-50 ${
+                navigationPage.id === page.id ? 'bg-slate-100' : ''
+              }`}
+              href={`/site/${site.business.slug}/pages/${navigationPage.slug}`}
+              key={navigationPage.id}
+            >
+              {navigationPage.title}
+            </a>
+          ))}
+        </nav>
       </header>
       <article className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
         <p

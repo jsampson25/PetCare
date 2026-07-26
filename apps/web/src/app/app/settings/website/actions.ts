@@ -4,6 +4,11 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
+import {
+  maxWebsiteCustomPages,
+  maxWebsiteNavigationPages,
+  reservedWebsitePageSlugs,
+} from './website-custom-pages';
 import { isWebsiteSectionLayout } from './website-section-catalog';
 
 const websiteMediaTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
@@ -74,7 +79,7 @@ export async function saveWebsiteDraft(formData: FormData) {
       .min(2)
       .max(60)
       .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-      .refine((slug) => !['book', 'portal', 'services', 'contact'].includes(slug)),
+      .refine((slug) => !reservedWebsitePageSlugs.has(slug)),
     body: z.string().trim().min(1).max(10000),
     showInNavigation: z.boolean(),
   });
@@ -97,8 +102,11 @@ export async function saveWebsiteDraft(formData: FormData) {
     );
   const customPages = z
     .array(customPageSchema)
-    .max(10)
+    .max(maxWebsiteCustomPages)
     .refine((pages) => new Set(pages.map((page) => page.slug)).size === pages.length)
+    .refine(
+      (pages) => pages.filter((page) => page.showInNavigation).length <= maxWebsiteNavigationPages,
+    )
     .safeParse(
       typeof raw.customPages === 'string'
         ? (() => {

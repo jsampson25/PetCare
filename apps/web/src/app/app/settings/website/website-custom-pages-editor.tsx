@@ -6,20 +6,24 @@ import {
   WEBSITE_EDITOR_RESTORE_EVENT_TYPE,
   type WebsiteEditorSnapshot,
 } from './website-editor-history';
+import {
+  createUniqueWebsitePageSlug,
+  isWebsiteCustomPageList,
+  maxWebsiteCustomPages,
+  maxWebsiteNavigationPages,
+  normalizeWebsitePageSlugInput,
+  reservedWebsitePageSlugs,
+  slugifyWebsitePageTitle,
+  type WebsiteCustomPage,
+} from './website-custom-pages';
 
-export type WebsiteCustomPage = {
-  id: string;
-  title: string;
-  slug: string;
-  body: string;
-  showInNavigation: boolean;
-};
+export type { WebsiteCustomPage } from './website-custom-pages';
 
-function makePage(): WebsiteCustomPage {
+function makePage(pages: WebsiteCustomPage[]): WebsiteCustomPage {
   return {
     id: crypto.randomUUID(),
     title: 'New page',
-    slug: 'new-page',
+    slug: createUniqueWebsitePageSlug('New page', pages),
     body: '',
     showInNavigation: false,
   };
@@ -27,6 +31,7 @@ function makePage(): WebsiteCustomPage {
 
 export function WebsiteCustomPagesEditor({ initialPages }: { initialPages: WebsiteCustomPage[] }) {
   const [pages, setPages] = useState(initialPages);
+  const [announcement, setAnnouncement] = useState('');
   const pagesInputRef = useRef<HTMLInputElement>(null);
   const previousPagesRef = useRef(JSON.stringify(initialPages));
 
@@ -46,7 +51,7 @@ export function WebsiteCustomPagesEditor({ initialPages }: { initialPages: Websi
         const restored = JSON.parse(
           readWebsiteEditorSnapshotValue(snapshot, 'customPages'),
         ) as WebsiteCustomPage[];
-        if (Array.isArray(restored)) setPages(restored);
+        if (isWebsiteCustomPageList(restored)) setPages(restored);
       } catch {
         // Ignore malformed history data and preserve the current editor state.
       }
@@ -66,9 +71,21 @@ export function WebsiteCustomPagesEditor({ initialPages }: { initialPages: Websi
     setPages((current) => {
       const next = [...current];
       [next[index], next[target]] = [next[target], next[index]];
+      setAnnouncement(
+        `${next[target]?.title ?? 'Page'} moved to position ${target + 1} of ${next.length}.`,
+      );
       return next;
     });
   }
+
+  const navigationCount = pages.filter((page) => page.showInNavigation).length;
+  const slugCounts = pages.reduce(
+    (counts, page) => counts.set(page.slug, (counts.get(page.slug) ?? 0) + 1),
+    new Map<string, number>(),
+  );
+  const duplicateSlugs = new Set(
+    [...slugCounts.entries()].filter(([, count]) => count > 1).map(([slug]) => slug),
+  );
 
   return (
     <fieldset className="sm:col-span-2">
@@ -77,16 +94,45 @@ export function WebsiteCustomPagesEditor({ initialPages }: { initialPages: Websi
           <legend className="text-sm font-black">Custom pages</legend>
           <p className="mt-1 text-sm text-[var(--text-secondary)]">
             Add pages such as policies, what to bring, facility details, or first-visit guidance.
+            Page order also controls the order of custom links in your navigation.
           </p>
         </div>
         <button
           className="min-h-10 rounded-lg border border-[var(--border-default)] bg-white px-4 text-sm font-black"
-          disabled={pages.length >= 10}
-          onClick={() => setPages((current) => [...current, makePage()])}
+          disabled={pages.length >= maxWebsiteCustomPages}
+          onClick={() => setPages((current) => [...current, makePage(current)])}
           type="button"
         >
           Add custom page
         </button>
+      </div>
+      <p aria-live="polite" className="sr-only">
+        {announcement}
+      </p>
+      <div className="mt-4 rounded-xl border border-[var(--border-default)] bg-[var(--surface-subtle)] p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="font-black">Main navigation</p>
+          <p className="text-xs font-bold text-[var(--text-secondary)]">
+            {navigationCount} of {maxWebsiteNavigationPages} custom links used
+          </p>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">
+          {['Home', 'Services', 'About', 'FAQ', 'Contact'].map((label) => (
+            <span className="rounded-full border bg-white px-3 py-1.5" key={label}>
+              {label}
+            </span>
+          ))}
+          {pages
+            .filter((page) => page.showInNavigation)
+            .map((page) => (
+              <span
+                className="rounded-full bg-[var(--action-primary)] px-3 py-1.5 text-white"
+                key={page.id}
+              >
+                {page.title || 'Untitled page'}
+              </span>
+            ))}
+        </div>
       </div>
       <input name="customPages" ref={pagesInputRef} type="hidden" value={JSON.stringify(pages)} />
       <div className="mt-4 grid gap-4">
@@ -120,6 +166,7 @@ export function WebsiteCustomPagesEditor({ initialPages }: { initialPages: Websi
                   ↓
                 </button>
                 <button
+                  aria-label={`Remove ${page.title}`}
                   className="min-h-9 rounded-lg px-2 text-sm font-bold text-red-700"
                   onClick={() =>
                     setPages((current) => current.filter((item) => item.id !== page.id))
@@ -147,16 +194,43 @@ export function WebsiteCustomPagesEditor({ initialPages }: { initialPages: Websi
                   <input
                     className="min-w-0 flex-1 bg-transparent outline-none"
                     maxLength={60}
+                    onBlur={() => updatePage(page.id, { slug: slugifyWebsitePageTitle(page.slug) })}
                     onChange={(event) =>
                       updatePage(page.id, {
-                        slug: event.target.value
-                          .toLowerCase()
-                          .replace(/[^a-z0-9-]/g, '-')
-                          .replace(/-+/g, '-'),
+                        slug: normalizeWebsitePageSlugInput(event.target.value),
                       })
                     }
                     value={page.slug}
                   />
+                </span>
+                <span className="mt-2 flex items-center justify-between gap-2 text-xs font-normal">
+                  <span
+                    className={
+                      reservedWebsitePageSlugs.has(page.slug) || duplicateSlugs.has(page.slug)
+                        ? 'font-bold text-red-700'
+                        : 'text-[var(--text-secondary)]'
+                    }
+                  >
+                    {reservedWebsitePageSlugs.has(page.slug)
+                      ? 'Choose a different address; this one is reserved.'
+                      : duplicateSlugs.has(page.slug)
+                        ? 'Each page needs a unique address.'
+                        : 'Lowercase letters, numbers, and hyphens.'}
+                  </span>
+                  <button
+                    className="shrink-0 font-bold text-[var(--action-primary)]"
+                    onClick={() =>
+                      updatePage(page.id, {
+                        slug: createUniqueWebsitePageSlug(
+                          page.title,
+                          pages.filter((candidate) => candidate.id !== page.id),
+                        ),
+                      })
+                    }
+                    type="button"
+                  >
+                    Use title
+                  </button>
                 </span>
               </label>
               <label className="text-sm font-bold sm:col-span-2">
@@ -172,6 +246,7 @@ export function WebsiteCustomPagesEditor({ initialPages }: { initialPages: Websi
               <label className="flex items-center gap-3 text-sm font-bold sm:col-span-2">
                 <input
                   checked={page.showInNavigation}
+                  disabled={!page.showInNavigation && navigationCount >= maxWebsiteNavigationPages}
                   onChange={(event) =>
                     updatePage(page.id, { showInNavigation: event.target.checked })
                   }

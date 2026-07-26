@@ -15,6 +15,7 @@ import {
 } from './actions';
 import { defaultWebsiteSections, WebsiteSectionEditor } from './website-section-editor';
 import { WebsiteCustomPagesEditor, type WebsiteCustomPage } from './website-custom-pages-editor';
+import { isWebsiteCustomPageList } from './website-custom-pages';
 import { WebsiteEditorCanvas } from './website-editor-canvas';
 import { WebsiteEditorHistoryControls } from './website-editor-history-controls';
 import { WebsiteMediaEditor, type WebsiteMedia } from './website-media-editor';
@@ -73,7 +74,9 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
   const storedSections = isWebsiteSectionLayout(c.section_layout)
     ? c.section_layout
     : defaultWebsiteSections;
-  const customPages = Array.isArray(c.custom_pages) ? (c.custom_pages as WebsiteCustomPage[]) : [];
+  const customPages: WebsiteCustomPage[] = isWebsiteCustomPageList(c.custom_pages)
+    ? c.custom_pages
+    : [];
   const heroMedia = c.hero_media as { id?: string; focal_x?: number; focal_y?: number } | undefined;
   const logoMedia = c.logo_media as { id?: string } | undefined;
   const servicesMedia = c.services_media as
