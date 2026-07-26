@@ -178,8 +178,11 @@ Draft changes appear only in authenticated preview. Publication is atomic: the w
   before saving through a same-origin, allowlisted message contract. Unsaved values are never
   written to the tenant website record.
 - Section order and visibility changes also stream into the canvas, and the authenticated saved
-  preview uses the same persisted order on first render. Theme selection and media placement still
-  require saving and refreshing the server-rendered preview.
+  preview uses the same persisted order on first render.
+- Logo, hero, services, and about-image selections stream from an allowlisted tenant media catalog;
+  removing an unsaved selection restores the correct visual fallback. Arbitrary form-provided URLs
+  are never accepted by the preview contract. Theme selection still requires saving and refreshing
+  the server-rendered preview.
 - Hero, services, about, and contact preview regions are keyboard selectable. Selection is
   synchronized through the same allowlisted message boundary, highlighted in both surfaces, and
   moves focus to the matching grouped editor controls.

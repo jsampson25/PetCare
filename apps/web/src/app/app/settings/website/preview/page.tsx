@@ -229,6 +229,7 @@ export default async function PreviewPage({
               className={`grid size-11 place-items-center text-xs font-black ${
                 logoImageUrl ? 'bg-contain bg-center bg-no-repeat' : 'rounded-2xl shadow-sm'
               }`}
+              data-preview-media="logo"
               role={logoImageUrl ? 'img' : undefined}
               style={{
                 backgroundColor: logoImageUrl ? 'transparent' : 'var(--tenant-primary)',
@@ -236,7 +237,7 @@ export default async function PreviewPage({
                 color: logoImageUrl ? 'transparent' : 'var(--action-primary-text)',
               }}
             >
-              {logoImageUrl ? null : site.business.name.slice(0, 2).toUpperCase()}
+              {site.business.name.slice(0, 2).toUpperCase()}
             </span>
             <span>
               <span className="block text-lg font-black tracking-tight">{site.business.name}</span>
@@ -326,20 +327,24 @@ export default async function PreviewPage({
             className={`relative min-h-[25rem] overflow-hidden border border-white bg-white shadow-[0_30px_90px_rgba(25,25,35,.12)] ${presentation.image} ${presentation.heroImage}`}
             aria-label={heroImageUrl ? heroMedia?.alt_text : undefined}
             role={heroImageUrl ? 'img' : undefined}
+            data-preview-media-container="hero"
           >
             <div
               className="absolute inset-0 opacity-90"
+              data-preview-media="hero"
               style={{
                 background: heroImageUrl
                   ? `linear-gradient(0deg, rgba(0,0,0,.28), rgba(0,0,0,0)), url(${heroImageUrl}) center / cover`
                   : 'linear-gradient(135deg, color-mix(in srgb, var(--tenant-primary) 12%, white), color-mix(in srgb, var(--tenant-accent) 22%, white))',
               }}
             />
-            {!heroImageUrl ? (
-              <div className="absolute left-1/2 top-1/2 grid size-40 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/70 text-7xl shadow-xl backdrop-blur">
-                🐾
-              </div>
-            ) : null}
+            <div
+              className="absolute left-1/2 top-1/2 grid size-40 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/70 text-7xl shadow-xl backdrop-blur"
+              data-preview-media-placeholder="hero"
+              hidden={Boolean(heroImageUrl)}
+            >
+              🐾
+            </div>
             <div className="absolute inset-x-6 bottom-6 grid grid-cols-3 gap-3 rounded-2xl bg-white/90 p-4 text-left shadow-xl backdrop-blur sm:inset-x-auto sm:right-6 sm:w-[24rem]">
               {[
                 ['8:00', 'Welcome'],
@@ -386,14 +391,14 @@ export default async function PreviewPage({
                 pickup.
               </p>
             </div>
-            {servicesImageUrl ? (
-              <div
-                aria-label={servicesMedia?.alt_text}
-                className="mt-10 min-h-64 rounded-[2rem] bg-cover bg-center shadow-lg"
-                role="img"
-                style={{ backgroundImage: `url(${servicesImageUrl})` }}
-              />
-            ) : null}
+            <div
+              aria-label={servicesImageUrl ? servicesMedia?.alt_text : undefined}
+              className="mt-10 min-h-64 rounded-[2rem] bg-cover bg-center shadow-lg"
+              data-preview-media="services"
+              hidden={!servicesImageUrl}
+              role={servicesImageUrl ? 'img' : undefined}
+              style={{ backgroundImage: servicesImageUrl ? `url(${servicesImageUrl})` : undefined }}
+            />
             <div className={`mt-12 grid gap-5 ${presentation.serviceGrid}`}>
               {(site.services.length
                 ? site.services
@@ -456,6 +461,7 @@ export default async function PreviewPage({
             <div
               aria-label={aboutImageUrl ? aboutMedia?.alt_text : undefined}
               className="min-h-72"
+              data-preview-media="about"
               role={aboutImageUrl ? 'img' : undefined}
               style={{
                 background: aboutImageUrl

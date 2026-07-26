@@ -183,7 +183,8 @@ visual, guided experience:
 - [x] Add a persistent saved-draft canvas beside the editing controls
 - [x] Stream unsaved text and brand-color changes into the canvas before saving
 - [x] Stream section order and visibility changes into the preview before saving
-- [ ] Stream unsaved theme and media-placement changes into the preview
+- [x] Stream unsaved media-placement changes into the preview
+- [ ] Stream unsaved theme changes into the preview
 - [x] Select a section directly from the canvas and focus its matching editor group
 - [x] Replace homepage section fields with a focused inspector panel
 - Add undo, redo, autosave status, saved state, and unsaved-change protection

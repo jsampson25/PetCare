@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export type WebsiteMedia = {
   id: string;
@@ -40,6 +40,15 @@ export function WebsiteMediaEditor({
     about: initialAboutMediaId,
   });
   const [draggedMediaId, setDraggedMediaId] = useState<string | null>(null);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const previousSelectionRef = useRef(JSON.stringify(selection));
+
+  useEffect(() => {
+    const serialized = JSON.stringify(selection);
+    if (serialized === previousSelectionRef.current) return;
+    previousSelectionRef.current = serialized;
+    mediaInputRef.current?.dispatchEvent(new Event('input', { bubbles: true }));
+  }, [selection]);
 
   return (
     <fieldset className="sm:col-span-2">
@@ -48,7 +57,7 @@ export function WebsiteMediaEditor({
         Drag photos into each section or use the placement buttons. Images stay available when you
         change styles and templates.
       </p>
-      <input name="logoMediaId" type="hidden" value={selection.logo} />
+      <input name="logoMediaId" ref={mediaInputRef} type="hidden" value={selection.logo} />
       <input name="heroMediaId" type="hidden" value={selection.hero} />
       <input name="servicesMediaId" type="hidden" value={selection.services} />
       <input name="aboutMediaId" type="hidden" value={selection.about} />

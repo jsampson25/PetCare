@@ -20,6 +20,7 @@ describe('website live preview messages', () => {
     formData.set('policies', 'Vaccinations are required.');
     formData.set('primary', '#123456');
     formData.set('accent', '#abcdef');
+    formData.set('heroMediaId', 'media-hero');
     formData.set(
       'sectionLayout',
       JSON.stringify([
@@ -30,7 +31,15 @@ describe('website live preview messages', () => {
       ]),
     );
 
-    expect(createWebsiteLivePreviewMessage(formData)).toEqual({
+    expect(
+      createWebsiteLivePreviewMessage(formData, [
+        {
+          id: 'media-hero',
+          publicUrl: 'https://cdn.example.com/hero.jpg',
+          alt_text: 'Dog enjoying outdoor playtime',
+        },
+      ]),
+    ).toEqual({
       type: WEBSITE_PREVIEW_MESSAGE_TYPE,
       payload: {
         about: 'Family owned and locally operated.',
@@ -41,6 +50,15 @@ describe('website live preview messages', () => {
         faqQuestion: 'What should I bring?',
         heroBody: 'Personalized care for every guest.',
         heroTitle: 'A better stay starts here',
+        media: {
+          about: null,
+          hero: {
+            altText: 'Dog enjoying outdoor playtime',
+            url: 'https://cdn.example.com/hero.jpg',
+          },
+          logo: null,
+          services: null,
+        },
         policies: 'Vaccinations are required.',
         primary: '#123456',
         sectionLayout: [
@@ -60,6 +78,19 @@ describe('website live preview messages', () => {
       parseWebsiteLivePreviewMessage({
         ...valid,
         payload: { ...valid.payload, primary: 'red' },
+      }),
+    ).toBeNull();
+
+    expect(
+      parseWebsiteLivePreviewMessage({
+        ...valid,
+        payload: {
+          ...valid.payload,
+          media: {
+            ...valid.payload.media,
+            hero: { url: 'javascript:alert(1)', altText: 'Unsafe image' },
+          },
+        },
       }),
     ).toBeNull();
 

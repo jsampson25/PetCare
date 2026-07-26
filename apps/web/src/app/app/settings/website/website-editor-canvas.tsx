@@ -7,6 +7,7 @@ import {
   isWebsitePreviewSection,
   parseWebsitePreviewSectionMessage,
   type WebsiteLivePreviewMessage,
+  type WebsitePreviewMediaCatalogItem,
   WEBSITE_EDITOR_SECTION_EVENT_TYPE,
   WEBSITE_PREVIEW_READY_MESSAGE_TYPE,
   type WebsitePreviewSection,
@@ -21,9 +22,11 @@ const previewDevices: Array<{ key: PreviewDevice; label: string; width: string }
 ];
 
 export function WebsiteEditorCanvas({
+  media,
   publicSlug,
   siteStatus,
 }: {
+  media: WebsitePreviewMediaCatalogItem[];
   publicSlug?: string | null;
   siteStatus: string;
 }) {
@@ -71,7 +74,7 @@ export function WebsiteEditorCanvas({
     function syncDraft() {
       const form = document.querySelector<HTMLFormElement>('[data-website-draft-form]');
       if (!form) return;
-      latestMessageRef.current = createWebsiteLivePreviewMessage(new FormData(form));
+      latestMessageRef.current = createWebsiteLivePreviewMessage(new FormData(form), media);
       setHasUnsavedPreview(true);
       sendLatestPreview();
     }
@@ -125,7 +128,7 @@ export function WebsiteEditorCanvas({
       window.removeEventListener('message', receivePreviewReady);
       window.removeEventListener(WEBSITE_EDITOR_SECTION_EVENT_TYPE, receiveInspectorSelection);
     };
-  }, [selectEditorSection, sendLatestPreview, sendSelectedSection]);
+  }, [media, selectEditorSection, sendLatestPreview, sendSelectedSection]);
 
   return (
     <aside aria-label="Website draft canvas" className="self-start xl:sticky xl:top-6">
@@ -140,7 +143,7 @@ export function WebsiteEditorCanvas({
                 </span>
               </div>
               <p className="mt-1 text-xs leading-5 text-slate-400">
-                Text and brand colors update as you type. Save to keep changes and refresh layouts.
+                Content, layout, colors, and images update here before you save.
               </p>
               <p className="mt-1 text-xs font-bold text-blue-300">
                 Click a website section to edit its matching controls.

@@ -6,6 +6,13 @@ export const WEBSITE_EDITOR_SECTION_EVENT_TYPE = 'petcare:website-editor-section
 export type WebsitePreviewSection = 'hero' | 'services' | 'about' | 'contact';
 export type WebsiteLayoutSectionId = 'services' | 'about' | 'faq' | 'contact';
 export type WebsiteLayoutSection = { id: WebsiteLayoutSectionId; visible: boolean };
+export type WebsitePreviewMediaSlot = 'logo' | 'hero' | 'services' | 'about';
+export type WebsitePreviewMedia = { url: string; altText: string };
+export type WebsitePreviewMediaCatalogItem = {
+  id: string;
+  publicUrl: string;
+  alt_text: string;
+};
 
 export type WebsiteLivePreviewDraft = {
   about: string;
@@ -16,6 +23,7 @@ export type WebsiteLivePreviewDraft = {
   faqQuestion: string;
   heroBody: string;
   heroTitle: string;
+  media: Record<WebsitePreviewMediaSlot, WebsitePreviewMedia | null>;
   policies: string;
   primary: string;
   sectionLayout: WebsiteLayoutSection[];
@@ -40,6 +48,7 @@ const defaultSectionLayout: WebsiteLayoutSection[] = [
   { id: 'contact', visible: true },
 ];
 const layoutSectionIds: WebsiteLayoutSectionId[] = ['services', 'about', 'faq', 'contact'];
+const mediaSlots: WebsitePreviewMediaSlot[] = ['logo', 'hero', 'services', 'about'];
 
 export function isWebsitePreviewSection(value: unknown): value is WebsitePreviewSection {
   return typeof value === 'string' && previewSections.includes(value as WebsitePreviewSection);
@@ -77,7 +86,47 @@ export function parseWebsiteSectionLayout(value: string): WebsiteLayoutSection[]
   }
 }
 
-export function createWebsiteLivePreviewMessage(formData: FormData): WebsiteLivePreviewMessage {
+function isSafeWebsitePreviewMedia(value: unknown): value is WebsitePreviewMedia | null {
+  if (value === null) return true;
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<WebsitePreviewMedia>;
+  if (typeof candidate.url !== 'string' || typeof candidate.altText !== 'string') return false;
+  try {
+    const url = new URL(candidate.url);
+    return (
+      (url.protocol === 'https:' || url.protocol === 'http:') && candidate.altText.length <= 500
+    );
+  } catch {
+    return false;
+  }
+}
+
+function resolveWebsitePreviewMedia(
+  formData: FormData,
+  mediaCatalog: WebsitePreviewMediaCatalogItem[],
+): Record<WebsitePreviewMediaSlot, WebsitePreviewMedia | null> {
+  return Object.fromEntries(
+    mediaSlots.map((slot) => {
+      const selectedId = stringValue(formData, `${slot}MediaId`);
+      const selected = mediaCatalog.find((item) => item.id === selectedId);
+      const media = selected ? { url: selected.publicUrl, altText: selected.alt_text } : null;
+      return [slot, isSafeWebsitePreviewMedia(media) ? media : null];
+    }),
+  ) as Record<WebsitePreviewMediaSlot, WebsitePreviewMedia | null>;
+}
+
+function isWebsitePreviewMediaSelection(
+  value: unknown,
+): value is Record<WebsitePreviewMediaSlot, WebsitePreviewMedia | null> {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<Record<WebsitePreviewMediaSlot, unknown>>;
+  return mediaSlots.every((slot) => isSafeWebsitePreviewMedia(candidate[slot]));
+}
+
+export function createWebsiteLivePreviewMessage(
+  formData: FormData,
+  mediaCatalog: WebsitePreviewMediaCatalogItem[] = [],
+): WebsiteLivePreviewMessage {
   const primary = stringValue(formData, 'primary');
   const accent = stringValue(formData, 'accent');
 
@@ -92,6 +141,7 @@ export function createWebsiteLivePreviewMessage(formData: FormData): WebsiteLive
       faqQuestion: stringValue(formData, 'faqQuestion'),
       heroBody: stringValue(formData, 'heroBody'),
       heroTitle: stringValue(formData, 'heroTitle'),
+      media: resolveWebsitePreviewMedia(formData, mediaCatalog),
       policies: stringValue(formData, 'policies'),
       primary: colorPattern.test(primary) ? primary : '#23664f',
       sectionLayout: parseWebsiteSectionLayout(stringValue(formData, 'sectionLayout')),
@@ -106,7 +156,7 @@ export function parseWebsiteLivePreviewMessage(value: unknown): WebsiteLivePrevi
 
   const payload = candidate.payload as Partial<WebsiteLivePreviewDraft>;
   const textFields: Array<
-    keyof Omit<WebsiteLivePreviewDraft, 'primary' | 'accent' | 'sectionLayout'>
+    keyof Omit<WebsiteLivePreviewDraft, 'primary' | 'accent' | 'media' | 'sectionLayout'>
   > = [
     'about',
     'contactEmail',
@@ -121,6 +171,7 @@ export function parseWebsiteLivePreviewMessage(value: unknown): WebsiteLivePrevi
   if (textFields.some((field) => typeof payload[field] !== 'string')) return null;
   if (typeof payload.primary !== 'string' || !colorPattern.test(payload.primary)) return null;
   if (typeof payload.accent !== 'string' || !colorPattern.test(payload.accent)) return null;
+  if (!isWebsitePreviewMediaSelection(payload.media)) return null;
   if (!isWebsiteSectionLayout(payload.sectionLayout)) return null;
 
   return candidate as WebsiteLivePreviewMessage;
