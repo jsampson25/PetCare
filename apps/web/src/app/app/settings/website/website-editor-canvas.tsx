@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   createWebsiteLivePreviewMessage,
+  createWebsitePreviewPath,
   createWebsitePreviewSectionMessage,
   isWebsitePreviewSection,
   parseWebsitePreviewSectionMessage,
@@ -22,22 +23,30 @@ const previewDevices: Array<{ key: PreviewDevice; label: string; width: string }
 ];
 
 export function WebsiteEditorCanvas({
+  isThemeTrial,
   media,
   publicSlug,
   siteStatus,
+  template,
+  theme,
 }: {
+  isThemeTrial: boolean;
   media: WebsitePreviewMediaCatalogItem[];
   publicSlug?: string | null;
   siteStatus: string;
+  template: string;
+  theme: string;
 }) {
   const [device, setDevice] = useState<PreviewDevice>('desktop');
   const [refreshKey, setRefreshKey] = useState(0);
-  const [hasUnsavedPreview, setHasUnsavedPreview] = useState(false);
+  const [hasUnsavedPreview, setHasUnsavedPreview] = useState(isThemeTrial);
   const [selectedSection, setSelectedSection] = useState<WebsitePreviewSection>('hero');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const latestMessageRef = useRef<WebsiteLivePreviewMessage | null>(null);
   const selectedSectionRef = useRef<WebsitePreviewSection>('hero');
   const selectedDevice = previewDevices.find((item) => item.key === device) ?? previewDevices[0];
+  const embeddedPreviewPath = createWebsitePreviewPath({ frame: true, template, theme });
+  const previewStudioPath = createWebsitePreviewPath({ template, theme });
 
   const sendLatestPreview = useCallback(() => {
     if (!latestMessageRef.current) return;
@@ -182,7 +191,7 @@ export function WebsiteEditorCanvas({
             </div>
             <a
               className="text-xs font-black text-blue-300 hover:text-blue-200"
-              href="/app/settings/website/preview"
+              href={previewStudioPath}
               target="_blank"
             >
               Open preview studio ↗
@@ -200,7 +209,7 @@ export function WebsiteEditorCanvas({
               key={`${device}-${refreshKey}`}
               onLoad={sendLatestPreview}
               ref={iframeRef}
-              src="/app/settings/website/preview?frame=1"
+              src={embeddedPreviewPath}
               title={`${selectedDevice.label} website draft preview`}
             />
           </div>

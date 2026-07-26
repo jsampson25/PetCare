@@ -14,6 +14,22 @@ export type WebsitePreviewMediaCatalogItem = {
   alt_text: string;
 };
 
+export function createWebsitePreviewPath({
+  frame = false,
+  template,
+  theme,
+}: {
+  frame?: boolean;
+  template: string;
+  theme: string;
+}) {
+  const params = new URLSearchParams();
+  if (frame) params.set('frame', '1');
+  params.set('theme', theme);
+  params.set('template', template);
+  return `/app/settings/website/preview?${params.toString()}`;
+}
+
 export type WebsiteLivePreviewDraft = {
   about: string;
   accent: string;

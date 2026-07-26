@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   createWebsiteLivePreviewMessage,
+  createWebsitePreviewPath,
   createWebsitePreviewSectionMessage,
   parseWebsiteLivePreviewMessage,
   parseWebsitePreviewSectionMessage,
@@ -8,6 +9,12 @@ import {
 } from './website-live-preview';
 
 describe('website live preview messages', () => {
+  it('builds a private preview path for an unsaved theme selection', () => {
+    expect(createWebsitePreviewPath({ frame: true, theme: 'warm', template: 'happy-tails' })).toBe(
+      '/app/settings/website/preview?frame=1&theme=warm&template=happy-tails',
+    );
+  });
+
   it('creates an approved preview payload from website form data', () => {
     const formData = new FormData();
     formData.set('heroTitle', 'A better stay starts here');

@@ -305,9 +305,12 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
           </form>
         </Card>
         <WebsiteEditorCanvas
+          isThemeTrial={themeSelection.isTrial}
           media={mediaWithUrls}
           publicSlug={business?.public_slug}
           siteStatus={site?.status ?? 'not_configured'}
+          template={themeSelection.template.key}
+          theme={themeSelection.style.key}
         />
       </div>
       <Card

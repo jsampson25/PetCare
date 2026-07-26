@@ -5,8 +5,13 @@ import type { CSSProperties } from 'react';
 import { resolveBusinessContext } from '../../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../../lib/supabase/server';
 import { getWebsitePresentation } from '../../../../../lib/websites/presentation';
-import { isWebsiteSectionLayout, type WebsiteLayoutSectionId } from '../website-live-preview';
+import {
+  createWebsitePreviewPath,
+  isWebsiteSectionLayout,
+  type WebsiteLayoutSectionId,
+} from '../website-live-preview';
 import { WebsitePreviewLiveBridge } from '../website-preview-live-bridge';
+import { resolveWebsiteThemeSelection, type WebsiteStyleKey } from '../website-theme-catalog';
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -59,8 +64,15 @@ export default async function PreviewPage({
 
   const site = data as DraftPreview;
   const content = site.content;
-  const templateKey = String(content.template_key ?? 'studio-split');
-  const presentation = getWebsitePresentation(site.theme_key, templateKey);
+  const themeSelection = resolveWebsiteThemeSelection(
+    typeof query.theme === 'string' ? query.theme : undefined,
+    typeof query.template === 'string' ? query.template : undefined,
+    site.theme_key as WebsiteStyleKey,
+    String(content.template_key ?? 'studio-split'),
+  );
+  const themeKey = themeSelection.style.key;
+  const templateKey = themeSelection.template.key;
+  const presentation = getWebsitePresentation(themeKey, templateKey);
   const validatedPrimary = validateTenantActionColor(site.brand_tokens.primary);
   const primaryTextColor =
     typeof site.brand_tokens.primaryText === 'string'
@@ -172,7 +184,11 @@ export default async function PreviewPage({
           >
             <iframe
               className="size-full border-0"
-              src="/app/settings/website/preview?frame=1"
+              src={createWebsitePreviewPath({
+                frame: true,
+                template: templateKey,
+                theme: themeKey,
+              })}
               title={`${site.business.name} ${previewFrames[device].label.toLowerCase()} website preview`}
             />
           </div>

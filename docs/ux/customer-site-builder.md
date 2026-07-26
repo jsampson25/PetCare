@@ -163,6 +163,11 @@ Draft changes appear only in authenticated preview. Publication is atomic: the w
 
 ## Current editor behavior
 
+Selecting **Try theme** opens the editor with an unsaved, allowlisted theme and template selection.
+The embedded canvas and full preview studio carry that selection into the authenticated preview URL,
+so the complete header, hero, section, card, typography, and layout composition can be reviewed before
+the draft is saved. Invalid or mismatched theme/template pairs fall back to the saved draft selection.
+
 - Theme discovery lives on a dedicated theme-library route rather than inside the long content form.
 - Every catalog card includes large desktop and mobile composition previews, a full standalone
   demo, recommended business types, style attributes, and included sections.
