@@ -1,6 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  createWebsiteLivePreviewMessage,
+  type WebsiteLivePreviewMessage,
+  WEBSITE_PREVIEW_READY_MESSAGE_TYPE,
+} from './website-live-preview';
 
 type PreviewDevice = 'desktop' | 'tablet' | 'mobile';
 
@@ -19,7 +24,57 @@ export function WebsiteEditorCanvas({
 }) {
   const [device, setDevice] = useState<PreviewDevice>('desktop');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [hasUnsavedPreview, setHasUnsavedPreview] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const latestMessageRef = useRef<WebsiteLivePreviewMessage | null>(null);
   const selectedDevice = previewDevices.find((item) => item.key === device) ?? previewDevices[0];
+
+  function sendLatestPreview() {
+    if (!latestMessageRef.current) return;
+    iframeRef.current?.contentWindow?.postMessage(latestMessageRef.current, window.location.origin);
+  }
+
+  useEffect(() => {
+    let animationFrame = 0;
+
+    function syncDraft() {
+      const form = document.querySelector<HTMLFormElement>('[data-website-draft-form]');
+      if (!form) return;
+      latestMessageRef.current = createWebsiteLivePreviewMessage(new FormData(form));
+      setHasUnsavedPreview(true);
+      sendLatestPreview();
+    }
+
+    function scheduleSync(event: Event) {
+      const form = document.querySelector<HTMLFormElement>('[data-website-draft-form]');
+      if (!(event.target instanceof Node) || !form?.contains(event.target)) return;
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(syncDraft);
+    }
+
+    function receivePreviewReady(event: MessageEvent) {
+      if (
+        event.origin !== window.location.origin ||
+        event.source !== iframeRef.current?.contentWindow ||
+        !event.data ||
+        typeof event.data !== 'object' ||
+        (event.data as { type?: string }).type !== WEBSITE_PREVIEW_READY_MESSAGE_TYPE
+      ) {
+        return;
+      }
+      sendLatestPreview();
+    }
+
+    document.addEventListener('input', scheduleSync);
+    document.addEventListener('change', scheduleSync);
+    window.addEventListener('message', receivePreviewReady);
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      document.removeEventListener('input', scheduleSync);
+      document.removeEventListener('change', scheduleSync);
+      window.removeEventListener('message', receivePreviewReady);
+    };
+  }, []);
 
   return (
     <aside aria-label="Website draft canvas" className="self-start xl:sticky xl:top-6">
@@ -34,7 +89,7 @@ export function WebsiteEditorCanvas({
                 </span>
               </div>
               <p className="mt-1 text-xs leading-5 text-slate-400">
-                Shows the last saved draft. Save changes, then refresh the canvas.
+                Text and brand colors update as you type. Save to keep changes and refresh layouts.
               </p>
             </div>
             <button
@@ -86,14 +141,18 @@ export function WebsiteEditorCanvas({
             <iframe
               className="size-full border-0"
               key={`${device}-${refreshKey}`}
+              onLoad={sendLatestPreview}
+              ref={iframeRef}
               src="/app/settings/website/preview?frame=1"
-              title={`${selectedDevice.label} saved website draft`}
+              title={`${selectedDevice.label} website draft preview`}
             />
           </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 px-4 py-3 text-xs text-slate-400">
-          <span>{selectedDevice.label} · private draft</span>
+          <span>
+            {selectedDevice.label} · {hasUnsavedPreview ? 'unsaved preview' : 'saved draft'}
+          </span>
           {siteStatus === 'published' && publicSlug ? (
             <a
               className="font-black text-blue-300 hover:text-blue-200"

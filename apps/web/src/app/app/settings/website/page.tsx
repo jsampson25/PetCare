@@ -156,7 +156,11 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
           description={`Live status: ${site?.status ?? 'not configured'}`}
         >
           <div id="draft-content" />
-          <form action={saveWebsiteDraft} className="grid gap-4 sm:grid-cols-2">
+          <form
+            action={saveWebsiteDraft}
+            className="grid gap-4 sm:grid-cols-2"
+            data-website-draft-form
+          >
             <WebsiteStylePicker
               isTrial={themeSelection.isTrial}
               style={themeSelection.style}

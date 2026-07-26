@@ -5,6 +5,7 @@ import type { CSSProperties } from 'react';
 import { resolveBusinessContext } from '../../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../../lib/supabase/server';
 import { getWebsitePresentation } from '../../../../../lib/websites/presentation';
+import { WebsitePreviewLiveBridge } from '../website-preview-live-bridge';
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -174,6 +175,7 @@ export default async function PreviewPage({
   return (
     <main
       className={`${query.frame === '1' ? 'fixed inset-0 z-[100] overflow-auto' : ''} min-h-screen ${presentation.canvas} ${presentation.font}`}
+      data-website-preview-root
       style={
         {
           '--tenant-primary': site.brand_tokens.primary,
@@ -183,6 +185,7 @@ export default async function PreviewPage({
         } as CSSProperties
       }
     >
+      <WebsitePreviewLiveBridge />
       <div className="sticky top-0 z-50 flex min-h-12 items-center justify-center gap-4 border-b border-amber-200 bg-amber-50 px-4 text-sm font-bold text-amber-950">
         <span>Private draft preview</span>
         <span className="hidden font-normal text-amber-800 sm:inline">
@@ -271,11 +274,13 @@ export default async function PreviewPage({
             </p>
             <h1
               className={`mt-5 text-5xl font-black leading-[0.98] sm:text-7xl ${presentation.heading}`}
+              data-preview-field="heroTitle"
             >
               {String(content.hero_title ?? 'Exceptional care for every pet')}
             </h1>
             <p
               className={`mt-7 max-w-2xl text-lg leading-8 text-slate-600 ${centered ? 'mx-auto' : ''}`}
+              data-preview-field="heroBody"
             >
               {String(content.hero_body ?? '')}
             </p>
@@ -434,7 +439,10 @@ export default async function PreviewPage({
                 Why families choose us
               </p>
               <h2 className="mt-4 text-4xl font-black tracking-tight">Care that feels personal</h2>
-              <p className={`mt-6 text-lg leading-8 ${presentation.aboutMuted}`}>
+              <p
+                className={`mt-6 text-lg leading-8 ${presentation.aboutMuted}`}
+                data-preview-field="about"
+              >
                 {String(content.about ?? '')}
               </p>
             </div>
@@ -446,7 +454,8 @@ export default async function PreviewPage({
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-6">
           <p className="font-black">{site.business.name}</p>
           <p className="text-sm text-slate-500">
-            {String(content.contact_email ?? '')} · {String(content.contact_phone ?? '')}
+            <span data-preview-field="contactEmail">{String(content.contact_email ?? '')}</span> ·{' '}
+            <span data-preview-field="contactPhone">{String(content.contact_phone ?? '')}</span>
           </p>
         </div>
       </footer>
