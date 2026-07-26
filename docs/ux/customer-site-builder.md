@@ -174,6 +174,11 @@ live canvas. The sticky editor toolbar reports saved, unsaved, and saving states
 that autosave is off, and requires a manual save. Unsaved changes trigger a confirmation before
 same-window navigation or browser unload; opening a preview in a new tab does not interrupt editing.
 
+Homepage section ordering uses dedicated drag handles instead of making the entire content row
+draggable. Pointer placement resolves to a visible before-or-after insertion line. The same handles
+support Arrow Up, Arrow Down, Home, and End, while separate move buttons remain available as an
+explicit non-drag alternative. Every successful move is announced with the section's new position.
+
 - Theme discovery lives on a dedicated theme-library route rather than inside the long content form.
 - Every catalog card includes large desktop and mobile composition previews, a full standalone
   demo, recommended business types, style attributes, and included sections.

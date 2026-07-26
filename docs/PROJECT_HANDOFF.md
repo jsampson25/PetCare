@@ -190,7 +190,7 @@ visual, guided experience:
 - [x] Add undo and redo across website content, layout, media, and custom pages
 - [x] Show saved/unsaved/saving state and make the manual autosave policy explicit
 - [x] Protect unsaved website changes during navigation and browser unload
-- Add true drag-and-drop section ordering on desktop and accessible keyboard reordering
+- [x] Add precise drag-and-drop section ordering and accessible keyboard reordering
 - Add section insertion from an approved block library
 - Allow per-section image selection and safe cropping
 - Improve page management and navigation editing
