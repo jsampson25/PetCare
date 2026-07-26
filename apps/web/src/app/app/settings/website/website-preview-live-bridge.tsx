@@ -40,6 +40,7 @@ function applyPreviewMedia(slot: WebsitePreviewMediaSlot, media: WebsitePreviewM
   const surface = document.querySelector<HTMLElement>(`[data-preview-media="${slot}"]`);
   if (!surface) return;
   const imageUrl = media ? `url(${JSON.stringify(media.url)})` : '';
+  const focalPosition = media ? `${media.focalPoint.x}% ${media.focalPoint.y}%` : 'center';
 
   if (slot === 'logo') {
     surface.style.backgroundColor = media ? 'transparent' : 'var(--tenant-primary)';
@@ -57,14 +58,15 @@ function applyPreviewMedia(slot: WebsitePreviewMediaSlot, media: WebsitePreviewM
   if (slot === 'services') {
     surface.hidden = !media;
     surface.style.backgroundImage = imageUrl;
+    surface.style.backgroundPosition = focalPosition;
     setImageSemantics(surface, media);
     return;
   }
 
   surface.style.background = media
     ? slot === 'hero'
-      ? `linear-gradient(0deg, rgba(0,0,0,.28), rgba(0,0,0,0)), ${imageUrl} center / cover`
-      : `${imageUrl} center / cover`
+      ? `linear-gradient(0deg, rgba(0,0,0,.28), rgba(0,0,0,0)), ${imageUrl} ${focalPosition} / cover`
+      : `${imageUrl} ${focalPosition} / cover`
     : slot === 'hero'
       ? 'linear-gradient(135deg, color-mix(in srgb, var(--tenant-primary) 12%, white), color-mix(in srgb, var(--tenant-accent) 22%, white))'
       : 'linear-gradient(145deg, color-mix(in srgb, var(--tenant-primary) 75%, #101827), color-mix(in srgb, var(--tenant-accent) 35%, #101827))';

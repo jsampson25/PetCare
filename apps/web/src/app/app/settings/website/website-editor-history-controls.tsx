@@ -16,9 +16,15 @@ const controlledFieldNames = new Set([
   'aboutMediaId',
   'customPages',
   'heroMediaId',
+  'heroFocalX',
+  'heroFocalY',
   'logoMediaId',
   'sectionLayout',
   'servicesMediaId',
+  'servicesFocalX',
+  'servicesFocalY',
+  'aboutFocalX',
+  'aboutFocalY',
 ]);
 
 function restoreNativeFields(form: HTMLFormElement, snapshot: WebsiteEditorSnapshot) {

@@ -140,6 +140,12 @@ export async function saveWebsiteDraft(formData: FormData) {
       heroMediaId: z.union([z.literal(''), z.uuid()]),
       servicesMediaId: z.union([z.literal(''), z.uuid()]),
       aboutMediaId: z.union([z.literal(''), z.uuid()]),
+      heroFocalX: z.coerce.number().int().min(0).max(100),
+      heroFocalY: z.coerce.number().int().min(0).max(100),
+      servicesFocalX: z.coerce.number().int().min(0).max(100),
+      servicesFocalY: z.coerce.number().int().min(0).max(100),
+      aboutFocalX: z.coerce.number().int().min(0).max(100),
+      aboutFocalY: z.coerce.number().int().min(0).max(100),
     })
     .safeParse(raw);
   if (!parsed.success || !sectionLayout.success || !customPages.success)
@@ -173,6 +179,10 @@ export async function saveWebsiteDraft(formData: FormData) {
   if (selectedMedia.error || selectedMedia.data?.length !== new Set(selectedMediaIds).size)
     redirect('/app/settings/website?error=Choose+a+photo+from+your+website+media+library.');
   const mediaById = new Map((selectedMedia.data ?? []).map((item) => [item.id, item]));
+  const mediaWithFocalPoint = (id: string, focalX: number, focalY: number) => {
+    const item = mediaById.get(id);
+    return item ? { ...item, focal_x: focalX, focal_y: focalY } : null;
+  };
   const { error } = await supabase.schema('app').rpc('save_tenant_website_draft', {
     target_business_id: context.businessId,
     theme_value: parsed.data.theme,
@@ -195,12 +205,26 @@ export async function saveWebsiteDraft(formData: FormData) {
       section_layout: sectionLayout.data,
       custom_pages: customPages.data,
       logo_media: parsed.data.logoMediaId ? (mediaById.get(parsed.data.logoMediaId) ?? null) : null,
-      hero_media: parsed.data.heroMediaId ? (mediaById.get(parsed.data.heroMediaId) ?? null) : null,
+      hero_media: parsed.data.heroMediaId
+        ? mediaWithFocalPoint(
+            parsed.data.heroMediaId,
+            parsed.data.heroFocalX,
+            parsed.data.heroFocalY,
+          )
+        : null,
       services_media: parsed.data.servicesMediaId
-        ? (mediaById.get(parsed.data.servicesMediaId) ?? null)
+        ? mediaWithFocalPoint(
+            parsed.data.servicesMediaId,
+            parsed.data.servicesFocalX,
+            parsed.data.servicesFocalY,
+          )
         : null,
       about_media: parsed.data.aboutMediaId
-        ? (mediaById.get(parsed.data.aboutMediaId) ?? null)
+        ? mediaWithFocalPoint(
+            parsed.data.aboutMediaId,
+            parsed.data.aboutFocalX,
+            parsed.data.aboutFocalY,
+          )
         : null,
     },
   });

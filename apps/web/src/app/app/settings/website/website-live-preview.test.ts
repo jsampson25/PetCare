@@ -28,6 +28,8 @@ describe('website live preview messages', () => {
     formData.set('primary', '#123456');
     formData.set('accent', '#abcdef');
     formData.set('heroMediaId', 'media-hero');
+    formData.set('heroFocalX', '25');
+    formData.set('heroFocalY', '70');
     formData.set(
       'sectionLayout',
       JSON.stringify([
@@ -61,6 +63,7 @@ describe('website live preview messages', () => {
           about: null,
           hero: {
             altText: 'Dog enjoying outdoor playtime',
+            focalPoint: { x: 25, y: 70 },
             url: 'https://cdn.example.com/hero.jpg',
           },
           logo: null,
@@ -85,6 +88,23 @@ describe('website live preview messages', () => {
       parseWebsiteLivePreviewMessage({
         ...valid,
         payload: { ...valid.payload, primary: 'red' },
+      }),
+    ).toBeNull();
+
+    expect(
+      parseWebsiteLivePreviewMessage({
+        ...valid,
+        payload: {
+          ...valid.payload,
+          media: {
+            ...valid.payload.media,
+            hero: {
+              url: 'https://cdn.example.com/hero.jpg',
+              altText: 'Dog playing outside',
+              focalPoint: { x: 120, y: 50 },
+            },
+          },
+        },
       }),
     ).toBeNull();
 

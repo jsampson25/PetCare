@@ -80,14 +80,22 @@ export default async function TenantSitePage({
       : validatedPrimary.accepted
         ? validatedPrimary.actionTextColor
         : '#ffffff';
-  const heroMedia = content.hero_media as
-    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  type PositionedMedia = {
+    object_path?: string;
+    alt_text?: string;
+    caption?: string | null;
+    focal_x?: number;
+    focal_y?: number;
+  };
+  const heroMedia = content.hero_media as PositionedMedia | undefined;
   const logoMedia = content.logo_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
-  const servicesMedia = content.services_media as
-    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
-  const aboutMedia = content.about_media as
-    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  const servicesMedia = content.services_media as PositionedMedia | undefined;
+  const aboutMedia = content.about_media as PositionedMedia | undefined;
+  const safeFocalValue = (value?: number) =>
+    Number.isInteger(value) && value !== undefined && value >= 0 && value <= 100 ? value : 50;
+  const focalPosition = (item?: PositionedMedia) =>
+    `${safeFocalValue(item?.focal_x)}% ${safeFocalValue(item?.focal_y)}%`;
   const supabase = await createSupabaseServerClient();
   const mediaUrl = (objectPath?: string) =>
     objectPath
@@ -292,7 +300,7 @@ export default async function TenantSitePage({
               heroImageUrl
                 ? {
                     backgroundImage: `url(${heroImageUrl})`,
-                    backgroundPosition: 'center',
+                    backgroundPosition: focalPosition(heroMedia),
                     backgroundSize: 'cover',
                   }
                 : undefined
@@ -355,9 +363,12 @@ export default async function TenantSitePage({
             {servicesImageUrl ? (
               <div
                 aria-label={servicesMedia?.alt_text}
-                className="mt-10 min-h-64 rounded-[2rem] bg-cover bg-center shadow-lg"
+                className="mt-10 min-h-64 rounded-[2rem] bg-cover shadow-lg"
                 role="img"
-                style={{ backgroundImage: `url(${servicesImageUrl})` }}
+                style={{
+                  backgroundImage: `url(${servicesImageUrl})`,
+                  backgroundPosition: focalPosition(servicesMedia),
+                }}
               />
             ) : null}
             <div className={`mt-10 grid gap-5 ${presentation.serviceGrid}`}>
@@ -397,9 +408,12 @@ export default async function TenantSitePage({
           {aboutImageUrl ? (
             <div
               aria-label={aboutMedia?.alt_text}
-              className={`mx-auto mb-5 min-h-72 max-w-7xl bg-cover bg-center shadow-lg ${presentation.image}`}
+              className={`mx-auto mb-5 min-h-72 max-w-7xl bg-cover shadow-lg ${presentation.image}`}
               role="img"
-              style={{ backgroundImage: `url(${aboutImageUrl})` }}
+              style={{
+                backgroundImage: `url(${aboutImageUrl})`,
+                backgroundPosition: focalPosition(aboutMedia),
+              }}
             />
           ) : null}
           <div className={`mx-auto max-w-7xl p-8 sm:p-10 ${presentation.about}`}>

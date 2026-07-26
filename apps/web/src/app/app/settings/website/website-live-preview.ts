@@ -17,7 +17,11 @@ export const WEBSITE_EDITOR_SECTION_EVENT_TYPE = 'petcare:website-editor-section
 
 export type WebsitePreviewSection = 'hero' | 'services' | 'about' | 'contact';
 export type WebsitePreviewMediaSlot = 'logo' | 'hero' | 'services' | 'about';
-export type WebsitePreviewMedia = { url: string; altText: string };
+export type WebsitePreviewMedia = {
+  url: string;
+  altText: string;
+  focalPoint: { x: number; y: number };
+};
 export type WebsitePreviewMediaCatalogItem = {
   id: string;
   publicUrl: string;
@@ -78,6 +82,13 @@ function stringValue(formData: FormData, name: string) {
   return typeof value === 'string' ? value : '';
 }
 
+function focalValue(formData: FormData, name: string) {
+  const raw = stringValue(formData, name);
+  if (raw === '') return 50;
+  const value = Number(raw);
+  return Number.isInteger(value) && value >= 0 && value <= 100 ? value : 50;
+}
+
 export function parseWebsiteSectionLayout(value: string): WebsiteLayoutSection[] {
   try {
     const parsed = JSON.parse(value) as unknown;
@@ -91,7 +102,18 @@ function isSafeWebsitePreviewMedia(value: unknown): value is WebsitePreviewMedia
   if (value === null) return true;
   if (!value || typeof value !== 'object') return false;
   const candidate = value as Partial<WebsitePreviewMedia>;
-  if (typeof candidate.url !== 'string' || typeof candidate.altText !== 'string') return false;
+  if (
+    typeof candidate.url !== 'string' ||
+    typeof candidate.altText !== 'string' ||
+    !candidate.focalPoint ||
+    !Number.isInteger(candidate.focalPoint.x) ||
+    !Number.isInteger(candidate.focalPoint.y) ||
+    candidate.focalPoint.x < 0 ||
+    candidate.focalPoint.x > 100 ||
+    candidate.focalPoint.y < 0 ||
+    candidate.focalPoint.y > 100
+  )
+    return false;
   try {
     const url = new URL(candidate.url);
     return (
@@ -110,7 +132,16 @@ function resolveWebsitePreviewMedia(
     mediaSlots.map((slot) => {
       const selectedId = stringValue(formData, `${slot}MediaId`);
       const selected = mediaCatalog.find((item) => item.id === selectedId);
-      const media = selected ? { url: selected.publicUrl, altText: selected.alt_text } : null;
+      const media = selected
+        ? {
+            url: selected.publicUrl,
+            altText: selected.alt_text,
+            focalPoint: {
+              x: focalValue(formData, `${slot}FocalX`),
+              y: focalValue(formData, `${slot}FocalY`),
+            },
+          }
+        : null;
       return [slot, isSafeWebsitePreviewMedia(media) ? media : null];
     }),
   ) as Record<WebsitePreviewMediaSlot, WebsitePreviewMedia | null>;

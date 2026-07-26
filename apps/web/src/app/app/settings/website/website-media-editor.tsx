@@ -17,6 +17,8 @@ export type WebsiteMedia = {
 };
 
 type Slot = 'logo' | 'hero' | 'services' | 'about';
+type FocalSlot = Exclude<Slot, 'logo'>;
+type FocalPoint = { x: number; y: number };
 
 const slots: Array<{ id: Slot; name: string; hint: string }> = [
   { id: 'logo', name: 'Business logo', hint: 'A transparent PNG works best' },
@@ -30,12 +32,14 @@ export function WebsiteMediaEditor({
   initialHeroMediaId,
   initialLogoMediaId,
   initialServicesMediaId,
+  initialFocalPoints,
   media,
 }: {
   initialAboutMediaId: string;
   initialHeroMediaId: string;
   initialLogoMediaId: string;
   initialServicesMediaId: string;
+  initialFocalPoints: Record<FocalSlot, FocalPoint>;
   media: WebsiteMedia[];
 }) {
   const [selection, setSelection] = useState<Record<Slot, string>>({
@@ -44,16 +48,17 @@ export function WebsiteMediaEditor({
     services: initialServicesMediaId,
     about: initialAboutMediaId,
   });
+  const [focalPoints, setFocalPoints] = useState(initialFocalPoints);
   const [draggedMediaId, setDraggedMediaId] = useState<string | null>(null);
   const mediaInputRef = useRef<HTMLInputElement>(null);
-  const previousSelectionRef = useRef(JSON.stringify(selection));
+  const previousSelectionRef = useRef(JSON.stringify({ selection, focalPoints }));
 
   useEffect(() => {
-    const serialized = JSON.stringify(selection);
+    const serialized = JSON.stringify({ selection, focalPoints });
     if (serialized === previousSelectionRef.current) return;
     previousSelectionRef.current = serialized;
     mediaInputRef.current?.dispatchEvent(new Event('input', { bubbles: true }));
-  }, [selection]);
+  }, [focalPoints, selection]);
 
   useEffect(() => {
     function restoreSelection(event: Event) {
@@ -65,6 +70,15 @@ export function WebsiteMediaEditor({
         hero: readWebsiteEditorSnapshotValue(snapshot, 'heroMediaId'),
         logo: readWebsiteEditorSnapshotValue(snapshot, 'logoMediaId'),
         services: readWebsiteEditorSnapshotValue(snapshot, 'servicesMediaId'),
+      });
+      const readFocal = (slot: FocalSlot, axis: 'X' | 'Y') => {
+        const value = Number(readWebsiteEditorSnapshotValue(snapshot, `${slot}Focal${axis}`));
+        return Number.isInteger(value) && value >= 0 && value <= 100 ? value : 50;
+      };
+      setFocalPoints({
+        hero: { x: readFocal('hero', 'X'), y: readFocal('hero', 'Y') },
+        services: { x: readFocal('services', 'X'), y: readFocal('services', 'Y') },
+        about: { x: readFocal('about', 'X'), y: readFocal('about', 'Y') },
       });
     }
 
@@ -83,6 +97,10 @@ export function WebsiteMediaEditor({
       <input name="heroMediaId" type="hidden" value={selection.hero} />
       <input name="servicesMediaId" type="hidden" value={selection.services} />
       <input name="aboutMediaId" type="hidden" value={selection.about} />
+      {(Object.entries(focalPoints) as Array<[FocalSlot, FocalPoint]>).flatMap(([slot, point]) => [
+        <input key={`${slot}-x`} name={`${slot}FocalX`} type="hidden" value={point.x} />,
+        <input key={`${slot}-y`} name={`${slot}FocalY`} type="hidden" value={point.y} />,
+      ])}
       <div className="mt-4 grid gap-4 xl:grid-cols-[1.2fr_.8fr]">
         <div className="grid gap-3 sm:grid-cols-2">
           {slots.map((slot) => {
@@ -111,7 +129,13 @@ export function WebsiteMediaEditor({
                         slot.id === 'logo' ? 'bg-contain bg-no-repeat p-6' : 'bg-cover'
                       }`}
                       role="img"
-                      style={{ backgroundImage: `url(${selected.publicUrl})` }}
+                      style={{
+                        backgroundImage: `url(${selected.publicUrl})`,
+                        backgroundPosition:
+                          slot.id === 'logo'
+                            ? 'center'
+                            : `${focalPoints[slot.id].x}% ${focalPoints[slot.id].y}%`,
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
                     <div className="absolute inset-x-3 bottom-3 text-white">
@@ -124,6 +148,49 @@ export function WebsiteMediaEditor({
                         Remove
                       </button>
                     </div>
+                    {slot.id !== 'logo' ? (
+                      <div className="absolute inset-x-3 top-3 rounded-xl bg-white/95 p-3 text-slate-950 shadow-lg">
+                        <p className="text-xs font-black">Crop focus</p>
+                        <label className="mt-2 grid grid-cols-[3rem_1fr] items-center gap-2 text-xs font-bold">
+                          Left
+                          <input
+                            aria-label={`${slot.name} horizontal crop focus`}
+                            max="100"
+                            min="0"
+                            onChange={(event) =>
+                              setFocalPoints((current) => ({
+                                ...current,
+                                [slot.id]: {
+                                  ...current[slot.id as FocalSlot],
+                                  x: Number(event.target.value),
+                                },
+                              }))
+                            }
+                            type="range"
+                            value={focalPoints[slot.id as FocalSlot].x}
+                          />
+                        </label>
+                        <label className="mt-1 grid grid-cols-[3rem_1fr] items-center gap-2 text-xs font-bold">
+                          Top
+                          <input
+                            aria-label={`${slot.name} vertical crop focus`}
+                            max="100"
+                            min="0"
+                            onChange={(event) =>
+                              setFocalPoints((current) => ({
+                                ...current,
+                                [slot.id]: {
+                                  ...current[slot.id as FocalSlot],
+                                  y: Number(event.target.value),
+                                },
+                              }))
+                            }
+                            type="range"
+                            value={focalPoints[slot.id as FocalSlot].y}
+                          />
+                        </label>
+                      </div>
+                    ) : null}
                   </>
                 ) : (
                   <div className="p-4 text-center">

@@ -81,14 +81,22 @@ export default async function PreviewPage({
         ? validatedPrimary.actionTextColor
         : '#ffffff';
   const centered = presentation.centered;
-  const heroMedia = content.hero_media as
-    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  type PositionedMedia = {
+    object_path?: string;
+    alt_text?: string;
+    caption?: string | null;
+    focal_x?: number;
+    focal_y?: number;
+  };
+  const heroMedia = content.hero_media as PositionedMedia | undefined;
   const logoMedia = content.logo_media as
     { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
-  const servicesMedia = content.services_media as
-    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
-  const aboutMedia = content.about_media as
-    { object_path?: string; alt_text?: string; caption?: string | null } | undefined;
+  const servicesMedia = content.services_media as PositionedMedia | undefined;
+  const aboutMedia = content.about_media as PositionedMedia | undefined;
+  const safeFocalValue = (value?: number) =>
+    Number.isInteger(value) && value !== undefined && value >= 0 && value <= 100 ? value : 50;
+  const focalPosition = (item?: PositionedMedia) =>
+    `${safeFocalValue(item?.focal_x)}% ${safeFocalValue(item?.focal_y)}%`;
   const mediaUrl = (objectPath?: string) =>
     objectPath
       ? supabase.storage.from('tenant-website-media').getPublicUrl(objectPath).data.publicUrl
@@ -353,7 +361,7 @@ export default async function PreviewPage({
               data-preview-media="hero"
               style={{
                 background: heroImageUrl
-                  ? `linear-gradient(0deg, rgba(0,0,0,.28), rgba(0,0,0,0)), url(${heroImageUrl}) center / cover`
+                  ? `linear-gradient(0deg, rgba(0,0,0,.28), rgba(0,0,0,0)), url(${heroImageUrl}) ${focalPosition(heroMedia)} / cover`
                   : 'linear-gradient(135deg, color-mix(in srgb, var(--tenant-primary) 12%, white), color-mix(in srgb, var(--tenant-accent) 22%, white))',
               }}
             />
@@ -412,11 +420,14 @@ export default async function PreviewPage({
             </div>
             <div
               aria-label={servicesImageUrl ? servicesMedia?.alt_text : undefined}
-              className="mt-10 min-h-64 rounded-[2rem] bg-cover bg-center shadow-lg"
+              className="mt-10 min-h-64 rounded-[2rem] bg-cover shadow-lg"
               data-preview-media="services"
               hidden={!servicesImageUrl}
               role={servicesImageUrl ? 'img' : undefined}
-              style={{ backgroundImage: servicesImageUrl ? `url(${servicesImageUrl})` : undefined }}
+              style={{
+                backgroundImage: servicesImageUrl ? `url(${servicesImageUrl})` : undefined,
+                backgroundPosition: focalPosition(servicesMedia),
+              }}
             />
             <div className={`mt-12 grid gap-5 ${presentation.serviceGrid}`}>
               {(site.services.length
@@ -484,7 +495,7 @@ export default async function PreviewPage({
               role={aboutImageUrl ? 'img' : undefined}
               style={{
                 background: aboutImageUrl
-                  ? `url(${aboutImageUrl}) center / cover`
+                  ? `url(${aboutImageUrl}) ${focalPosition(aboutMedia)} / cover`
                   : 'linear-gradient(145deg, color-mix(in srgb, var(--tenant-primary) 75%, #101827), color-mix(in srgb, var(--tenant-accent) 35%, #101827))',
               }}
             />

@@ -74,10 +74,18 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
     ? c.section_layout
     : defaultWebsiteSections;
   const customPages = Array.isArray(c.custom_pages) ? (c.custom_pages as WebsiteCustomPage[]) : [];
-  const heroMedia = c.hero_media as { id?: string } | undefined;
+  const heroMedia = c.hero_media as { id?: string; focal_x?: number; focal_y?: number } | undefined;
   const logoMedia = c.logo_media as { id?: string } | undefined;
-  const servicesMedia = c.services_media as { id?: string } | undefined;
-  const aboutMedia = c.about_media as { id?: string } | undefined;
+  const servicesMedia = c.services_media as
+    { id?: string; focal_x?: number; focal_y?: number } | undefined;
+  const aboutMedia = c.about_media as
+    { id?: string; focal_x?: number; focal_y?: number } | undefined;
+  const safeFocalValue = (value?: number) =>
+    Number.isInteger(value) && value !== undefined && value >= 0 && value <= 100 ? value : 50;
+  const focalPoint = (item?: { focal_x?: number; focal_y?: number }) => ({
+    x: safeFocalValue(item?.focal_x),
+    y: safeFocalValue(item?.focal_y),
+  });
   const mediaWithUrls: WebsiteMedia[] = (media ?? []).map((item) => ({
     ...item,
     publicUrl: supabase.storage.from('tenant-website-media').getPublicUrl(item.object_path).data
@@ -169,6 +177,11 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
             <WebsiteMediaEditor
               initialAboutMediaId={aboutMedia?.id ?? ''}
               initialHeroMediaId={heroMedia?.id ?? ''}
+              initialFocalPoints={{
+                hero: focalPoint(heroMedia),
+                services: focalPoint(servicesMedia),
+                about: focalPoint(aboutMedia),
+              }}
               initialLogoMediaId={logoMedia?.id ?? ''}
               initialServicesMediaId={servicesMedia?.id ?? ''}
               media={mediaWithUrls}

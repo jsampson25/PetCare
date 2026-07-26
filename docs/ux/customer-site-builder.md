@@ -199,6 +199,9 @@ explicit non-drag alternative. Every successful move is announced with the secti
   removing an unsaved selection restores the correct visual fallback. Arbitrary form-provided URLs
   are never accepted by the preview contract. Theme selection still requires saving and refreshing
   the server-rendered preview.
+- Hero, services, and about images expose bounded horizontal and vertical focal-point controls. The
+  crop focus streams into the preview, participates in undo and redo, and is persisted with the
+  selected media snapshot so every responsive layout uses the same intentional subject position.
 - Hero, services, about, and contact preview regions are keyboard selectable. Selection is
   synchronized through the same allowlisted message boundary, highlighted in both surfaces, and
   moves focus to the matching grouped editor controls.
