@@ -171,3 +171,7 @@ Draft changes appear only in authenticated preview. Publication is atomic: the w
   website draft.
 - The editor clearly identifies saved selections and unsaved trials and retains content-safe theme
   switching.
+- On wide workspace layouts, a persistent canvas remains beside the editing controls and offers
+  desktop, tablet, and mobile widths. It renders the latest saved private draft, can be refreshed
+  after saving, and links to the full preview studio. Streaming unsaved field changes into this
+  canvas is the next editor-state milestone.

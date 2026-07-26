@@ -180,7 +180,8 @@ visual, guided experience:
 - [x] Show large desktop and mobile previews before selection
 - [x] Add theme details, included sections, style attributes, and recommended business types
 - [x] Provide a clear **Try theme** flow that does not overwrite the saved draft until confirmed
-- Add a persistent live canvas beside the editing controls
+- [x] Add a persistent saved-draft canvas beside the editing controls
+- [ ] Stream unsaved field changes into the canvas before saving
 - Select a section directly from the canvas
 - Replace long stacked forms with a focused inspector panel
 - Add undo, redo, autosave status, saved state, and unsaved-change protection

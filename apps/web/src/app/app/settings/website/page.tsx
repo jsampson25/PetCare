@@ -19,6 +19,7 @@ import {
   type WebsiteSection,
 } from './website-section-editor';
 import { WebsiteCustomPagesEditor, type WebsiteCustomPage } from './website-custom-pages-editor';
+import { WebsiteEditorCanvas } from './website-editor-canvas';
 import { WebsiteMediaEditor, type WebsiteMedia } from './website-media-editor';
 import { WebsiteStylePicker } from './website-style-picker';
 import { resolveWebsiteThemeSelection, type WebsiteStyleKey } from './website-theme-catalog';
@@ -103,40 +104,6 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
           {q.error}
         </Alert>
       ) : null}
-      <section className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,31,58,.08)]">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 sm:px-6">
-          <div>
-            <p className="font-black text-[#0b1f3a]">Your saved draft</p>
-            <p className="mt-1 text-sm text-slate-500">
-              See the latest saved version here. Open the preview studio to check tablet and mobile
-              layouts.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <ButtonLink href="/app/settings/website/preview" variant="secondary">
-              Open preview studio
-            </ButtonLink>
-            {site?.status === 'published' && business?.public_slug ? (
-              <ButtonLink href={`/site/${business.public_slug}`} variant="secondary">
-                View live website
-              </ButtonLink>
-            ) : (
-              <span className="inline-flex min-h-11 items-center rounded-xl bg-amber-50 px-4 text-sm font-bold text-amber-800">
-                Not published yet
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="bg-slate-100 p-3 sm:p-5">
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <iframe
-              className="h-[30rem] w-full"
-              src="/app/settings/website/preview?frame=1"
-              title="Saved website draft"
-            />
-          </div>
-        </div>
-      </section>
       <Card
         title="Media library"
         description="Upload photos once, then drag or reuse them throughout your website."
@@ -183,99 +150,108 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
           JPG, PNG, or WebP up to 10 MB. Use only images you have permission to publish.
         </p>
       </Card>
-      <Card title="Draft content" description={`Live status: ${site?.status ?? 'not configured'}`}>
-        <div id="draft-content" />
-        <form action={saveWebsiteDraft} className="grid gap-4 sm:grid-cols-2">
-          <WebsiteStylePicker
-            isTrial={themeSelection.isTrial}
-            style={themeSelection.style}
-            template={themeSelection.template}
-          />
-          <WebsiteSectionEditor initialSections={storedSections} />
-          <WebsiteMediaEditor
-            initialAboutMediaId={aboutMedia?.id ?? ''}
-            initialHeroMediaId={heroMedia?.id ?? ''}
-            initialLogoMediaId={logoMedia?.id ?? ''}
-            initialServicesMediaId={servicesMedia?.id ?? ''}
-            media={mediaWithUrls}
-          />
-          <WebsiteCustomPagesEditor initialPages={customPages} />
-          <Field
-            defaultValue={String(b.primary ?? '#23664f')}
-            label="Primary color"
-            name="primary"
-            type="color"
-          />
-          <Field
-            defaultValue={String(b.accent ?? '#d97745')}
-            label="Accent color"
-            name="accent"
-            type="color"
-          />
-          <Field
-            defaultValue={String(c.hero_title ?? '')}
-            label="Homepage headline"
-            name="heroTitle"
-            required
-          />
-          <label className="text-sm font-bold sm:col-span-2">
-            Homepage introduction
-            <textarea
-              className="mt-2 min-h-24 w-full rounded-lg border p-3"
-              defaultValue={String(c.hero_body ?? '')}
-              name="heroBody"
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(28rem,.9fr)]">
+        <Card
+          title="Draft content"
+          description={`Live status: ${site?.status ?? 'not configured'}`}
+        >
+          <div id="draft-content" />
+          <form action={saveWebsiteDraft} className="grid gap-4 sm:grid-cols-2">
+            <WebsiteStylePicker
+              isTrial={themeSelection.isTrial}
+              style={themeSelection.style}
+              template={themeSelection.template}
+            />
+            <WebsiteSectionEditor initialSections={storedSections} />
+            <WebsiteMediaEditor
+              initialAboutMediaId={aboutMedia?.id ?? ''}
+              initialHeroMediaId={heroMedia?.id ?? ''}
+              initialLogoMediaId={logoMedia?.id ?? ''}
+              initialServicesMediaId={servicesMedia?.id ?? ''}
+              media={mediaWithUrls}
+            />
+            <WebsiteCustomPagesEditor initialPages={customPages} />
+            <Field
+              defaultValue={String(b.primary ?? '#23664f')}
+              label="Primary color"
+              name="primary"
+              type="color"
+            />
+            <Field
+              defaultValue={String(b.accent ?? '#d97745')}
+              label="Accent color"
+              name="accent"
+              type="color"
+            />
+            <Field
+              defaultValue={String(c.hero_title ?? '')}
+              label="Homepage headline"
+              name="heroTitle"
               required
             />
-          </label>
-          <label className="text-sm font-bold sm:col-span-2">
-            About us
-            <textarea
-              className="mt-2 min-h-32 w-full rounded-lg border p-3"
-              defaultValue={String(c.about ?? '')}
-              name="about"
+            <label className="text-sm font-bold sm:col-span-2">
+              Homepage introduction
+              <textarea
+                className="mt-2 min-h-24 w-full rounded-lg border p-3"
+                defaultValue={String(c.hero_body ?? '')}
+                name="heroBody"
+                required
+              />
+            </label>
+            <label className="text-sm font-bold sm:col-span-2">
+              About us
+              <textarea
+                className="mt-2 min-h-32 w-full rounded-lg border p-3"
+                defaultValue={String(c.about ?? '')}
+                name="about"
+                required
+              />
+            </label>
+            <Field
+              defaultValue={faq?.question ?? ''}
+              label="FAQ question"
+              name="faqQuestion"
               required
             />
-          </label>
-          <Field
-            defaultValue={faq?.question ?? ''}
-            label="FAQ question"
-            name="faqQuestion"
-            required
-          />
-          <Field defaultValue={faq?.answer ?? ''} label="FAQ answer" name="faqAnswer" required />
-          <label className="text-sm font-bold sm:col-span-2">
-            Policies summary
-            <textarea
-              className="mt-2 min-h-24 w-full rounded-lg border p-3"
-              defaultValue={String(c.policies ?? '')}
-              name="policies"
+            <Field defaultValue={faq?.answer ?? ''} label="FAQ answer" name="faqAnswer" required />
+            <label className="text-sm font-bold sm:col-span-2">
+              Policies summary
+              <textarea
+                className="mt-2 min-h-24 w-full rounded-lg border p-3"
+                defaultValue={String(c.policies ?? '')}
+                name="policies"
+                required
+              />
+            </label>
+            <Field
+              defaultValue={String(c.contact_email ?? '')}
+              label="Public email"
+              name="contactEmail"
+              required
+              type="email"
+            />
+            <Field
+              defaultValue={String(c.contact_phone ?? '')}
+              label="Public phone"
+              name="contactPhone"
               required
             />
-          </label>
-          <Field
-            defaultValue={String(c.contact_email ?? '')}
-            label="Public email"
-            name="contactEmail"
-            required
-            type="email"
-          />
-          <Field
-            defaultValue={String(c.contact_phone ?? '')}
-            label="Public phone"
-            name="contactPhone"
-            required
-          />
-          <Field defaultValue={String(c.seo_title ?? '')} label="SEO title" name="seoTitle" />
-          <Field
-            defaultValue={String(c.seo_description ?? '')}
-            label="SEO description"
-            name="seoDescription"
-          />
-          <div className="sm:col-span-2">
-            <Button type="submit">Save draft</Button>
-          </div>
-        </form>
-      </Card>
+            <Field defaultValue={String(c.seo_title ?? '')} label="SEO title" name="seoTitle" />
+            <Field
+              defaultValue={String(c.seo_description ?? '')}
+              label="SEO description"
+              name="seoDescription"
+            />
+            <div className="sm:col-span-2">
+              <Button type="submit">Save website draft</Button>
+            </div>
+          </form>
+        </Card>
+        <WebsiteEditorCanvas
+          publicSlug={business?.public_slug}
+          siteStatus={site?.status ?? 'not_configured'}
+        />
+      </div>
       <Card
         title="Custom domain"
         description="The platform subdomain remains available while DNS ownership and TLS are verified."
