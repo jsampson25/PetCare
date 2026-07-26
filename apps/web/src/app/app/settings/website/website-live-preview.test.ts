@@ -15,9 +15,20 @@ describe('website live preview messages', () => {
     formData.set('about', 'Family owned and locally operated.');
     formData.set('contactEmail', 'hello@example.com');
     formData.set('contactPhone', '555-0100');
+    formData.set('faqQuestion', 'What should I bring?');
+    formData.set('faqAnswer', 'Bring food and medication.');
+    formData.set('policies', 'Vaccinations are required.');
     formData.set('primary', '#123456');
     formData.set('accent', '#abcdef');
-    formData.set('policies', 'This field is intentionally not sent.');
+    formData.set(
+      'sectionLayout',
+      JSON.stringify([
+        { id: 'about', visible: true },
+        { id: 'services', visible: false },
+        { id: 'faq', visible: true },
+        { id: 'contact', visible: true },
+      ]),
+    );
 
     expect(createWebsiteLivePreviewMessage(formData)).toEqual({
       type: WEBSITE_PREVIEW_MESSAGE_TYPE,
@@ -26,9 +37,18 @@ describe('website live preview messages', () => {
         accent: '#abcdef',
         contactEmail: 'hello@example.com',
         contactPhone: '555-0100',
+        faqAnswer: 'Bring food and medication.',
+        faqQuestion: 'What should I bring?',
         heroBody: 'Personalized care for every guest.',
         heroTitle: 'A better stay starts here',
+        policies: 'Vaccinations are required.',
         primary: '#123456',
+        sectionLayout: [
+          { id: 'about', visible: true },
+          { id: 'services', visible: false },
+          { id: 'faq', visible: true },
+          { id: 'contact', visible: true },
+        ],
       },
     });
   });
@@ -40,6 +60,21 @@ describe('website live preview messages', () => {
       parseWebsiteLivePreviewMessage({
         ...valid,
         payload: { ...valid.payload, primary: 'red' },
+      }),
+    ).toBeNull();
+
+    expect(
+      parseWebsiteLivePreviewMessage({
+        ...valid,
+        payload: {
+          ...valid.payload,
+          sectionLayout: [
+            { id: 'services', visible: true },
+            { id: 'services', visible: false },
+            { id: 'faq', visible: true },
+            { id: 'contact', visible: true },
+          ],
+        },
       }),
     ).toBeNull();
   });

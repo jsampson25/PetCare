@@ -174,10 +174,12 @@ Draft changes appear only in authenticated preview. Publication is atomic: the w
 - On wide workspace layouts, a persistent canvas remains beside the editing controls and offers
   desktop, tablet, and mobile widths. It renders the private draft and links to the full preview
   studio.
-- Headline, introduction, about, contact, and brand-color changes stream into the private canvas
+- Headline, introduction, about, FAQ, policies, contact, and brand-color changes stream into the private canvas
   before saving through a same-origin, allowlisted message contract. Unsaved values are never
-  written to the tenant website record. Structural changes such as theme selection, section order,
-  visibility, and media placement still require saving and refreshing the server-rendered preview.
+  written to the tenant website record.
+- Section order and visibility changes also stream into the canvas, and the authenticated saved
+  preview uses the same persisted order on first render. Theme selection and media placement still
+  require saving and refreshing the server-rendered preview.
 - Hero, services, about, and contact preview regions are keyboard selectable. Selection is
   synchronized through the same allowlisted message boundary, highlighted in both surfaces, and
   moves focus to the matching grouped editor controls.

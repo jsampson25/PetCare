@@ -5,6 +5,7 @@ import type { CSSProperties } from 'react';
 import { resolveBusinessContext } from '../../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../../lib/supabase/server';
 import { getWebsitePresentation } from '../../../../../lib/websites/presentation';
+import { isWebsiteSectionLayout, type WebsiteLayoutSectionId } from '../website-live-preview';
 import { WebsitePreviewLiveBridge } from '../website-preview-live-bridge';
 
 export const metadata = { robots: { index: false, follow: false } };
@@ -84,14 +85,19 @@ export default async function PreviewPage({
   const logoImageUrl = mediaUrl(logoMedia?.object_path);
   const servicesImageUrl = mediaUrl(servicesMedia?.object_path);
   const aboutImageUrl = mediaUrl(aboutMedia?.object_path);
-  const sectionLayout = Array.isArray(content.section_layout)
-    ? (content.section_layout as Array<{ id: string; visible: boolean }>)
+  const sectionLayout = isWebsiteSectionLayout(content.section_layout)
+    ? content.section_layout
     : [
         { id: 'services', visible: true },
         { id: 'about', visible: true },
         { id: 'faq', visible: true },
         { id: 'contact', visible: true },
       ];
+  const sectionOrder = (sectionId: WebsiteLayoutSectionId) =>
+    Math.max(
+      0,
+      sectionLayout.findIndex((section) => section.id === sectionId),
+    );
   const visibleSections = new Set(
     sectionLayout.filter((section) => section.visible).map((section) => section.id),
   );
@@ -108,6 +114,9 @@ export default async function PreviewPage({
         showInNavigation: boolean;
       }>)
     : [];
+  const firstFaq = Array.isArray(content.faqs)
+    ? (content.faqs[0] as { question?: string; answer?: string } | undefined)
+    : undefined;
   const previewNavigationItems = [
     ...sectionLayout
       .filter((section) => section.visible)
@@ -347,13 +356,16 @@ export default async function PreviewPage({
         </div>
       </section>
 
-      {visibleSections.has('services') ? (
+      <div className="flex flex-col" data-preview-layout-root>
         <section
           aria-label="Edit services section"
           className={`cursor-pointer border-y border-slate-200/70 bg-white outline-none transition-shadow focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-500 data-[preview-selected=true]:ring-4 data-[preview-selected=true]:ring-inset data-[preview-selected=true]:ring-blue-500 ${presentation.section}`}
+          data-preview-layout-section="services"
           data-preview-section="services"
+          hidden={!visibleSections.has('services')}
           id="services"
           role="button"
+          style={{ order: sectionOrder('services') }}
           tabIndex={0}
         >
           <div className="mx-auto max-w-7xl px-6">
@@ -426,15 +438,16 @@ export default async function PreviewPage({
             </div>
           </div>
         </section>
-      ) : null}
 
-      {visibleSections.has('about') ? (
         <section
           aria-label="Edit about section"
           className={`cursor-pointer px-6 outline-none transition-shadow focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-500 data-[preview-selected=true]:ring-4 data-[preview-selected=true]:ring-inset data-[preview-selected=true]:ring-blue-500 ${presentation.section}`}
+          data-preview-layout-section="about"
           data-preview-section="about"
+          hidden={!visibleSections.has('about')}
           id="about"
           role="button"
+          style={{ order: sectionOrder('about') }}
           tabIndex={0}
         >
           <div
@@ -466,23 +479,63 @@ export default async function PreviewPage({
             </div>
           </div>
         </section>
-      ) : null}
 
-      <footer
-        aria-label="Edit contact section"
-        className="cursor-pointer border-t bg-white py-10 outline-none transition-shadow focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-500 data-[preview-selected=true]:ring-4 data-[preview-selected=true]:ring-inset data-[preview-selected=true]:ring-blue-500"
-        data-preview-section="contact"
-        role="button"
-        tabIndex={0}
-      >
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-6">
-          <p className="font-black">{site.business.name}</p>
-          <p className="text-sm text-slate-500">
-            <span data-preview-field="contactEmail">{String(content.contact_email ?? '')}</span> ·{' '}
-            <span data-preview-field="contactPhone">{String(content.contact_phone ?? '')}</span>
-          </p>
-        </div>
-      </footer>
+        <section
+          aria-label="Edit frequently asked questions section"
+          className={`cursor-pointer border-y border-slate-200/70 bg-white px-6 outline-none transition-shadow focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-500 data-[preview-selected=true]:ring-4 data-[preview-selected=true]:ring-inset data-[preview-selected=true]:ring-blue-500 ${presentation.section}`}
+          data-preview-layout-section="faq"
+          data-preview-section="contact"
+          hidden={!visibleSections.has('faq')}
+          id="faq"
+          role="button"
+          style={{ order: sectionOrder('faq') }}
+          tabIndex={0}
+        >
+          <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[.8fr_1.2fr]">
+            <div>
+              <p
+                className="text-xs font-black uppercase tracking-[0.22em]"
+                style={{ color: 'var(--tenant-primary)' }}
+              >
+                Plan with confidence
+              </p>
+              <h2 className="mt-3 text-4xl font-black tracking-[-0.035em] sm:text-5xl">
+                Frequently asked questions
+              </h2>
+              <p className="mt-5 leading-7 text-slate-600" data-preview-field="policies">
+                {String(content.policies ?? '')}
+              </p>
+            </div>
+            <article className={`p-6 sm:p-8 ${presentation.card}`}>
+              <h3 className="text-xl font-black" data-preview-field="faqQuestion">
+                {firstFaq?.question ?? 'What should I bring for my pet?'}
+              </h3>
+              <p className="mt-4 leading-7 text-slate-600" data-preview-field="faqAnswer">
+                {firstFaq?.answer ?? ''}
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <footer
+          aria-label="Edit contact section"
+          className="cursor-pointer border-t bg-white py-10 outline-none transition-shadow focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-500 data-[preview-selected=true]:ring-4 data-[preview-selected=true]:ring-inset data-[preview-selected=true]:ring-blue-500"
+          data-preview-layout-section="contact"
+          data-preview-section="contact"
+          hidden={!visibleSections.has('contact')}
+          role="button"
+          style={{ order: sectionOrder('contact') }}
+          tabIndex={0}
+        >
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-6">
+            <p className="font-black">{site.business.name}</p>
+            <p className="text-sm text-slate-500">
+              <span data-preview-field="contactEmail">{String(content.contact_email ?? '')}</span> ·{' '}
+              <span data-preview-field="contactPhone">{String(content.contact_phone ?? '')}</span>
+            </p>
+          </div>
+        </footer>
+      </div>
     </main>
   );
 }

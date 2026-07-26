@@ -4,15 +4,21 @@ export const WEBSITE_PREVIEW_SECTION_MESSAGE_TYPE = 'petcare.website-preview.sec
 export const WEBSITE_EDITOR_SECTION_EVENT_TYPE = 'petcare:website-editor-section';
 
 export type WebsitePreviewSection = 'hero' | 'services' | 'about' | 'contact';
+export type WebsiteLayoutSectionId = 'services' | 'about' | 'faq' | 'contact';
+export type WebsiteLayoutSection = { id: WebsiteLayoutSectionId; visible: boolean };
 
 export type WebsiteLivePreviewDraft = {
   about: string;
   accent: string;
   contactEmail: string;
   contactPhone: string;
+  faqAnswer: string;
+  faqQuestion: string;
   heroBody: string;
   heroTitle: string;
+  policies: string;
   primary: string;
+  sectionLayout: WebsiteLayoutSection[];
 };
 
 export type WebsiteLivePreviewMessage = {
@@ -27,6 +33,13 @@ export type WebsitePreviewSectionMessage = {
 
 const colorPattern = /^#[0-9a-f]{6}$/i;
 const previewSections: WebsitePreviewSection[] = ['hero', 'services', 'about', 'contact'];
+const defaultSectionLayout: WebsiteLayoutSection[] = [
+  { id: 'services', visible: true },
+  { id: 'about', visible: true },
+  { id: 'faq', visible: true },
+  { id: 'contact', visible: true },
+];
+const layoutSectionIds: WebsiteLayoutSectionId[] = ['services', 'about', 'faq', 'contact'];
 
 export function isWebsitePreviewSection(value: unknown): value is WebsitePreviewSection {
   return typeof value === 'string' && previewSections.includes(value as WebsitePreviewSection);
@@ -35,6 +48,33 @@ export function isWebsitePreviewSection(value: unknown): value is WebsitePreview
 function stringValue(formData: FormData, name: string) {
   const value = formData.get(name);
   return typeof value === 'string' ? value : '';
+}
+
+export function isWebsiteSectionLayout(value: unknown): value is WebsiteLayoutSection[] {
+  if (!Array.isArray(value) || value.length !== layoutSectionIds.length) return false;
+  const seen = new Set<string>();
+  return value.every((section) => {
+    if (!section || typeof section !== 'object') return false;
+    const candidate = section as Partial<WebsiteLayoutSection>;
+    if (
+      !layoutSectionIds.includes(candidate.id as WebsiteLayoutSectionId) ||
+      typeof candidate.visible !== 'boolean' ||
+      seen.has(String(candidate.id))
+    ) {
+      return false;
+    }
+    seen.add(String(candidate.id));
+    return true;
+  });
+}
+
+export function parseWebsiteSectionLayout(value: string): WebsiteLayoutSection[] {
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return isWebsiteSectionLayout(parsed) ? parsed : defaultSectionLayout;
+  } catch {
+    return defaultSectionLayout;
+  }
 }
 
 export function createWebsiteLivePreviewMessage(formData: FormData): WebsiteLivePreviewMessage {
@@ -48,9 +88,13 @@ export function createWebsiteLivePreviewMessage(formData: FormData): WebsiteLive
       accent: colorPattern.test(accent) ? accent : '#d97745',
       contactEmail: stringValue(formData, 'contactEmail'),
       contactPhone: stringValue(formData, 'contactPhone'),
+      faqAnswer: stringValue(formData, 'faqAnswer'),
+      faqQuestion: stringValue(formData, 'faqQuestion'),
       heroBody: stringValue(formData, 'heroBody'),
       heroTitle: stringValue(formData, 'heroTitle'),
+      policies: stringValue(formData, 'policies'),
       primary: colorPattern.test(primary) ? primary : '#23664f',
+      sectionLayout: parseWebsiteSectionLayout(stringValue(formData, 'sectionLayout')),
     },
   };
 }
@@ -61,17 +105,23 @@ export function parseWebsiteLivePreviewMessage(value: unknown): WebsiteLivePrevi
   if (candidate.type !== WEBSITE_PREVIEW_MESSAGE_TYPE || !candidate.payload) return null;
 
   const payload = candidate.payload as Partial<WebsiteLivePreviewDraft>;
-  const textFields: Array<keyof Omit<WebsiteLivePreviewDraft, 'primary' | 'accent'>> = [
+  const textFields: Array<
+    keyof Omit<WebsiteLivePreviewDraft, 'primary' | 'accent' | 'sectionLayout'>
+  > = [
     'about',
     'contactEmail',
     'contactPhone',
+    'faqAnswer',
+    'faqQuestion',
     'heroBody',
     'heroTitle',
+    'policies',
   ];
 
   if (textFields.some((field) => typeof payload[field] !== 'string')) return null;
   if (typeof payload.primary !== 'string' || !colorPattern.test(payload.primary)) return null;
   if (typeof payload.accent !== 'string' || !colorPattern.test(payload.accent)) return null;
+  if (!isWebsiteSectionLayout(payload.sectionLayout)) return null;
 
   return candidate as WebsiteLivePreviewMessage;
 }

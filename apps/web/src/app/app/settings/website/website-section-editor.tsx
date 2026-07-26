@@ -1,11 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { WebsiteLayoutSection } from './website-live-preview';
 
-export type WebsiteSection = {
-  id: 'services' | 'about' | 'faq' | 'contact';
-  visible: boolean;
-};
+export type WebsiteSection = WebsiteLayoutSection;
 
 const sectionDetails: Record<WebsiteSection['id'], { name: string; description: string }> = {
   services: {
@@ -36,6 +34,15 @@ export const defaultWebsiteSections: WebsiteSection[] = [
 export function WebsiteSectionEditor({ initialSections }: { initialSections: WebsiteSection[] }) {
   const [sections, setSections] = useState(initialSections);
   const [draggedId, setDraggedId] = useState<WebsiteSection['id'] | null>(null);
+  const layoutInputRef = useRef<HTMLInputElement>(null);
+  const previousLayoutRef = useRef(JSON.stringify(initialSections));
+
+  useEffect(() => {
+    const serialized = JSON.stringify(sections);
+    if (serialized === previousLayoutRef.current) return;
+    previousLayoutRef.current = serialized;
+    layoutInputRef.current?.dispatchEvent(new Event('input', { bubbles: true }));
+  }, [sections]);
 
   function move(index: number, direction: -1 | 1) {
     const target = index + direction;
@@ -67,7 +74,12 @@ export function WebsiteSectionEditor({ initialSections }: { initialSections: Web
         Drag sections into order, or use the arrow buttons. Hidden sections remain in your draft so
         you can restore them later.
       </p>
-      <input name="sectionLayout" type="hidden" value={JSON.stringify(sections)} />
+      <input
+        name="sectionLayout"
+        ref={layoutInputRef}
+        type="hidden"
+        value={JSON.stringify(sections)}
+      />
       <div className="mt-4 grid gap-2">
         {sections.map((section, index) => {
           const detail = sectionDetails[section.id];

@@ -14,8 +14,11 @@ const previewFieldSelectors = {
   about: '[data-preview-field="about"]',
   contactEmail: '[data-preview-field="contactEmail"]',
   contactPhone: '[data-preview-field="contactPhone"]',
+  faqAnswer: '[data-preview-field="faqAnswer"]',
+  faqQuestion: '[data-preview-field="faqQuestion"]',
   heroBody: '[data-preview-field="heroBody"]',
   heroTitle: '[data-preview-field="heroTitle"]',
+  policies: '[data-preview-field="policies"]',
 } as const;
 
 export function WebsitePreviewLiveBridge() {
@@ -58,6 +61,16 @@ export function WebsitePreviewLiveBridge() {
           element.textContent = value;
         });
       }
+
+      const layoutRoot = document.querySelector<HTMLElement>('[data-preview-layout-root]');
+      message.payload.sectionLayout.forEach((section, index) => {
+        const element = layoutRoot?.querySelector<HTMLElement>(
+          `[data-preview-layout-section="${section.id}"]`,
+        );
+        if (!element) return;
+        element.hidden = !section.visible;
+        element.style.order = String(index);
+      });
     }
 
     function publishSectionSelection(target: EventTarget | null) {
