@@ -1,5 +1,6 @@
 export const WEBSITE_EDITOR_RESTORE_EVENT_TYPE = 'petcare:website-editor-restore';
 export const WEBSITE_EDITOR_HISTORY_EVENT_TYPE = 'petcare:website-editor-history';
+export const WEBSITE_EDITOR_APPLY_SNAPSHOT_EVENT_TYPE = 'petcare:website-editor-apply-snapshot';
 
 export type WebsiteEditorSnapshot = Record<string, string[]>;
 

@@ -6,6 +6,7 @@ import {
   appendWebsiteEditorSnapshot,
   createWebsiteEditorSnapshot,
   serializeWebsiteEditorSnapshot,
+  WEBSITE_EDITOR_APPLY_SNAPSHOT_EVENT_TYPE,
   WEBSITE_EDITOR_HISTORY_EVENT_TYPE,
   WEBSITE_EDITOR_RESTORE_EVENT_TYPE,
   type WebsiteEditorHistory,
@@ -25,6 +26,7 @@ const controlledFieldNames = new Set([
   'servicesFocalY',
   'aboutFocalX',
   'aboutFocalY',
+  'themeCopies',
 ]);
 
 function restoreNativeFields(form: HTMLFormElement, snapshot: WebsiteEditorSnapshot) {
@@ -127,6 +129,28 @@ export function WebsiteEditorHistoryControls({ initiallyDirty }: { initiallyDirt
       restore(nextIndex);
     }
 
+    function handleApplySnapshot(event: Event) {
+      const snapshot = (event as CustomEvent<{ snapshot?: unknown }>).detail?.snapshot;
+      if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) return;
+      window.clearTimeout(captureTimer);
+      const current = createWebsiteEditorSnapshot(new FormData(form));
+      const withCurrent = appendWebsiteEditorSnapshot(historyRef.current, current);
+      const next = appendWebsiteEditorSnapshot(withCurrent, snapshot as WebsiteEditorSnapshot);
+      restoringRef.current = true;
+      historyRef.current = next;
+      setHistoryIndex(next.index);
+      setHistoryLength(next.entries.length);
+      restoreNativeFields(form, snapshot as WebsiteEditorSnapshot);
+      window.dispatchEvent(
+        new CustomEvent(WEBSITE_EDITOR_RESTORE_EVENT_TYPE, { detail: { snapshot } }),
+      );
+      updateDirty(snapshot as WebsiteEditorSnapshot);
+      window.setTimeout(() => {
+        form.dispatchEvent(new Event('input', { bubbles: true }));
+        restoringRef.current = false;
+      });
+    }
+
     function handleKeyDown(event: KeyboardEvent) {
       if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
       const key = event.key.toLowerCase();
@@ -172,6 +196,7 @@ export function WebsiteEditorHistoryControls({ initiallyDirty }: { initiallyDirt
     document.addEventListener('keydown', handleKeyDown);
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener(WEBSITE_EDITOR_HISTORY_EVENT_TYPE, handleHistoryAction);
+    window.addEventListener(WEBSITE_EDITOR_APPLY_SNAPSHOT_EVENT_TYPE, handleApplySnapshot);
     return () => {
       window.clearTimeout(captureTimer);
       form.removeEventListener('input', scheduleCapture);
@@ -181,6 +206,7 @@ export function WebsiteEditorHistoryControls({ initiallyDirty }: { initiallyDirt
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener(WEBSITE_EDITOR_HISTORY_EVENT_TYPE, handleHistoryAction);
+      window.removeEventListener(WEBSITE_EDITOR_APPLY_SNAPSHOT_EVENT_TYPE, handleApplySnapshot);
     };
   }, [initiallyDirty]);
 

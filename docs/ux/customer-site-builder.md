@@ -193,6 +193,10 @@ explicit non-drag alternative. Every successful move is announced with the secti
 - Embedded device controls use true 1280×720, 768×1024, and 390×844 responsive viewports, scaled
   to the available editor space. Switching devices resizes the existing live iframe instead of
   navigating or reloading it, so unsaved content and the selected section remain in place.
+- Owners can preserve up to five named design copies containing the approved theme, color, layout,
+  media-placement, and crop settings without duplicating business copy or custom pages. A
+  reset-to-template action restores those design fields while preserving written content, and both
+  applying a copy and resetting can be undone before the draft is saved.
 - Headline, introduction, about, FAQ, policies, contact, and brand-color changes stream into the private canvas
   before saving through a same-origin, allowlisted message contract. Unsaved values are never
   written to the tenant website record.

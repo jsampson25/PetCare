@@ -21,6 +21,8 @@ import { WebsiteEditorHistoryControls } from './website-editor-history-controls'
 import { WebsiteMediaEditor, type WebsiteMedia } from './website-media-editor';
 import { WebsiteSectionInspector } from './website-section-inspector';
 import { WebsiteStylePicker } from './website-style-picker';
+import { isWebsiteThemeCopyList } from './website-theme-copies';
+import { WebsiteThemeManager } from './website-theme-manager';
 import { resolveWebsiteThemeSelection, type WebsiteStyleKey } from './website-theme-catalog';
 import { isWebsiteSectionLayout } from './website-section-catalog';
 type SP = Promise<Record<string, string | string[] | undefined>>;
@@ -77,6 +79,7 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
   const customPages: WebsiteCustomPage[] = isWebsiteCustomPageList(c.custom_pages)
     ? c.custom_pages
     : [];
+  const themeCopies = isWebsiteThemeCopyList(c.theme_copies) ? c.theme_copies : [];
   const heroMedia = c.hero_media as { id?: string; focal_x?: number; focal_y?: number } | undefined;
   const logoMedia = c.logo_media as { id?: string } | undefined;
   const servicesMedia = c.services_media as
@@ -174,6 +177,11 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
             <WebsiteEditorHistoryControls initiallyDirty={themeSelection.isTrial} />
             <WebsiteStylePicker
               isTrial={themeSelection.isTrial}
+              style={themeSelection.style}
+              template={themeSelection.template}
+            />
+            <WebsiteThemeManager
+              initialCopies={themeCopies}
               style={themeSelection.style}
               template={themeSelection.template}
             />

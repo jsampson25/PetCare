@@ -10,6 +10,7 @@ import {
   reservedWebsitePageSlugs,
 } from './website-custom-pages';
 import { isWebsiteSectionLayout } from './website-section-catalog';
+import { isWebsiteThemeCopyList } from './website-theme-copies';
 
 const websiteMediaTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const maxWebsiteMediaBytes = 10 * 1024 * 1024;
@@ -118,6 +119,17 @@ export async function saveWebsiteDraft(formData: FormData) {
           })()
         : null,
     );
+  const themeCopies = z.custom(isWebsiteThemeCopyList).safeParse(
+    typeof raw.themeCopies === 'string'
+      ? (() => {
+          try {
+            return JSON.parse(raw.themeCopies);
+          } catch {
+            return null;
+          }
+        })()
+      : null,
+  );
   const parsed = z
     .object({
       theme: z.enum(['modern', 'warm', 'classic']),
@@ -156,7 +168,7 @@ export async function saveWebsiteDraft(formData: FormData) {
       aboutFocalY: z.coerce.number().int().min(0).max(100),
     })
     .safeParse(raw);
-  if (!parsed.success || !sectionLayout.success || !customPages.success)
+  if (!parsed.success || !sectionLayout.success || !customPages.success || !themeCopies.success)
     redirect('/app/settings/website?error=Complete+the+required+website+content.');
   const primaryColor = validateTenantActionColor(parsed.data.primary);
   if (!primaryColor.accepted)
@@ -212,6 +224,7 @@ export async function saveWebsiteDraft(formData: FormData) {
       seo_description: parsed.data.seoDescription,
       section_layout: sectionLayout.data,
       custom_pages: customPages.data,
+      theme_copies: themeCopies.data,
       logo_media: parsed.data.logoMediaId ? (mediaById.get(parsed.data.logoMediaId) ?? null) : null,
       hero_media: parsed.data.heroMediaId
         ? mediaWithFocalPoint(
