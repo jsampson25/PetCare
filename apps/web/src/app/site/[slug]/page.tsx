@@ -8,6 +8,12 @@ import type { CSSProperties } from 'react';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
 import { getWebsitePresentation } from '../../../lib/websites/presentation';
 import { submitInquiry } from './actions';
+import {
+  defaultWebsiteSectionLayout,
+  isWebsiteSectionLayout,
+  websiteSectionCatalog,
+  type WebsiteLayoutSectionId,
+} from '../../app/settings/website/website-section-catalog';
 
 type Site = {
   business: { name: string; slug: string };
@@ -18,25 +24,12 @@ type Site = {
   locations: Array<{ name: string; time_zone: string }>;
   seo: { title: string; description: string };
 };
-type SectionId = 'services' | 'about' | 'faq' | 'contact';
 type CustomPage = {
   id: string;
   title: string;
   slug: string;
   body: string;
   showInNavigation: boolean;
-};
-const defaultSectionLayout: Array<{ id: SectionId; visible: boolean }> = [
-  { id: 'services', visible: true },
-  { id: 'about', visible: true },
-  { id: 'faq', visible: true },
-  { id: 'contact', visible: true },
-];
-const sectionLabels: Record<SectionId, string> = {
-  services: 'Services',
-  about: 'About',
-  faq: 'FAQ',
-  contact: 'Contact',
 };
 async function getSite(slug: string) {
   const supabase = await createSupabaseServerClient();
@@ -72,9 +65,9 @@ export default async function TenantSitePage({
   const faqs = Array.isArray(content.faqs)
     ? (content.faqs as Array<{ question: string; answer: string }>)
     : [];
-  const sectionLayout = Array.isArray(content.section_layout)
-    ? (content.section_layout as Array<{ id: SectionId; visible: boolean }>)
-    : defaultSectionLayout;
+  const sectionLayout = isWebsiteSectionLayout(content.section_layout)
+    ? content.section_layout
+    : defaultWebsiteSectionLayout;
   const customPages = Array.isArray(content.custom_pages)
     ? (content.custom_pages as CustomPage[])
     : [];
@@ -104,9 +97,9 @@ export default async function TenantSitePage({
   const logoImageUrl = mediaUrl(logoMedia?.object_path);
   const servicesImageUrl = mediaUrl(servicesMedia?.object_path);
   const aboutImageUrl = mediaUrl(aboutMedia?.object_path);
-  const sectionStyle = (id: SectionId): CSSProperties => ({
+  const sectionStyle = (id: WebsiteLayoutSectionId): CSSProperties => ({
     display:
-      sectionLayout.find((section) => section.id === id)?.visible === false ? 'none' : undefined,
+      sectionLayout.find((section) => section.id === id)?.visible === true ? undefined : 'none',
     order: Math.max(
       0,
       sectionLayout.findIndex((section) => section.id === id),
@@ -152,7 +145,7 @@ export default async function TenantSitePage({
     .map((section) => ({
       href: `#${section.id}`,
       id: section.id,
-      label: sectionLabels[section.id],
+      label: websiteSectionCatalog[section.id].name,
     }));
   const customNavigationItems = customPages
     .filter((page) => page.showInNavigation)
@@ -456,6 +449,99 @@ export default async function TenantSitePage({
                 </details>
               ))}
             </div>
+          </div>
+        </section>
+        <section className="px-6 py-20" id="highlights" style={sectionStyle('highlights')}>
+          <div className="mx-auto max-w-7xl">
+            <p
+              className="text-xs font-black uppercase tracking-[0.18em]"
+              style={{ color: 'var(--tenant-primary)' }}
+            >
+              Care made easier
+            </p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight">Confidence at every step</h2>
+            <div className="mt-10 grid gap-5 md:grid-cols-3">
+              {[
+                [
+                  'Simple online booking',
+                  'Choose services, share care details, and request a visit from any device.',
+                ],
+                [
+                  'Personalized routines',
+                  'Your pet profile keeps feeding, medication, and comfort notes together.',
+                ],
+                [
+                  'Updates while away',
+                  'Stay connected to the care experience from arrival through pickup.',
+                ],
+              ].map(([title, body]) => (
+                <article className={`p-6 ${presentation.card}`} key={title}>
+                  <h3 className="text-xl font-black">{title}</h3>
+                  <p className="mt-3 leading-7 text-slate-600">{body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section
+          className="border-y border-black/5 bg-white px-6 py-20"
+          id="process"
+          style={sectionStyle('process')}
+        >
+          <div className="mx-auto max-w-7xl">
+            <p
+              className="text-xs font-black uppercase tracking-[0.18em]"
+              style={{ color: 'var(--tenant-primary)' }}
+            >
+              How it works
+            </p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight">From profile to pickup</h2>
+            <ol className="mt-10 grid gap-6 md:grid-cols-3">
+              {[
+                ['1', 'Create a pet profile', 'Share the details the care team needs to prepare.'],
+                [
+                  '2',
+                  'Book the right care',
+                  'Choose dates, services, and add-ons in one guided flow.',
+                ],
+                [
+                  '3',
+                  'Stay connected',
+                  'Manage the visit and receive updates from your customer portal.',
+                ],
+              ].map(([step, title, body]) => (
+                <li className="flex gap-4" key={step}>
+                  <span
+                    className="grid size-11 shrink-0 place-items-center rounded-full font-black"
+                    style={{
+                      backgroundColor: 'var(--tenant-primary)',
+                      color: 'var(--action-primary-text)',
+                    }}
+                  >
+                    {step}
+                  </span>
+                  <span>
+                    <strong className="block text-lg">{title}</strong>
+                    <span className="mt-2 block leading-7 text-slate-600">{body}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+        <section className="px-6 py-16" id="cta" style={sectionStyle('cta')}>
+          <div
+            className={`mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 p-8 sm:flex-row sm:items-center sm:p-10 ${presentation.about}`}
+          >
+            <div>
+              <p
+                className={`text-xs font-black uppercase tracking-[0.18em] ${presentation.aboutEyebrow}`}
+              >
+                Ready when you are
+              </p>
+              <h2 className="mt-3 text-3xl font-black">Plan your pet&apos;s next visit</h2>
+            </div>
+            <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
           </div>
         </section>
         <section

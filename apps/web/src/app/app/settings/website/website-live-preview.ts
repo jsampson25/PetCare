@@ -1,11 +1,21 @@
+import {
+  defaultWebsiteSectionLayout,
+  isWebsiteSectionLayout,
+  type WebsiteLayoutSection,
+} from './website-section-catalog';
+
+export {
+  isWebsiteSectionLayout,
+  type WebsiteLayoutSection,
+  type WebsiteLayoutSectionId,
+} from './website-section-catalog';
+
 export const WEBSITE_PREVIEW_MESSAGE_TYPE = 'petcare.website-preview.update';
 export const WEBSITE_PREVIEW_READY_MESSAGE_TYPE = 'petcare.website-preview.ready';
 export const WEBSITE_PREVIEW_SECTION_MESSAGE_TYPE = 'petcare.website-preview.section';
 export const WEBSITE_EDITOR_SECTION_EVENT_TYPE = 'petcare:website-editor-section';
 
 export type WebsitePreviewSection = 'hero' | 'services' | 'about' | 'contact';
-export type WebsiteLayoutSectionId = 'services' | 'about' | 'faq' | 'contact';
-export type WebsiteLayoutSection = { id: WebsiteLayoutSectionId; visible: boolean };
 export type WebsitePreviewMediaSlot = 'logo' | 'hero' | 'services' | 'about';
 export type WebsitePreviewMedia = { url: string; altText: string };
 export type WebsitePreviewMediaCatalogItem = {
@@ -57,13 +67,6 @@ export type WebsitePreviewSectionMessage = {
 
 const colorPattern = /^#[0-9a-f]{6}$/i;
 const previewSections: WebsitePreviewSection[] = ['hero', 'services', 'about', 'contact'];
-const defaultSectionLayout: WebsiteLayoutSection[] = [
-  { id: 'services', visible: true },
-  { id: 'about', visible: true },
-  { id: 'faq', visible: true },
-  { id: 'contact', visible: true },
-];
-const layoutSectionIds: WebsiteLayoutSectionId[] = ['services', 'about', 'faq', 'contact'];
 const mediaSlots: WebsitePreviewMediaSlot[] = ['logo', 'hero', 'services', 'about'];
 
 export function isWebsitePreviewSection(value: unknown): value is WebsitePreviewSection {
@@ -75,30 +78,12 @@ function stringValue(formData: FormData, name: string) {
   return typeof value === 'string' ? value : '';
 }
 
-export function isWebsiteSectionLayout(value: unknown): value is WebsiteLayoutSection[] {
-  if (!Array.isArray(value) || value.length !== layoutSectionIds.length) return false;
-  const seen = new Set<string>();
-  return value.every((section) => {
-    if (!section || typeof section !== 'object') return false;
-    const candidate = section as Partial<WebsiteLayoutSection>;
-    if (
-      !layoutSectionIds.includes(candidate.id as WebsiteLayoutSectionId) ||
-      typeof candidate.visible !== 'boolean' ||
-      seen.has(String(candidate.id))
-    ) {
-      return false;
-    }
-    seen.add(String(candidate.id));
-    return true;
-  });
-}
-
 export function parseWebsiteSectionLayout(value: string): WebsiteLayoutSection[] {
   try {
     const parsed = JSON.parse(value) as unknown;
-    return isWebsiteSectionLayout(parsed) ? parsed : defaultSectionLayout;
+    return isWebsiteSectionLayout(parsed) ? parsed : defaultWebsiteSectionLayout;
   } catch {
-    return defaultSectionLayout;
+    return defaultWebsiteSectionLayout;
   }
 }
 

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { resolveBusinessContext } from '../../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../../lib/supabase/server';
+import { isWebsiteSectionLayout } from './website-section-catalog';
 
 const websiteMediaTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const maxWebsiteMediaBytes = 10 * 1024 * 1024;
@@ -61,7 +62,7 @@ export async function saveWebsiteDraft(formData: FormData) {
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('website.edit')) redirect('/denied');
   const websiteSectionSchema = z.object({
-    id: z.enum(['services', 'about', 'faq', 'contact']),
+    id: z.string(),
     visible: z.boolean(),
   });
   const customPageSchema = z.object({
@@ -80,8 +81,9 @@ export async function saveWebsiteDraft(formData: FormData) {
   const raw = Object.fromEntries(formData);
   const sectionLayout = z
     .array(websiteSectionSchema)
-    .length(4)
-    .refine((sections) => new Set(sections.map((section) => section.id)).size === 4)
+    .min(4)
+    .max(7)
+    .refine(isWebsiteSectionLayout)
     .safeParse(
       typeof raw.sectionLayout === 'string'
         ? (() => {

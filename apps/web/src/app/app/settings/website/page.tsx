@@ -13,11 +13,7 @@ import {
   unpublishWebsite,
   uploadWebsiteMedia,
 } from './actions';
-import {
-  defaultWebsiteSections,
-  WebsiteSectionEditor,
-  type WebsiteSection,
-} from './website-section-editor';
+import { defaultWebsiteSections, WebsiteSectionEditor } from './website-section-editor';
 import { WebsiteCustomPagesEditor, type WebsiteCustomPage } from './website-custom-pages-editor';
 import { WebsiteEditorCanvas } from './website-editor-canvas';
 import { WebsiteEditorHistoryControls } from './website-editor-history-controls';
@@ -25,6 +21,7 @@ import { WebsiteMediaEditor, type WebsiteMedia } from './website-media-editor';
 import { WebsiteSectionInspector } from './website-section-inspector';
 import { WebsiteStylePicker } from './website-style-picker';
 import { resolveWebsiteThemeSelection, type WebsiteStyleKey } from './website-theme-catalog';
+import { isWebsiteSectionLayout } from './website-section-catalog';
 type SP = Promise<Record<string, string | string[] | undefined>>;
 export default async function WebsiteSettingsPage({ searchParams }: { searchParams: SP }) {
   const context = await resolveBusinessContext();
@@ -73,8 +70,8 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
     String(c.template_key ?? 'studio-split'),
   );
   const faq = Array.isArray(c.faqs) ? (c.faqs[0] as Record<string, string> | undefined) : undefined;
-  const storedSections = Array.isArray(c.section_layout)
-    ? (c.section_layout as WebsiteSection[])
+  const storedSections = isWebsiteSectionLayout(c.section_layout)
+    ? c.section_layout
     : defaultWebsiteSections;
   const customPages = Array.isArray(c.custom_pages) ? (c.custom_pages as WebsiteCustomPage[]) : [];
   const heroMedia = c.hero_media as { id?: string } | undefined;

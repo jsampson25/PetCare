@@ -6,7 +6,15 @@ import {
   WEBSITE_EDITOR_RESTORE_EVENT_TYPE,
   type WebsiteEditorSnapshot,
 } from './website-editor-history';
-import type { WebsiteLayoutSection } from './website-live-preview';
+import {
+  addWebsiteSection,
+  defaultWebsiteSectionLayout,
+  isWebsiteSectionLayout,
+  removeWebsiteSection,
+  websiteOptionalSectionIds,
+  websiteSectionCatalog,
+  type WebsiteLayoutSection,
+} from './website-section-catalog';
 import {
   moveWebsiteSection,
   reorderWebsiteSections,
@@ -15,31 +23,8 @@ import {
 
 export type WebsiteSection = WebsiteLayoutSection;
 
-const sectionDetails: Record<WebsiteSection['id'], { name: string; description: string }> = {
-  services: {
-    name: 'Services',
-    description: 'Boarding, daycare, grooming, and other published services.',
-  },
-  about: {
-    name: 'About and trust',
-    description: 'Your story, care philosophy, and reasons families choose you.',
-  },
-  faq: {
-    name: 'Frequently asked questions',
-    description: 'Answers that help customers prepare before booking.',
-  },
-  contact: {
-    name: 'Contact and policies',
-    description: 'Locations, contact form, hours, and policy information.',
-  },
-};
-
-export const defaultWebsiteSections: WebsiteSection[] = [
-  { id: 'services', visible: true },
-  { id: 'about', visible: true },
-  { id: 'faq', visible: true },
-  { id: 'contact', visible: true },
-];
+const sectionDetails = websiteSectionCatalog;
+export const defaultWebsiteSections: WebsiteSection[] = defaultWebsiteSectionLayout;
 
 export function WebsiteSectionEditor({ initialSections }: { initialSections: WebsiteSection[] }) {
   const [sections, setSections] = useState(initialSections);
@@ -68,13 +53,7 @@ export function WebsiteSectionEditor({ initialSections }: { initialSections: Web
         const restored = JSON.parse(
           readWebsiteEditorSnapshotValue(snapshot, 'sectionLayout'),
         ) as WebsiteSection[];
-        if (
-          Array.isArray(restored) &&
-          restored.length === defaultWebsiteSections.length &&
-          restored.every((section) =>
-            defaultWebsiteSections.some((candidate) => candidate.id === section.id),
-          )
-        ) {
+        if (isWebsiteSectionLayout(restored)) {
           setSections(restored);
         }
       } catch {
@@ -254,9 +233,55 @@ export function WebsiteSectionEditor({ initialSections }: { initialSections: Web
               >
                 {section.visible ? 'Visible' : 'Hidden'}
               </button>
+              {detail.optional ? (
+                <button
+                  aria-label={`Remove ${detail.name}`}
+                  className="min-h-9 rounded-lg border border-red-200 px-3 text-sm font-bold text-red-700"
+                  onClick={() => {
+                    setSections((current) => removeWebsiteSection(current, section.id));
+                    setAnnouncement(`${detail.name} removed from the homepage.`);
+                  }}
+                  type="button"
+                >
+                  Remove
+                </button>
+              ) : null}
             </div>
           );
         })}
+      </div>
+      <div className="mt-6 rounded-xl border border-dashed border-[var(--border-strong)] bg-slate-50 p-4">
+        <p className="font-black">Approved section library</p>
+        <p className="mt-1 text-sm text-[var(--text-secondary)]">
+          Add a predesigned block. Every block follows your selected style and remains safe on
+          mobile.
+        </p>
+        <div className="mt-3 grid gap-2 lg:grid-cols-3">
+          {websiteOptionalSectionIds.map((id) => {
+            const detail = sectionDetails[id];
+            const added = sections.some((section) => section.id === id);
+            return (
+              <button
+                className="rounded-xl border border-[var(--border-default)] bg-white p-3 text-left disabled:cursor-default disabled:opacity-60"
+                disabled={added}
+                key={id}
+                onClick={() => {
+                  setSections((current) => addWebsiteSection(current, id));
+                  setAnnouncement(`${detail.name} added to the homepage.`);
+                }}
+                type="button"
+              >
+                <span className="block font-black">{detail.name}</span>
+                <span className="mt-1 block text-xs text-[var(--text-secondary)]">
+                  {detail.description}
+                </span>
+                <span className="mt-2 block text-xs font-black text-[var(--action-primary)]">
+                  {added ? 'Added' : '+ Add section'}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </fieldset>
   );

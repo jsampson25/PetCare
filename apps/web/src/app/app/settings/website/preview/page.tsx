@@ -118,6 +118,9 @@ export default async function PreviewPage({
     about: 'About',
     faq: 'FAQ',
     contact: 'Contact',
+    highlights: 'Care highlights',
+    process: 'How it works',
+    cta: 'Book now',
   };
   const customPages = Array.isArray(content.custom_pages)
     ? (content.custom_pages as Array<{
@@ -536,6 +539,99 @@ export default async function PreviewPage({
                 {firstFaq?.answer ?? ''}
               </p>
             </article>
+          </div>
+        </section>
+
+        <section
+          className="px-6 py-20"
+          data-preview-layout-section="highlights"
+          hidden={!visibleSections.has('highlights')}
+          id="highlights"
+          style={{ order: sectionOrder('highlights') }}
+        >
+          <div className="mx-auto max-w-7xl">
+            <p
+              className="text-xs font-black uppercase tracking-[0.2em]"
+              style={{ color: 'var(--tenant-primary)' }}
+            >
+              Care made easier
+            </p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight">Confidence at every step</h2>
+            <div className="mt-10 grid gap-5 md:grid-cols-3">
+              {[
+                ['Simple online booking', 'Choose services and request a visit from any device.'],
+                ['Personalized routines', 'Keep every important care detail in one pet profile.'],
+                ['Updates while away', 'Stay connected from arrival through pickup.'],
+              ].map(([title, body]) => (
+                <article className={`p-6 ${presentation.card}`} key={title}>
+                  <h3 className="text-xl font-black">{title}</h3>
+                  <p className="mt-3 leading-7 text-slate-600">{body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          className="border-y border-slate-200/70 bg-white px-6 py-20"
+          data-preview-layout-section="process"
+          hidden={!visibleSections.has('process')}
+          id="process"
+          style={{ order: sectionOrder('process') }}
+        >
+          <div className="mx-auto max-w-7xl">
+            <p
+              className="text-xs font-black uppercase tracking-[0.2em]"
+              style={{ color: 'var(--tenant-primary)' }}
+            >
+              How it works
+            </p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight">From profile to pickup</h2>
+            <ol className="mt-10 grid gap-6 md:grid-cols-3">
+              {[
+                ['1', 'Create a pet profile', 'Share the details the care team needs.'],
+                ['2', 'Book the right care', 'Choose dates, services, and add-ons.'],
+                ['3', 'Stay connected', 'Manage the visit from your customer portal.'],
+              ].map(([step, title, body]) => (
+                <li className="flex gap-4" key={step}>
+                  <span
+                    className="grid size-11 shrink-0 place-items-center rounded-full font-black"
+                    style={{
+                      background: 'var(--tenant-primary)',
+                      color: 'var(--action-primary-text)',
+                    }}
+                  >
+                    {step}
+                  </span>
+                  <span>
+                    <strong className="block text-lg">{title}</strong>
+                    <span className="mt-2 block text-slate-600">{body}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section
+          className="px-6 py-16"
+          data-preview-layout-section="cta"
+          hidden={!visibleSections.has('cta')}
+          id="cta"
+          style={{ order: sectionOrder('cta') }}
+        >
+          <div
+            className={`mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 p-8 sm:flex-row sm:items-center ${presentation.about}`}
+          >
+            <div>
+              <p
+                className={`text-xs font-black uppercase tracking-[0.18em] ${presentation.aboutEyebrow}`}
+              >
+                Ready when you are
+              </p>
+              <h2 className="mt-3 text-3xl font-black">Plan your pet&apos;s next visit</h2>
+            </div>
+            <ButtonLink href={`/book?tenant=${site.business.slug}`}>Book now</ButtonLink>
           </div>
         </section>
 
