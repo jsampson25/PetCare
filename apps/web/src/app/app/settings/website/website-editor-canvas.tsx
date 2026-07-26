@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   createWebsiteLivePreviewMessage,
   createWebsitePreviewSectionMessage,
+  isWebsitePreviewSection,
   parseWebsitePreviewSectionMessage,
   type WebsiteLivePreviewMessage,
+  WEBSITE_EDITOR_SECTION_EVENT_TYPE,
   WEBSITE_PREVIEW_READY_MESSAGE_TYPE,
   type WebsitePreviewSection,
 } from './website-live-preview';
@@ -28,42 +30,40 @@ export function WebsiteEditorCanvas({
   const [device, setDevice] = useState<PreviewDevice>('desktop');
   const [refreshKey, setRefreshKey] = useState(0);
   const [hasUnsavedPreview, setHasUnsavedPreview] = useState(false);
-  const [selectedSection, setSelectedSection] = useState<WebsitePreviewSection | null>(null);
+  const [selectedSection, setSelectedSection] = useState<WebsitePreviewSection>('hero');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const latestMessageRef = useRef<WebsiteLivePreviewMessage | null>(null);
-  const selectedSectionRef = useRef<WebsitePreviewSection | null>(null);
+  const selectedSectionRef = useRef<WebsitePreviewSection>('hero');
   const selectedDevice = previewDevices.find((item) => item.key === device) ?? previewDevices[0];
 
-  function sendLatestPreview() {
+  const sendLatestPreview = useCallback(() => {
     if (!latestMessageRef.current) return;
     iframeRef.current?.contentWindow?.postMessage(latestMessageRef.current, window.location.origin);
-  }
+  }, []);
 
-  function sendSelectedSection(section = selectedSectionRef.current) {
+  const sendSelectedSection = useCallback((section = selectedSectionRef.current) => {
     if (!section) return;
     iframeRef.current?.contentWindow?.postMessage(
       createWebsitePreviewSectionMessage(section),
       window.location.origin,
     );
-  }
+  }, []);
 
-  function focusEditorSection(section: WebsitePreviewSection) {
-    selectedSectionRef.current = section;
-    setSelectedSection(section);
-    document.querySelectorAll<HTMLElement>('[data-editor-section]').forEach((element) => {
-      if (element.dataset.editorSection === section) {
-        element.dataset.editorSelected = 'true';
-      } else {
-        delete element.dataset.editorSelected;
+  const selectEditorSection = useCallback(
+    (section: WebsitePreviewSection, notifyInspector: boolean) => {
+      selectedSectionRef.current = section;
+      setSelectedSection(section);
+      sendSelectedSection(section);
+      if (notifyInspector) {
+        window.dispatchEvent(
+          new CustomEvent(WEBSITE_EDITOR_SECTION_EVENT_TYPE, {
+            detail: { section, source: 'canvas' },
+          }),
+        );
       }
-    });
-
-    const target = document.querySelector<HTMLElement>(`[data-editor-section="${section}"]`);
-    target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    target
-      ?.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, select, button')
-      ?.focus({ preventScroll: true });
-  }
+    },
+    [sendSelectedSection],
+  );
 
   useEffect(() => {
     let animationFrame = 0;
@@ -90,7 +90,7 @@ export function WebsiteEditorCanvas({
       ) {
         const sectionMessage = parseWebsitePreviewSectionMessage(event.data);
         if (sectionMessage) {
-          focusEditorSection(sectionMessage.payload.section);
+          selectEditorSection(sectionMessage.payload.section, true);
           return;
         }
       }
@@ -108,16 +108,24 @@ export function WebsiteEditorCanvas({
       sendSelectedSection();
     }
 
+    function receiveInspectorSelection(event: Event) {
+      const detail = (event as CustomEvent<{ section?: unknown; source?: unknown }>).detail;
+      if (detail?.source !== 'inspector' || !isWebsitePreviewSection(detail.section)) return;
+      selectEditorSection(detail.section, false);
+    }
+
     document.addEventListener('input', scheduleSync);
     document.addEventListener('change', scheduleSync);
     window.addEventListener('message', receivePreviewReady);
+    window.addEventListener(WEBSITE_EDITOR_SECTION_EVENT_TYPE, receiveInspectorSelection);
     return () => {
       window.cancelAnimationFrame(animationFrame);
       document.removeEventListener('input', scheduleSync);
       document.removeEventListener('change', scheduleSync);
       window.removeEventListener('message', receivePreviewReady);
+      window.removeEventListener(WEBSITE_EDITOR_SECTION_EVENT_TYPE, receiveInspectorSelection);
     };
-  }, []);
+  }, [selectEditorSection, sendLatestPreview, sendSelectedSection]);
 
   return (
     <aside aria-label="Website draft canvas" className="self-start xl:sticky xl:top-6">

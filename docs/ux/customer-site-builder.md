@@ -181,3 +181,7 @@ Draft changes appear only in authenticated preview. Publication is atomic: the w
 - Hero, services, about, and contact preview regions are keyboard selectable. Selection is
   synchronized through the same allowlisted message boundary, highlighted in both surfaces, and
   moves focus to the matching grouped editor controls.
+- Homepage section controls use a synchronized tabbed inspector that shows one editing group at a
+  time while keeping every group mounted so unsaved values survive section changes. If native form
+  validation finds an invalid field in a hidden group, that group is revealed before focus moves to
+  the field.
