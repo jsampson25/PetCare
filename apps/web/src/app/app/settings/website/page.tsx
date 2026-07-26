@@ -20,6 +20,7 @@ import {
 } from './website-section-editor';
 import { WebsiteCustomPagesEditor, type WebsiteCustomPage } from './website-custom-pages-editor';
 import { WebsiteEditorCanvas } from './website-editor-canvas';
+import { WebsiteEditorHistoryControls } from './website-editor-history-controls';
 import { WebsiteMediaEditor, type WebsiteMedia } from './website-media-editor';
 import { WebsiteSectionInspector } from './website-section-inspector';
 import { WebsiteStylePicker } from './website-style-picker';
@@ -162,6 +163,7 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
             className="grid gap-4 sm:grid-cols-2"
             data-website-draft-form
           >
+            <WebsiteEditorHistoryControls initiallyDirty={themeSelection.isTrial} />
             <WebsiteStylePicker
               isTrial={themeSelection.isTrial}
               style={themeSelection.style}
@@ -298,9 +300,6 @@ export default async function WebsiteSettingsPage({ searchParams }: { searchPara
                 label="SEO description"
                 name="seoDescription"
               />
-            </div>
-            <div className="sm:col-span-2">
-              <Button type="submit">Save website draft</Button>
             </div>
           </form>
         </Card>

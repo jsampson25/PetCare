@@ -168,6 +168,12 @@ The embedded canvas and full preview studio carry that selection into the authen
 so the complete header, hero, section, card, typography, and layout composition can be reviewed before
 the draft is saved. Invalid or mismatched theme/template pairs fall back to the saved draft selection.
 
+The editor keeps a bounded in-memory history for ordinary fields and the structured section, media,
+and custom-page editors. Undo and redo restore the complete form snapshot and immediately update the
+live canvas. The sticky editor toolbar reports saved, unsaved, and saving states, explicitly shows
+that autosave is off, and requires a manual save. Unsaved changes trigger a confirmation before
+same-window navigation or browser unload; opening a preview in a new tab does not interrupt editing.
+
 - Theme discovery lives on a dedicated theme-library route rather than inside the long content form.
 - Every catalog card includes large desktop and mobile composition previews, a full standalone
   demo, recommended business types, style attributes, and included sections.

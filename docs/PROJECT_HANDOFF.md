@@ -187,7 +187,9 @@ visual, guided experience:
 - [x] Stream unsaved theme changes into the preview
 - [x] Select a section directly from the canvas and focus its matching editor group
 - [x] Replace homepage section fields with a focused inspector panel
-- Add undo, redo, autosave status, saved state, and unsaved-change protection
+- [x] Add undo and redo across website content, layout, media, and custom pages
+- [x] Show saved/unsaved/saving state and make the manual autosave policy explicit
+- [x] Protect unsaved website changes during navigation and browser unload
 - Add true drag-and-drop section ordering on desktop and accessible keyboard reordering
 - Add section insertion from an approved block library
 - Allow per-section image selection and safe cropping

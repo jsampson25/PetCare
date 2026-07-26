@@ -1,6 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  readWebsiteEditorSnapshotValue,
+  WEBSITE_EDITOR_RESTORE_EVENT_TYPE,
+  type WebsiteEditorSnapshot,
+} from './website-editor-history';
 
 export type WebsiteCustomPage = {
   id: string;
@@ -22,6 +27,34 @@ function makePage(): WebsiteCustomPage {
 
 export function WebsiteCustomPagesEditor({ initialPages }: { initialPages: WebsiteCustomPage[] }) {
   const [pages, setPages] = useState(initialPages);
+  const pagesInputRef = useRef<HTMLInputElement>(null);
+  const previousPagesRef = useRef(JSON.stringify(initialPages));
+
+  useEffect(() => {
+    const serialized = JSON.stringify(pages);
+    if (serialized === previousPagesRef.current) return;
+    previousPagesRef.current = serialized;
+    pagesInputRef.current?.dispatchEvent(new Event('input', { bubbles: true }));
+  }, [pages]);
+
+  useEffect(() => {
+    function restorePages(event: Event) {
+      const snapshot = (event as CustomEvent<{ snapshot?: WebsiteEditorSnapshot }>).detail
+        ?.snapshot;
+      if (!snapshot) return;
+      try {
+        const restored = JSON.parse(
+          readWebsiteEditorSnapshotValue(snapshot, 'customPages'),
+        ) as WebsiteCustomPage[];
+        if (Array.isArray(restored)) setPages(restored);
+      } catch {
+        // Ignore malformed history data and preserve the current editor state.
+      }
+    }
+
+    window.addEventListener(WEBSITE_EDITOR_RESTORE_EVENT_TYPE, restorePages);
+    return () => window.removeEventListener(WEBSITE_EDITOR_RESTORE_EVENT_TYPE, restorePages);
+  }, []);
 
   function updatePage(id: string, values: Partial<WebsiteCustomPage>) {
     setPages((current) => current.map((page) => (page.id === id ? { ...page, ...values } : page)));
@@ -55,7 +88,7 @@ export function WebsiteCustomPagesEditor({ initialPages }: { initialPages: Websi
           Add custom page
         </button>
       </div>
-      <input name="customPages" type="hidden" value={JSON.stringify(pages)} />
+      <input name="customPages" ref={pagesInputRef} type="hidden" value={JSON.stringify(pages)} />
       <div className="mt-4 grid gap-4">
         {pages.length === 0 ? (
           <div className="rounded-xl border border-dashed p-6 text-center text-sm text-[var(--text-secondary)]">

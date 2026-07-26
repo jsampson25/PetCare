@@ -1,6 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import {
+  readWebsiteEditorSnapshotValue,
+  WEBSITE_EDITOR_RESTORE_EVENT_TYPE,
+  type WebsiteEditorSnapshot,
+} from './website-editor-history';
 import type { WebsiteLayoutSection } from './website-live-preview';
 
 export type WebsiteSection = WebsiteLayoutSection;
@@ -43,6 +48,33 @@ export function WebsiteSectionEditor({ initialSections }: { initialSections: Web
     previousLayoutRef.current = serialized;
     layoutInputRef.current?.dispatchEvent(new Event('input', { bubbles: true }));
   }, [sections]);
+
+  useEffect(() => {
+    function restoreSections(event: Event) {
+      const snapshot = (event as CustomEvent<{ snapshot?: WebsiteEditorSnapshot }>).detail
+        ?.snapshot;
+      if (!snapshot) return;
+      try {
+        const restored = JSON.parse(
+          readWebsiteEditorSnapshotValue(snapshot, 'sectionLayout'),
+        ) as WebsiteSection[];
+        if (
+          Array.isArray(restored) &&
+          restored.length === defaultWebsiteSections.length &&
+          restored.every((section) =>
+            defaultWebsiteSections.some((candidate) => candidate.id === section.id),
+          )
+        ) {
+          setSections(restored);
+        }
+      } catch {
+        // Ignore malformed history data and preserve the current editor state.
+      }
+    }
+
+    window.addEventListener(WEBSITE_EDITOR_RESTORE_EVENT_TYPE, restoreSections);
+    return () => window.removeEventListener(WEBSITE_EDITOR_RESTORE_EVENT_TYPE, restoreSections);
+  }, []);
 
   function move(index: number, direction: -1 | 1) {
     const target = index + direction;

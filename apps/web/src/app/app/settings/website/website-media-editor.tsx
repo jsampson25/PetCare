@@ -1,6 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import {
+  readWebsiteEditorSnapshotValue,
+  WEBSITE_EDITOR_RESTORE_EVENT_TYPE,
+  type WebsiteEditorSnapshot,
+} from './website-editor-history';
 
 export type WebsiteMedia = {
   id: string;
@@ -49,6 +54,23 @@ export function WebsiteMediaEditor({
     previousSelectionRef.current = serialized;
     mediaInputRef.current?.dispatchEvent(new Event('input', { bubbles: true }));
   }, [selection]);
+
+  useEffect(() => {
+    function restoreSelection(event: Event) {
+      const snapshot = (event as CustomEvent<{ snapshot?: WebsiteEditorSnapshot }>).detail
+        ?.snapshot;
+      if (!snapshot) return;
+      setSelection({
+        about: readWebsiteEditorSnapshotValue(snapshot, 'aboutMediaId'),
+        hero: readWebsiteEditorSnapshotValue(snapshot, 'heroMediaId'),
+        logo: readWebsiteEditorSnapshotValue(snapshot, 'logoMediaId'),
+        services: readWebsiteEditorSnapshotValue(snapshot, 'servicesMediaId'),
+      });
+    }
+
+    window.addEventListener(WEBSITE_EDITOR_RESTORE_EVENT_TYPE, restoreSelection);
+    return () => window.removeEventListener(WEBSITE_EDITOR_RESTORE_EVENT_TYPE, restoreSelection);
+  }, []);
 
   return (
     <fieldset className="sm:col-span-2">
