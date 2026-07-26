@@ -13,14 +13,11 @@ import {
   WEBSITE_PREVIEW_READY_MESSAGE_TYPE,
   type WebsitePreviewSection,
 } from './website-live-preview';
-
-type PreviewDevice = 'desktop' | 'tablet' | 'mobile';
-
-const previewDevices: Array<{ key: PreviewDevice; label: string; width: string }> = [
-  { key: 'desktop', label: 'Desktop', width: '100%' },
-  { key: 'tablet', label: 'Tablet', width: '48rem' },
-  { key: 'mobile', label: 'Mobile', width: '24.375rem' },
-];
+import {
+  calculateWebsitePreviewScale,
+  websitePreviewDevices,
+  type WebsitePreviewDevice,
+} from './website-preview-devices';
 
 export function WebsiteEditorCanvas({
   isThemeTrial,
@@ -37,16 +34,33 @@ export function WebsiteEditorCanvas({
   template: string;
   theme: string;
 }) {
-  const [device, setDevice] = useState<PreviewDevice>('desktop');
+  const [device, setDevice] = useState<WebsitePreviewDevice>('desktop');
+  const [stageWidth, setStageWidth] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
   const [hasUnsavedPreview, setHasUnsavedPreview] = useState(isThemeTrial);
   const [selectedSection, setSelectedSection] = useState<WebsitePreviewSection>('hero');
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const latestMessageRef = useRef<WebsiteLivePreviewMessage | null>(null);
   const selectedSectionRef = useRef<WebsitePreviewSection>('hero');
-  const selectedDevice = previewDevices.find((item) => item.key === device) ?? previewDevices[0];
+  const selectedDevice =
+    websitePreviewDevices.find((item) => item.key === device) ?? websitePreviewDevices[0]!;
+  const previewScale = calculateWebsitePreviewScale(
+    Math.max(0, stageWidth - 24),
+    selectedDevice.width,
+  );
   const embeddedPreviewPath = createWebsitePreviewPath({ frame: true, template, theme });
   const previewStudioPath = createWebsitePreviewPath({ template, theme });
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const updateWidth = () => setStageWidth(stage.clientWidth);
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(stage);
+    return () => observer.disconnect();
+  }, []);
 
   const sendLatestPreview = useCallback(() => {
     if (!latestMessageRef.current) return;
@@ -173,7 +187,7 @@ export function WebsiteEditorCanvas({
               className="flex rounded-xl border border-white/10 bg-white/5 p-1"
               role="group"
             >
-              {previewDevices.map((item) => (
+              {websitePreviewDevices.map((item) => (
                 <button
                   aria-pressed={device === item.key}
                   className={`rounded-lg px-3 py-2 text-xs font-black transition ${
@@ -199,25 +213,42 @@ export function WebsiteEditorCanvas({
           </div>
         </div>
 
-        <div className="flex min-h-[42rem] justify-center overflow-auto bg-slate-200 p-3">
+        <div
+          className="flex min-h-[42rem] justify-center overflow-auto bg-slate-200 p-3"
+          ref={stageRef}
+        >
           <div
-            className="h-[42rem] max-w-full shrink-0 overflow-hidden rounded-xl bg-white shadow-xl transition-[width]"
-            style={{ width: selectedDevice.width }}
+            className="relative shrink-0 overflow-hidden rounded-xl bg-white shadow-xl transition-[width,height]"
+            style={{
+              width: selectedDevice.width * previewScale,
+              height: selectedDevice.height * previewScale,
+            }}
           >
-            <iframe
-              className="size-full border-0"
-              key={`${device}-${refreshKey}`}
-              onLoad={sendLatestPreview}
-              ref={iframeRef}
-              src={embeddedPreviewPath}
-              title={`${selectedDevice.label} website draft preview`}
-            />
+            <div
+              className="absolute left-0 top-0 origin-top-left"
+              style={{
+                width: selectedDevice.width,
+                height: selectedDevice.height,
+                transform: `scale(${previewScale})`,
+              }}
+            >
+              <iframe
+                className="size-full border-0"
+                key={refreshKey}
+                onLoad={sendLatestPreview}
+                ref={iframeRef}
+                src={embeddedPreviewPath}
+                title={`${selectedDevice.label} website draft preview`}
+              />
+            </div>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 px-4 py-3 text-xs text-slate-400">
-          <span>
-            {selectedDevice.label} · {hasUnsavedPreview ? 'unsaved preview' : 'saved draft'}
+          <span aria-live="polite">
+            {selectedDevice.label} {selectedDevice.width}×{selectedDevice.height} ·{' '}
+            {Math.round(previewScale * 100)}% canvas ·{' '}
+            {hasUnsavedPreview ? 'unsaved preview' : 'saved draft'}
           </span>
           {selectedSection ? (
             <span className="rounded-full bg-blue-400/15 px-2.5 py-1 font-black text-blue-200">

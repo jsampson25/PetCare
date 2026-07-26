@@ -190,6 +190,9 @@ explicit non-drag alternative. Every successful move is announced with the secti
 - On wide workspace layouts, a persistent canvas remains beside the editing controls and offers
   desktop, tablet, and mobile widths. It renders the private draft and links to the full preview
   studio.
+- Embedded device controls use true 1280×720, 768×1024, and 390×844 responsive viewports, scaled
+  to the available editor space. Switching devices resizes the existing live iframe instead of
+  navigating or reloading it, so unsaved content and the selected section remain in place.
 - Headline, introduction, about, FAQ, policies, contact, and brand-color changes stream into the private canvas
   before saving through a same-origin, allowlisted message contract. Unsaved values are never
   written to the tenant website record.

@@ -194,7 +194,7 @@ visual, guided experience:
 - [x] Add section insertion from an approved block library
 - [x] Allow per-section image selection and safe cropping
 - [x] Improve page management and navigation editing
-- Add responsive device controls without navigating away from the editor
+- [x] Add responsive device controls without navigating away from the editor
 - Add theme duplication and reset-to-template behavior
 
 Do not build unrestricted raw HTML editing for MVP. Keep the builder governed, accessible, secure,
