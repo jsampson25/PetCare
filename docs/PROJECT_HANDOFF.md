@@ -177,10 +177,9 @@ The current builder has the right data and publishing foundation, but the editor
 visual, guided experience:
 
 - [x] Move theme browsing into a dedicated theme-library screen
-- [x] Show large desktop previews before selection
+- [x] Show large desktop and mobile previews before selection
 - [x] Add theme details, included sections, style attributes, and recommended business types
 - [x] Provide a clear **Try theme** flow that does not overwrite the saved draft until confirmed
-- [ ] Add large mobile previews before selection
 - Add a persistent live canvas beside the editing controls
 - Select a section directly from the canvas
 - Replace long stacked forms with a focused inspector panel

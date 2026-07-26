@@ -164,8 +164,8 @@ Draft changes appear only in authenticated preview. Publication is atomic: the w
 ## Current editor behavior
 
 - Theme discovery lives on a dedicated theme-library route rather than inside the long content form.
-- Every catalog card includes a large composition preview, a full standalone demo, recommended
-  business types, style attributes, and included sections.
+- Every catalog card includes large desktop and mobile composition previews, a full standalone
+  demo, recommended business types, style attributes, and included sections.
 - **Try theme** returns to the editor with an unsaved trial selection. It does not update the tenant
   website record, the draft preview, or the published website until the owner explicitly saves the
   website draft.

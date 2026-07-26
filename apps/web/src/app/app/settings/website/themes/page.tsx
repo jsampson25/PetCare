@@ -79,7 +79,24 @@ export default async function WebsiteThemeLibraryPage() {
                   }`}
                   key={template.key}
                 >
-                  <WebsiteTemplatePreview layout={template.layout} style={style} />
+                  <div className="grid grid-cols-[minmax(0,1fr)_7.5rem] items-end gap-3 rounded-2xl bg-slate-100 p-3">
+                    <div>
+                      <p className="mb-2 text-[0.65rem] font-black uppercase tracking-wide text-slate-500">
+                        Desktop
+                      </p>
+                      <WebsiteTemplatePreview layout={template.layout} style={style} />
+                    </div>
+                    <div>
+                      <p className="mb-2 text-center text-[0.65rem] font-black uppercase tracking-wide text-slate-500">
+                        Mobile
+                      </p>
+                      <WebsiteTemplatePreview
+                        device="mobile"
+                        layout={template.layout}
+                        style={style}
+                      />
+                    </div>
+                  </div>
                   <div className="p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div>
