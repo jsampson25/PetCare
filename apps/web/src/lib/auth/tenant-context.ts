@@ -1,10 +1,13 @@
 import { cookies } from 'next/headers';
 
 import { createSupabaseServerClient } from '../supabase/server';
+import { resolveIdentityPresentation } from './identity-presentation';
 
 export const businessContextCookie = 'petcare-business-context';
 
 export type BusinessContext = {
+  accountEmail?: string;
+  accountName: string;
   businessId: string;
   businessName: string;
   identityId: string;
@@ -78,6 +81,7 @@ export async function resolveBusinessContext(): Promise<BusinessContext | null> 
   const roles = (roleAssignments ?? []).map((assignment) => assignment.role_key);
   const sessionAssuranceLevel =
     typeof claimsData?.claims?.aal === 'string' ? claimsData.claims.aal : 'aal1';
+  const identity = resolveIdentityPresentation(claimsData?.claims);
   let permissionAssignments: { permission_key: string }[] = [];
   let roleDefinitions: { requires_mfa: boolean; role_key: string }[] = [];
   if (roles.length) {
@@ -90,6 +94,8 @@ export async function resolveBusinessContext(): Promise<BusinessContext | null> 
   }
 
   return {
+    accountEmail: identity.email,
+    accountName: identity.name,
     businessId,
     businessName: business.name,
     identityId,

@@ -56,7 +56,7 @@ export default async function SecuritySettingsPage({
         </Alert>
       ) : null}
       <Card
-        description="Authenticator factors are managed by the identity provider. PetCare never stores their secrets."
+        description="Authenticator factors are managed by the identity provider. Roventra never stores their secrets."
         title="Multi-factor authentication"
       >
         <dl className="space-y-3 text-sm">
@@ -77,7 +77,7 @@ export default async function SecuritySettingsPage({
         </Link>
       </Card>
       <Card
-        description="Review this session or revoke access on other devices. PetCare never displays or stores session tokens."
+        description="Review this session or revoke access on other devices. Roventra never displays or stores session tokens."
         title="Sessions"
       >
         <dl className="space-y-3 text-sm">

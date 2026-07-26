@@ -1,6 +1,9 @@
 import { createSupabaseServerClient } from '../supabase/server';
+import { resolveIdentityPresentation } from './identity-presentation';
 
 export type PlatformContext = {
+  accountEmail?: string;
+  accountName: string;
   identityId: string;
   permissions: Set<string>;
   requiresMfa: boolean;
@@ -16,7 +19,10 @@ export async function resolvePlatformContext(): Promise<PlatformContext | null> 
   if (!data) return null;
   const identityId = claimsData?.claims?.sub;
   if (typeof identityId !== 'string' || data.identity_id !== identityId) return null;
+  const identity = resolveIdentityPresentation(claimsData?.claims);
   return {
+    accountEmail: identity.email,
+    accountName: identity.name,
     identityId,
     permissions: new Set(Array.isArray(data.permissions) ? data.permissions : []),
     requiresMfa: Boolean(data.requires_mfa),

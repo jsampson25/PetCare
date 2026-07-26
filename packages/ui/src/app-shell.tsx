@@ -12,17 +12,23 @@ const shellNames: Record<ShellKind, string> = {
 };
 
 export function AppShell({
+  accountDetail,
+  accountHref,
+  accountName = 'Signed-in user',
   children,
   contextLabel,
   items,
   kind,
   permissions = new Set<string>(),
-  brandName = 'PetCare',
+  brandName = 'Roventra',
   brandLogoAlt,
   brandLogoMode = 'mark',
   brandLogoUrl,
   brandTokens,
 }: {
+  accountDetail?: string;
+  accountHref?: string;
+  accountName?: string;
   children: ReactNode;
   contextLabel: string;
   items: readonly NavigationItem[];
@@ -35,6 +41,31 @@ export function AppShell({
   brandTokens?: { primary?: string; primaryText?: string; accent?: string };
 }) {
   const navigation = visibleNavigation(items, permissions);
+  const accountParts = accountName.trim().split(/\s+/).filter(Boolean);
+  const accountInitials =
+    accountParts.length > 1
+      ? `${accountParts[0]?.[0] ?? ''}${accountParts.at(-1)?.[0] ?? ''}`.toUpperCase()
+      : (accountParts[0]?.slice(0, 2).toUpperCase() ?? 'SU');
+  const accountContents = (
+    <>
+      <span
+        className="grid size-8 shrink-0 place-items-center rounded-full bg-blue-50 text-xs font-black text-blue-700"
+        aria-hidden="true"
+      >
+        {accountInitials}
+      </span>
+      <span className="hidden min-w-0 text-left sm:block">
+        <span className="block max-w-40 truncate text-sm font-bold text-[var(--text-primary)]">
+          {accountName}
+        </span>
+        {accountDetail ? (
+          <span className="block max-w-40 truncate text-[0.68rem] text-[var(--text-muted)]">
+            {accountDetail}
+          </span>
+        ) : null}
+      </span>
+    </>
+  );
 
   return (
     <div
@@ -104,15 +135,22 @@ export function AppShell({
             </p>
             <p className="mt-0.5 text-sm font-semibold">{contextLabel}</p>
           </div>
-          <span className="flex items-center gap-2 rounded-full border border-[var(--border-default)] bg-[var(--surface-default)] px-2.5 py-1.5 text-sm font-semibold shadow-sm">
-            <span
-              className="grid size-7 place-items-center rounded-full bg-[var(--surface-subtle)] text-xs"
-              aria-hidden="true"
+          {accountHref ? (
+            <a
+              aria-label={`Account: ${accountName}`}
+              className="flex min-h-11 items-center gap-2 rounded-full border border-[var(--border-default)] bg-[var(--surface-default)] px-2.5 py-1.5 shadow-sm transition hover:border-blue-300 hover:bg-blue-50/40"
+              href={accountHref}
             >
-              DU
+              {accountContents}
+            </a>
+          ) : (
+            <span
+              aria-label={`Signed in as ${accountName}`}
+              className="flex min-h-11 items-center gap-2 rounded-full border border-[var(--border-default)] bg-[var(--surface-default)] px-2.5 py-1.5 shadow-sm"
+            >
+              {accountContents}
             </span>
-            <span className="hidden sm:inline">Demo user</span>
-          </span>
+          )}
         </header>
         <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:py-10">{children}</main>
       </div>

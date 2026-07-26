@@ -66,7 +66,7 @@ export default async function SubscriptionsPage() {
         <p className="text-sm font-bold text-[var(--action-primary)]">Platform commerce</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight">SaaS subscriptions</h1>
         <p className="mt-2 text-[var(--text-secondary)]">
-          Pet-care businesses paying PetCare, fully separate from their customer invoices and
+          Pet-care businesses paying Roventra, fully separate from their customer invoices and
           payments.
         </p>
       </header>

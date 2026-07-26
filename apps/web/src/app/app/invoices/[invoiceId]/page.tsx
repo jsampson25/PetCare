@@ -276,7 +276,7 @@ export default async function InvoiceDetailPage({
                     <label className="flex items-center gap-2 text-sm font-bold sm:col-span-3">
                       <input name="confirmed" type="checkbox" value="true" required />I confirm this
                       money should be returned. Manual tenders have already been returned outside
-                      PetCare.
+                      Roventra.
                     </label>
                     <div className="sm:col-span-3">
                       <Button type="submit" variant="secondary">

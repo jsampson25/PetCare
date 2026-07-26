@@ -36,8 +36,8 @@ export default async function PlatformBillingPage() {
         </p>
       </header>
       <Alert title="Separate from pet-owner payments" tone="info">
-        These events update only the business-to-PetCare subscription. They never create or modify a
-        customer invoice, deposit, payment, refund, receipt, or booking balance.
+        These events update only the business-to-Roventra subscription. They never create or modify
+        a customer invoice, deposit, payment, refund, receipt, or booking balance.
       </Alert>
       {error ? (
         <Alert title="Billing reconciliation unavailable" tone="danger">

@@ -45,9 +45,16 @@ export default async function CustomerPortalLayout({ children }: { children: Rea
     : undefined;
   return (
     <AppShell
+      accountDetail={dashboard.customer.email}
+      accountHref="/portal/account"
+      accountName={
+        dashboard.customer.preferred_name ||
+        `${dashboard.customer.first_name} ${dashboard.customer.last_name}`.trim() ||
+        dashboard.customer.email
+      }
       brandLogoAlt={logoMedia?.alt_text}
       brandLogoUrl={logoUrl}
-      contextLabel={`${dashboard.business.name} · ${dashboard.household.display_name}`}
+      contextLabel={`${dashboard.business.name} / ${dashboard.household.display_name}`}
       items={customerNavigation}
       kind="customer"
       brandName={brand?.business_name ?? dashboard.business.name}

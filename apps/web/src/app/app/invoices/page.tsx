@@ -39,7 +39,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
         <p className="text-sm font-bold text-[var(--text-secondary)]">Finance</p>
         <h1 className="text-3xl font-black tracking-tight">Invoices</h1>
         <p className="mt-2 text-[var(--text-secondary)]">
-          Itemized balances and posted payment history from the PetCare ledger.
+          Itemized balances and posted payment history from the Roventra ledger.
         </p>
       </header>
       {typeof parameters.notice === 'string' ? (

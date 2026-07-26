@@ -220,6 +220,9 @@ export default async function BusinessLayout({ children }: { children: ReactNode
     | undefined;
   return (
     <AppShell
+      accountDetail={context.accountEmail}
+      accountHref="/app/settings/security"
+      accountName={context.accountName}
       brandLogoAlt="Roventra"
       brandLogoMode="lockup"
       brandLogoUrl="/brand/roventra-logo-kit/roventra-unified-white.png"

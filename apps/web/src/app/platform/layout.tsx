@@ -71,7 +71,14 @@ export default async function PlatformLayout({ children }: { children: ReactNode
     redirect('/auth/mfa?next=/platform');
   return (
     <AppShell
-      contextLabel="PetCare operations"
+      accountDetail={context.accountEmail}
+      accountName={context.accountName}
+      brandLogoAlt="Roventra"
+      brandLogoMode="lockup"
+      brandLogoUrl="/brand/roventra-logo-kit/roventra-unified-white.png"
+      brandName="Roventra"
+      brandTokens={{ accent: '#60a5fa', primary: '#2864ed', primaryText: '#ffffff' }}
+      contextLabel="Roventra operations"
       items={platformNavigation}
       kind="platform"
       permissions={context.permissions}
