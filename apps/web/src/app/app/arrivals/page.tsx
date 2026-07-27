@@ -45,8 +45,9 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
       ) : null}
       <Card
         className="overflow-hidden"
-        title="Expected pets"
         description="Confirmed bookings remain reservations until custody is explicitly accepted."
+        eyebrow="Check-in queue"
+        title="Expected pets"
       >
         {items?.length ? (
           <RecordList>

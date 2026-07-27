@@ -11,7 +11,7 @@ Shared interface primitives for every PetCare surface. Components use the semant
 | `badge`              | Compact textual status labels                                             |
 | `button`             | Primary, secondary, quiet, destructive, disabled, and loading actions     |
 | `button-link`        | Navigation styled as an action                                            |
-| `card`               | Grouped content surface with optional title and description               |
+| `card`               | Responsive section hierarchy with context, title, actions, and tone       |
 | `command-bar`        | Responsive grouping for filters and secondary view actions                |
 | `data-table`         | Semantic tabular data with caption and contained overflow                 |
 | `dialog`             | Managed native modal with focus containment and Escape behavior           |

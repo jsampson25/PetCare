@@ -111,16 +111,21 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
         const dayItems = grouped.get(key) ?? [];
         return (
           <Card
+            actions={
+              <Badge tone={dayItems.length ? 'info' : 'neutral'}>
+                {dayItems.length} item{dayItems.length === 1 ? '' : 's'}
+              </Badge>
+            }
             className={
               index === 0 ? 'overflow-hidden border-[var(--action-primary)]' : 'overflow-hidden'
             }
+            eyebrow="Daily agenda"
             key={key}
             title={new Intl.DateTimeFormat('en-US', {
               weekday: 'long',
               month: 'long',
               day: 'numeric',
             }).format(date)}
-            description={`${dayItems.length} scheduled service item${dayItems.length === 1 ? '' : 's'}`}
           >
             {dayItems.length ? (
               <div className="divide-y divide-[var(--border-default)]">

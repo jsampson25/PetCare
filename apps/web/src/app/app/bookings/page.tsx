@@ -133,8 +133,9 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
         </Alert>
       ) : null}
       <Card
-        title="Recent bookings"
         description="A pending request is never presented as a confirmed reservation."
+        eyebrow="Reservation records"
+        title="Recent bookings"
       >
         {bookings?.length ? (
           <RecordList>
@@ -182,8 +183,9 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
         )}
       </Card>
       <Card
-        title="Active waitlist"
         description="Priority is chronological; every offer must revalidate eligibility, capacity, pricing, and policy."
+        eyebrow="Capacity recovery"
+        title="Active waitlist"
       >
         {waitlist?.length ? (
           <RecordList>
@@ -234,8 +236,9 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
         )}
       </Card>
       <Card
-        title="Timed offers"
         description="Offers retain a dedicated capacity hold and expire without creating a reservation."
+        eyebrow="Capacity offers"
+        title="Timed offers"
       >
         {offers?.length ? (
           <RecordList>

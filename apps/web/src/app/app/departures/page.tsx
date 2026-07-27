@@ -5,6 +5,7 @@ import { Card } from '@petcare/ui/card';
 import { PageHeader } from '@petcare/ui/page-header';
 import { Field } from '@petcare/ui/field';
 import { SelectField } from '@petcare/ui/select-field';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
@@ -141,10 +142,18 @@ export default async function DeparturesPage({ searchParams }: { searchParams: S
             ].filter(Boolean) as string[];
             return (
               <Card
+                actions={
+                  <Badge tone={blockers.length ? 'warning' : 'success'}>
+                    {blockers.length
+                      ? `${blockers.length} blocker${blockers.length === 1 ? '' : 's'}`
+                      : 'Ready'}
+                  </Badge>
+                }
                 className="overflow-hidden border-slate-200"
+                description={`${operational?.locations?.name} · scheduled ${new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(operational?.scheduled_end ?? ''))}`}
+                eyebrow="Checkout record"
                 key={visit.id}
                 title={`${pet?.name} · ${pet?.breed}`}
-                description={`${operational?.locations?.name} · scheduled ${new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(operational?.scheduled_end ?? ''))}`}
               >
                 <div className="mb-5 flex flex-wrap gap-2">
                   {blockers.length ? (
@@ -238,11 +247,10 @@ export default async function DeparturesPage({ searchParams }: { searchParams: S
           })}
         </div>
       ) : (
-        <Card>
-          <p className="text-sm text-[var(--text-secondary)]">
-            No pets currently awaiting checkout.
-          </p>
-        </Card>
+        <StatePanel
+          description="Pets will appear here after check-in and remain until checkout is reconciled."
+          title="No pets awaiting checkout"
+        />
       )}
     </div>
   );

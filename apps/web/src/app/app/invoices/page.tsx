@@ -76,8 +76,9 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
         </form>
       </CommandBar>
       <Card
-        title="Invoice ledger"
         description="Balances are derived from immutable invoice versions and successful allocations."
+        eyebrow="Billing records"
+        title="Invoice ledger"
       >
         {invoices?.length ? (
           <RecordList>

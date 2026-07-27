@@ -51,17 +51,13 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
         </Alert>
       ) : null}
       {canCreate ? (
-        <Card className="overflow-hidden !p-0">
-          <div className="bg-[linear-gradient(135deg,#edf6f0,#fff)] px-6 py-5">
-            <p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--action-primary)]">
-              New household
-            </p>
-            <h2 className="mt-1 text-xl font-black">Add a customer and first dog</h2>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              Create the relationship and care profile together.
-            </p>
-          </div>
-          <form action={createCustomerHouseholdWithPet} className="grid gap-5 p-6 lg:grid-cols-2">
+        <Card
+          description="Create the relationship and care profile together."
+          eyebrow="New household"
+          title="Add a customer and first dog"
+          tone="accent"
+        >
+          <form action={createCustomerHouseholdWithPet} className="grid gap-5 lg:grid-cols-2">
             <fieldset className="grid gap-5 rounded-2xl border border-[var(--border-default)] p-5 sm:grid-cols-2">
               <legend className="px-2 text-lg font-bold">1 · Customer</legend>
               <Field label="First name" name="firstName" required />
@@ -96,7 +92,12 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
           </form>
         </Card>
       ) : null}
-      <Card title={`Customers (${customers?.length ?? 0})`}>
+      <Card
+        actions={<Badge tone="info">{customers?.length ?? 0} records</Badge>}
+        description="Customer identities, contact details, account status, and household access."
+        eyebrow="Customer directory"
+        title="Customers"
+      >
         {customers?.length ? (
           <RecordList>
             {customers.map((customer) => (
