@@ -9,6 +9,7 @@
     "./button": "./src/button.tsx",
     "./button-link": "./src/button-link.tsx",
     "./card": "./src/card.tsx",
+    "./command-bar": "./src/command-bar.tsx",
     "./data-table": "./src/data-table.tsx",
     "./dialog": "./src/dialog.tsx",
     "./field": "./src/field.tsx",

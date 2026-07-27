@@ -4,6 +4,7 @@ import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { Field } from '@petcare/ui/field';
 import { PageHeader } from '@petcare/ui/page-header';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -126,9 +127,11 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-[var(--text-secondary)]">
-            No customer records yet. Add the first customer above.
-          </p>
+          <StatePanel
+            description="Add the first customer and pet with the household form above."
+            size="compact"
+            title="No customer records yet"
+          />
         )}
       </Card>
     </div>

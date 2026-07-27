@@ -1,7 +1,11 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
+import { Button } from '@petcare/ui/button';
+import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { CommandBar } from '@petcare/ui/command-bar';
 import { PageHeader } from '@petcare/ui/page-header';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -51,12 +55,15 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
           {parameters.error}
         </Alert>
       ) : null}
-      <Card title="Filter invoices">
-        <form method="get">
+      <CommandBar
+        description="Narrow the ledger by invoice lifecycle state."
+        title="Filter invoices"
+      >
+        <form className="flex flex-wrap items-end gap-3" method="get">
           <label className="text-sm font-bold">
-            Status{' '}
+            Status
             <select
-              className="ml-2 min-h-11 rounded-lg border bg-white px-3"
+              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
               defaultValue={status}
               name="status"
             >
@@ -68,14 +75,11 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
               <option value="void">Void</option>
             </select>
           </label>
-          <button
-            className="ml-3 min-h-11 rounded-lg bg-[var(--action-primary)] px-5 text-sm font-bold text-[var(--action-primary-text)]"
-            type="submit"
-          >
-            Apply
-          </button>
+          <Button type="submit" variant="secondary">
+            Apply filters
+          </Button>
         </form>
-      </Card>
+      </CommandBar>
       <Card
         title="Invoice ledger"
         description="Balances are derived from immutable invoice versions and successful allocations."
@@ -126,9 +130,16 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
             })}
           </div>
         ) : (
-          <p className="text-sm text-[var(--text-secondary)]">
-            No invoices match this view. Issue one from a booking.
-          </p>
+          <StatePanel
+            action={
+              <ButtonLink href="/app/bookings" variant="secondary">
+                View bookings
+              </ButtonLink>
+            }
+            description="Adjust the filter or issue an invoice from a booking."
+            size="compact"
+            title="No invoices match this view"
+          />
         )}
       </Card>
     </div>

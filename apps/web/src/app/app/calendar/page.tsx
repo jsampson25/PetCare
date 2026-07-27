@@ -1,7 +1,10 @@
 import { Badge } from '@petcare/ui/badge';
+import { Button } from '@petcare/ui/button';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { CommandBar } from '@petcare/ui/command-bar';
 import { PageHeader } from '@petcare/ui/page-header';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -56,15 +59,15 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
         eyebrow="Reservations"
         title="Calendar agenda"
       />
-      <Card
-        className="border-blue-100 bg-[linear-gradient(135deg,#f2f7ff,#fff)]"
+      <CommandBar
+        description="Adjust the agenda window without changing the underlying reservation records."
         title="Choose week"
       >
         <form className="flex flex-wrap items-end gap-3" method="get">
           <label className="text-sm font-bold">
             Starting date
             <input
-              className="ml-2 min-h-11 rounded-lg border bg-white px-3"
+              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
               defaultValue={requestedDate}
               name="date"
               type="date"
@@ -73,7 +76,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
           <label className="text-sm font-bold">
             Location
             <select
-              className="ml-2 min-h-11 rounded-lg border bg-white px-3"
+              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
               defaultValue={requestedLocation}
               name="location"
             >
@@ -88,7 +91,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
           <label className="text-sm font-bold">
             Item status
             <select
-              className="ml-2 min-h-11 rounded-lg border bg-white px-3"
+              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
               defaultValue={requestedStatus}
               name="status"
             >
@@ -100,14 +103,11 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
               <option value="no_show">No-show</option>
             </select>
           </label>
-          <button
-            className="min-h-11 rounded-lg bg-[var(--action-primary)] px-5 text-sm font-bold text-[var(--action-primary-text)]"
-            type="submit"
-          >
+          <Button type="submit" variant="secondary">
             Show week
-          </button>
+          </Button>
         </form>
-      </Card>
+      </CommandBar>
       {[...Array(7)].map((_, index) => {
         const date = new Date(start);
         date.setDate(date.getDate() + index);
@@ -163,7 +163,11 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
                 })}
               </div>
             ) : (
-              <p className="text-sm text-[var(--text-secondary)]">Nothing scheduled.</p>
+              <StatePanel
+                description="This day is clear for the selected location and status."
+                size="compact"
+                title="Nothing scheduled"
+              />
             )}
           </Card>
         );

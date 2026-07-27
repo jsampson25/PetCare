@@ -224,6 +224,7 @@ Capture defects with screenshots and exact URLs.
 - [x] Audit every workspace route for leftover green styling and old `PetCare` labels; preserve
       green only for semantic success states and customer-controlled website themes
 - [x] Standardize core list and operations page headers with a shared responsive component
+- [x] Standardize core workspace command bars and empty-result presentation
 - Standardize page headers, command bars, filters, tables, cards, forms, and empty states
 - Use SVG icons consistently
 - Add representative beta sample data so screens can be evaluated visually

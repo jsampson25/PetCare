@@ -3,7 +3,9 @@ import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { CommandBar } from '@petcare/ui/command-bar';
 import { PageHeader } from '@petcare/ui/page-header';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -80,7 +82,16 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
         eyebrow="Reservations"
         title="Bookings"
       />
-      <Card
+      <CommandBar
+        secondaryAction={
+          context.permissions.has('bookings.modify') ? (
+            <form action={expireBookingRequests}>
+              <Button type="submit" variant="quiet">
+                Process expired requests
+              </Button>
+            </form>
+          ) : null
+        }
         title="Find bookings"
         description="Search the authoritative booking number and narrow the lifecycle state."
       >
@@ -116,14 +127,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
             Apply filters
           </Button>
         </form>
-        {context.permissions.has('bookings.modify') ? (
-          <form action={expireBookingRequests} className="mt-4 border-t pt-4">
-            <Button type="submit" variant="quiet">
-              Process expired requests
-            </Button>
-          </form>
-        ) : null}
-      </Card>
+      </CommandBar>
       {typeof parameters.notice === 'string' ? (
         <Alert title="Booking updated" tone="success">
           {parameters.notice}
@@ -167,9 +171,16 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
             })}
           </div>
         ) : (
-          <p className="text-sm text-[var(--text-secondary)]">
-            No booking requests have been created yet.
-          </p>
+          <StatePanel
+            action={
+              context.permissions.has('bookings.create') ? (
+                <ButtonLink href="/app/bookings/new">Create booking</ButtonLink>
+              ) : null
+            }
+            description="Adjust the filters or create the first booking request."
+            size="compact"
+            title="No bookings in this view"
+          />
         )}
       </Card>
       <Card
@@ -217,7 +228,11 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
             })}
           </div>
         ) : (
-          <p className="text-sm text-[var(--text-secondary)]">No active waitlist demand.</p>
+          <StatePanel
+            description="Customers waiting for unavailable dates will appear here."
+            size="compact"
+            title="No active waitlist demand"
+          />
         )}
       </Card>
       <Card
@@ -278,7 +293,11 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
             })}
           </div>
         ) : (
-          <p className="text-sm text-[var(--text-secondary)]">No active offers.</p>
+          <StatePanel
+            description="Time-limited capacity offers will appear here until accepted or expired."
+            size="compact"
+            title="No active offers"
+          />
         )}
       </Card>
     </div>
