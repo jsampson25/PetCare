@@ -3,6 +3,7 @@ import { Button } from '@petcare/ui/button';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { Field } from '@petcare/ui/field';
+import { PageHeader } from '@petcare/ui/page-header';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -30,13 +31,11 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--action-primary)]">Customer records</p>
-        <h1 className="text-3xl font-black tracking-tight">Customers and households</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Create the customer relationship and first pet record used by booking and care.
-        </p>
-      </header>
+      <PageHeader
+        description="Create the customer relationship and first pet record used by booking and care."
+        eyebrow="Customer records"
+        title="Customers and households"
+      />
       {error ? (
         <Alert title="Customer not created" tone="danger">
           {error}

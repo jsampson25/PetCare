@@ -2,6 +2,7 @@ import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
 import { Card } from '@petcare/ui/card';
+import { PageHeader } from '@petcare/ui/page-header';
 import { Field } from '@petcare/ui/field';
 import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -83,21 +84,16 @@ export default async function DeparturesPage({ searchParams }: { searchParams: S
   const canOverride = context.roles.includes('owner') || context.roles.includes('manager');
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border-default)] pb-6">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--action-primary)]">
-            Departure operations
-          </p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight">Checkout & reconciliation</h1>
-          <p className="mt-2 text-[var(--text-secondary)]">
-            Release the correct pet only after authority, care, incidents, belongings, report card,
-            and balance are reconciled.
-          </p>
-        </div>
-        <span className="rounded-full bg-[var(--surface-subtle)] px-4 py-2 text-sm font-black">
-          {visits?.length ?? 0} in care
-        </span>
-      </header>
+      <PageHeader
+        actions={
+          <span className="rounded-full bg-[var(--surface-subtle)] px-4 py-2 text-sm font-black">
+            {visits?.length ?? 0} in care
+          </span>
+        }
+        description="Release the correct pet only after authority, care, incidents, belongings, report card, and balance are reconciled."
+        eyebrow="Departure operations"
+        title="Checkout & reconciliation"
+      />
       {typeof parameters.notice === 'string' ? (
         <Alert title="Departure updated" tone="success">
           {parameters.notice}

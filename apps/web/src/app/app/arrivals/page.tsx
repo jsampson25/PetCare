@@ -2,6 +2,7 @@ import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { PageHeader } from '@petcare/ui/page-header';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -25,20 +26,16 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
     .limit(100);
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border-default)] pb-6">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--action-primary)]">
-            Operations
-          </p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight">Arrivals</h1>
-          <p className="mt-2 text-[var(--text-secondary)]">
-            Record physical arrival first, then complete identity, safety, care, and custody review.
-          </p>
-        </div>
-        <span className="rounded-full bg-[var(--surface-subtle)] px-4 py-2 text-sm font-black">
-          {items?.length ?? 0} expected
-        </span>
-      </header>
+      <PageHeader
+        actions={
+          <span className="rounded-full bg-[var(--surface-subtle)] px-4 py-2 text-sm font-black">
+            {items?.length ?? 0} expected
+          </span>
+        }
+        description="Record physical arrival first, then complete identity, safety, care, and custody review."
+        eyebrow="Operations"
+        title="Arrivals"
+      />
       {typeof parameters.error === 'string' ? (
         <Alert title="Arrival unavailable" tone="danger">
           {parameters.error}

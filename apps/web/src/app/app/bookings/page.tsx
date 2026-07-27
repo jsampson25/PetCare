@@ -3,6 +3,7 @@ import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { PageHeader } from '@petcare/ui/page-header';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -69,18 +70,16 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
   ]);
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm font-bold text-[var(--text-secondary)]">Reservations</p>
-          <h1 className="text-3xl font-black tracking-tight">Bookings</h1>
-          <p className="mt-2 text-[var(--text-secondary)]">
-            Authoritative requests, confirmations, and exceptions across every service.
-          </p>
-        </div>
-        {context.permissions.has('bookings.create') ? (
-          <ButtonLink href="/app/bookings/new">New booking</ButtonLink>
-        ) : null}
-      </header>
+      <PageHeader
+        actions={
+          context.permissions.has('bookings.create') ? (
+            <ButtonLink href="/app/bookings/new">New booking</ButtonLink>
+          ) : null
+        }
+        description="Authoritative requests, confirmations, and exceptions across every service."
+        eyebrow="Reservations"
+        title="Bookings"
+      />
       <Card
         title="Find bookings"
         description="Search the authoritative booking number and narrow the lifecycle state."

@@ -223,6 +223,7 @@ Capture defects with screenshots and exact URLs.
 - [x] Replace the hard-coded demo identity and stale PetCare labels on authenticated shell surfaces
 - [x] Audit every workspace route for leftover green styling and old `PetCare` labels; preserve
       green only for semantic success states and customer-controlled website themes
+- [x] Standardize core list and operations page headers with a shared responsive component
 - Standardize page headers, command bars, filters, tables, cards, forms, and empty states
 - Use SVG icons consistently
 - Add representative beta sample data so screens can be evaluated visually

@@ -1,6 +1,7 @@
 import { Badge } from '@petcare/ui/badge';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { PageHeader } from '@petcare/ui/page-header';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -49,18 +50,12 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
   }
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border-default)] pb-6">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--action-primary)]">
-            Reservations
-          </p>
-          <h1 className="text-3xl font-black tracking-tight">Calendar agenda</h1>
-          <p className="mt-2 text-[var(--text-secondary)]">
-            Seven-day authoritative schedule with an accessible list presentation.
-          </p>
-        </div>
-        <ButtonLink href="/app/bookings/new">New booking</ButtonLink>
-      </header>
+      <PageHeader
+        actions={<ButtonLink href="/app/bookings/new">New booking</ButtonLink>}
+        description="Seven-day authoritative schedule with an accessible list presentation."
+        eyebrow="Reservations"
+        title="Calendar agenda"
+      />
       <Card
         className="border-blue-100 bg-[linear-gradient(135deg,#f2f7ff,#fff)]"
         title="Choose week"

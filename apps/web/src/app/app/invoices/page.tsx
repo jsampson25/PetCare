@@ -1,6 +1,7 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Card } from '@petcare/ui/card';
+import { PageHeader } from '@petcare/ui/page-header';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -35,13 +36,11 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
     new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(minor / 100);
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--text-secondary)]">Finance</p>
-        <h1 className="text-3xl font-black tracking-tight">Invoices</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Itemized balances and posted payment history from the Roventra ledger.
-        </p>
-      </header>
+      <PageHeader
+        description="Itemized balances and posted payment history from the Roventra ledger."
+        eyebrow="Finance"
+        title="Invoices"
+      />
       {typeof parameters.notice === 'string' ? (
         <Alert title="Invoice updated" tone="success">
           {parameters.notice}
