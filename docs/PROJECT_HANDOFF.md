@@ -221,7 +221,8 @@ Capture defects with screenshots and exact URLs.
 ### 3. Continue business workspace visual modernization
 
 - [x] Replace the hard-coded demo identity and stale PetCare labels on authenticated shell surfaces
-- Audit every workspace route for leftover green styling and old `PetCare` labels
+- [x] Audit every workspace route for leftover green styling and old `PetCare` labels; preserve
+      green only for semantic success states and customer-controlled website themes
 - Standardize page headers, command bars, filters, tables, cards, forms, and empty states
 - Use SVG icons consistently
 - Add representative beta sample data so screens can be evaluated visually

@@ -180,7 +180,7 @@ export default async function CustomerHouseholdPage({
       ) : null}
       {canAddPet ? (
         <Card
-          className="overflow-hidden border-emerald-100"
+          className="overflow-hidden border-blue-100"
           title="Add another dog"
           description="Create another pet under the same household."
         >

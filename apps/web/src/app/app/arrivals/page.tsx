@@ -79,7 +79,7 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
                   key={`${item.booking_id}-${index}`}
                 >
                   <span
-                    className="grid size-12 place-items-center rounded-2xl bg-[#dcece2] font-black text-[#155b3d]"
+                    className="grid size-12 place-items-center rounded-2xl bg-blue-50 font-black text-blue-700"
                     aria-hidden="true"
                   >
                     {pet?.name?.slice(0, 2).toUpperCase()}

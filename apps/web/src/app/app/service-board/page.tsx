@@ -80,7 +80,7 @@ export default async function ServiceBoardPage({
   });
   return (
     <div className="space-y-6">
-      <header className="rounded-[2rem] bg-[#173f30] p-7 text-white shadow-[var(--elevation-2)] sm:p-9">
+      <header className="rounded-[2rem] bg-[linear-gradient(125deg,#0b1f3a_0%,#12376a_58%,#2864ed_145%)] p-7 text-white shadow-[var(--elevation-2)] sm:p-9">
         <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-200">
           Daily operations
         </p>
