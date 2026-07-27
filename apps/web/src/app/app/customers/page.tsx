@@ -1,9 +1,11 @@
 import { Alert } from '@petcare/ui/alert';
+import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { Field } from '@petcare/ui/field';
 import { PageHeader } from '@petcare/ui/page-header';
+import { RecordList, RecordListItem } from '@petcare/ui/record-list';
 import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
@@ -99,33 +101,40 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
       ) : null}
       <Card title={`Customers (${customers?.length ?? 0})`}>
         {customers?.length ? (
-          <ul className="divide-y divide-[var(--border-default)]">
+          <RecordList>
             {customers.map((customer) => (
-              <li
-                className="grid gap-3 py-4 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-center sm:gap-5"
+              <RecordListItem
+                action={
+                  <ButtonLink href={`/app/customers/${customer.id}`} variant="secondary">
+                    View household
+                  </ButtonLink>
+                }
+                description={
+                  <>
+                    {customer.preferred_name ? (
+                      <span className="block">
+                        Legal name: {customer.first_name} {customer.last_name}
+                      </span>
+                    ) : null}
+                    <span className="block">
+                      {customer.email} · {customer.phone}
+                    </span>
+                  </>
+                }
                 key={customer.id}
-              >
-                <div>
-                  <p className="font-bold">
+                status={
+                  <Badge tone={customer.status === 'active' ? 'success' : 'info'}>
+                    {customer.status}
+                  </Badge>
+                }
+                title={
+                  <>
                     {customer.preferred_name || customer.first_name} {customer.last_name}
-                  </p>
-                  {customer.preferred_name ? (
-                    <p className="text-sm text-[var(--text-secondary)]">
-                      Legal name: {customer.first_name} {customer.last_name}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="text-sm text-[var(--text-secondary)]">
-                  <p>{customer.email}</p>
-                  <p>{customer.phone}</p>
-                </div>
-                <span className="text-sm font-semibold capitalize">{customer.status}</span>
-                <ButtonLink href={`/app/customers/${customer.id}`} variant="secondary">
-                  View household
-                </ButtonLink>
-              </li>
+                  </>
+                }
+              />
             ))}
-          </ul>
+          </RecordList>
         ) : (
           <StatePanel
             description="Add the first customer and pet with the household form above."

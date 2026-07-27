@@ -5,6 +5,7 @@ import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { CommandBar } from '@petcare/ui/command-bar';
 import { PageHeader } from '@petcare/ui/page-header';
+import { RecordList, RecordListItem } from '@petcare/ui/record-list';
 import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
@@ -85,7 +86,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
         description="Balances are derived from immutable invoice versions and successful allocations."
       >
         {invoices?.length ? (
-          <div className="divide-y">
+          <RecordList>
             {invoices.map((invoice) => {
               const customer = invoice.customers as unknown as {
                 first_name: string;
@@ -94,41 +95,47 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
               const booking = invoice.bookings as unknown as { booking_number: string } | null;
               const balance = balanceByInvoice.get(invoice.id);
               return (
-                <a
-                  className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
-                  href={`/app/invoices/${invoice.id}`}
-                  key={invoice.id}
-                >
-                  <div>
-                    <p className="font-black">
-                      {invoice.invoice_number} · {customer?.first_name} {customer?.last_name}
-                    </p>
-                    <p className="text-sm text-[var(--text-secondary)]">
+                <RecordListItem
+                  action={
+                    <ButtonLink href={`/app/invoices/${invoice.id}`} variant="secondary">
+                      View invoice
+                    </ButtonLink>
+                  }
+                  description={
+                    <>
                       {booking?.booking_number ?? 'No booking'} ·{' '}
                       {money(balance?.paid_minor ?? 0, invoice.currency_code)} paid of{' '}
                       {money(balance?.total_minor ?? 0, invoice.currency_code)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <Badge
-                      tone={
-                        invoice.status === 'paid'
-                          ? 'success'
-                          : invoice.status === 'partially_paid'
-                            ? 'warning'
-                            : 'info'
-                      }
-                    >
-                      {invoice.status.replaceAll('_', ' ')}
-                    </Badge>
-                    <p className="mt-1 text-sm font-bold">
-                      {money(balance?.balance_due_minor ?? 0, invoice.currency_code)} due
-                    </p>
-                  </div>
-                </a>
+                    </>
+                  }
+                  key={invoice.id}
+                  status={
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Badge
+                        tone={
+                          invoice.status === 'paid'
+                            ? 'success'
+                            : invoice.status === 'partially_paid'
+                              ? 'warning'
+                              : 'info'
+                        }
+                      >
+                        {invoice.status.replaceAll('_', ' ')}
+                      </Badge>
+                      <span className="text-sm font-bold">
+                        {money(balance?.balance_due_minor ?? 0, invoice.currency_code)} due
+                      </span>
+                    </div>
+                  }
+                  title={
+                    <>
+                      {invoice.invoice_number} · {customer?.first_name} {customer?.last_name}
+                    </>
+                  }
+                />
               );
             })}
-          </div>
+          </RecordList>
         ) : (
           <StatePanel
             action={

@@ -5,6 +5,7 @@ import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { CommandBar } from '@petcare/ui/command-bar';
 import { PageHeader } from '@petcare/ui/page-header';
+import { RecordList, RecordListItem } from '@petcare/ui/record-list';
 import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
@@ -143,7 +144,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
         description="A pending request is never presented as a confirmed reservation."
       >
         {bookings?.length ? (
-          <div className="divide-y">
+          <RecordList>
             {bookings.map((booking) => {
               const customer = booking.customers as unknown as {
                 first_name: string;
@@ -151,25 +152,29 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
               } | null;
               const location = booking.locations as unknown as { name: string } | null;
               return (
-                <a
-                  className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
-                  href={`/app/bookings/${booking.id}`}
-                  key={booking.id}
-                >
-                  <div>
-                    <p className="font-black">{booking.booking_number}</p>
-                    <p className="text-sm text-[var(--text-secondary)]">
+                <RecordListItem
+                  action={
+                    <ButtonLink href={`/app/bookings/${booking.id}`} variant="secondary">
+                      View booking
+                    </ButtonLink>
+                  }
+                  description={
+                    <>
                       {customer?.first_name} {customer?.last_name} · {location?.name} ·{' '}
                       {booking.source_channel.replaceAll('_', ' ')}
-                    </p>
-                  </div>
-                  <Badge tone={tone(booking.status) as 'danger' | 'info' | 'success' | 'warning'}>
-                    {booking.status.replaceAll('_', ' ')}
-                  </Badge>
-                </a>
+                    </>
+                  }
+                  key={booking.id}
+                  status={
+                    <Badge tone={tone(booking.status) as 'danger' | 'info' | 'success' | 'warning'}>
+                      {booking.status.replaceAll('_', ' ')}
+                    </Badge>
+                  }
+                  title={booking.booking_number}
+                />
               );
             })}
-          </div>
+          </RecordList>
         ) : (
           <StatePanel
             action={
@@ -188,7 +193,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
         description="Priority is chronological; every offer must revalidate eligibility, capacity, pricing, and policy."
       >
         {waitlist?.length ? (
-          <div className="divide-y">
+          <RecordList>
             {waitlist.map((entry) => {
               const customer = entry.customers as unknown as {
                 first_name: string;
@@ -197,36 +202,36 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
               const pet = entry.pets as unknown as { name: string } | null;
               const service = entry.services as unknown as { internal_name: string } | null;
               return (
-                <div
-                  className="flex flex-wrap justify-between gap-3 py-4 first:pt-0 last:pb-0"
-                  key={entry.id}
-                >
-                  <div>
-                    <p className="font-bold">
-                      {pet?.name} · {service?.internal_name}
-                    </p>
-                    <p className="text-sm text-[var(--text-secondary)]">
-                      {customer?.first_name} {customer?.last_name} ·{' '}
-                      {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(
-                        new Date(entry.preferred_start),
-                      )}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge tone="info">{entry.status}</Badge>
-                    {entry.status === 'active' && context.permissions.has('bookings.modify') ? (
+                <RecordListItem
+                  action={
+                    entry.status === 'active' && context.permissions.has('bookings.modify') ? (
                       <form action={offerWaitlistEntry}>
                         <input name="entryId" type="hidden" value={entry.id} />
                         <Button type="submit" variant="secondary">
                           Offer slot
                         </Button>
                       </form>
-                    ) : null}
-                  </div>
-                </div>
+                    ) : null
+                  }
+                  description={
+                    <>
+                      {customer?.first_name} {customer?.last_name} ·{' '}
+                      {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(
+                        new Date(entry.preferred_start),
+                      )}
+                    </>
+                  }
+                  key={entry.id}
+                  status={<Badge tone="info">{entry.status}</Badge>}
+                  title={
+                    <>
+                      {pet?.name} · {service?.internal_name}
+                    </>
+                  }
+                />
               );
             })}
-          </div>
+          </RecordList>
         ) : (
           <StatePanel
             description="Customers waiting for unavailable dates will appear here."
@@ -240,7 +245,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
         description="Offers retain a dedicated capacity hold and expire without creating a reservation."
       >
         {offers?.length ? (
-          <div className="divide-y">
+          <RecordList>
             {offers.map((offer) => {
               const entry = offer.waitlist_entries as unknown as {
                 preferred_start: string;
@@ -258,40 +263,43 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
                 ),
               );
               return (
-                <div
-                  className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
-                  key={offer.id}
-                >
-                  <div>
-                    <p className="font-bold">
-                      {entry?.pets?.name} · {entry?.services?.internal_name}
-                    </p>
-                    <p className="text-sm text-[var(--text-secondary)]">
+                <RecordListItem
+                  action={
+                    <div className="flex flex-wrap gap-2">
+                      <form action={acceptWaitlistOffer}>
+                        <input name="offerId" type="hidden" value={offer.id} />
+                        <input name="units" type="hidden" value={units} />
+                        <Button type="submit">Convert</Button>
+                      </form>
+                      {context.permissions.has('bookings.modify') ? (
+                        <form action={declineWaitlistOffer}>
+                          <input name="offerId" type="hidden" value={offer.id} />
+                          <Button type="submit" variant="quiet">
+                            Decline
+                          </Button>
+                        </form>
+                      ) : null}
+                    </div>
+                  }
+                  description={
+                    <>
                       {entry?.customers?.first_name} {entry?.customers?.last_name} · expires{' '}
                       {new Intl.DateTimeFormat('en-US', { timeStyle: 'short' }).format(
                         new Date(offer.deadline_at),
                       )}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <form action={acceptWaitlistOffer}>
-                      <input name="offerId" type="hidden" value={offer.id} />
-                      <input name="units" type="hidden" value={units} />
-                      <Button type="submit">Convert</Button>
-                    </form>
-                    {context.permissions.has('bookings.modify') ? (
-                      <form action={declineWaitlistOffer}>
-                        <input name="offerId" type="hidden" value={offer.id} />
-                        <Button type="submit" variant="quiet">
-                          Decline
-                        </Button>
-                      </form>
-                    ) : null}
-                  </div>
-                </div>
+                    </>
+                  }
+                  key={offer.id}
+                  status={<Badge tone="warning">offer pending</Badge>}
+                  title={
+                    <>
+                      {entry?.pets?.name} · {entry?.services?.internal_name}
+                    </>
+                  }
+                />
               );
             })}
-          </div>
+          </RecordList>
         ) : (
           <StatePanel
             description="Time-limited capacity offers will appear here until accepted or expired."

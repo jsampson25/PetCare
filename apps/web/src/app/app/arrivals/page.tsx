@@ -3,6 +3,8 @@ import { Badge } from '@petcare/ui/badge';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { PageHeader } from '@petcare/ui/page-header';
+import { RecordList, RecordListItem } from '@petcare/ui/record-list';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -47,7 +49,7 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
         description="Confirmed bookings remain reservations until custody is explicitly accepted."
       >
         {items?.length ? (
-          <div className="divide-y divide-[var(--border-default)]">
+          <RecordList>
             {items.map((item, index) => {
               const booking = item.bookings as unknown as {
                 booking_number: string;
@@ -71,32 +73,36 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
                 ? 'handoff pending'
                 : visitStatus.replaceAll('_', ' ');
               return (
-                <div
-                  className="grid gap-4 p-5 transition hover:bg-[var(--surface-subtle)] sm:grid-cols-[auto_1fr_auto] sm:items-center"
+                <RecordListItem
+                  action={
+                    <ButtonLink href={`/app/arrivals/${item.booking_id}`} variant="secondary">
+                      Open check-in
+                    </ButtonLink>
+                  }
+                  description={
+                    <>
+                      <span className="block">
+                        {booking.booking_number} · {booking.customers?.first_name}{' '}
+                        {booking.customers?.last_name} · {booking.locations?.name}
+                      </span>
+                      <span className="block text-[var(--text-primary)]">
+                        {new Intl.DateTimeFormat('en-US', {
+                          dateStyle: 'medium',
+                          timeStyle: 'short',
+                        }).format(new Date(item.starts_at))}
+                      </span>
+                    </>
+                  }
                   key={`${item.booking_id}-${index}`}
-                >
-                  <span
-                    className="grid size-12 place-items-center rounded-2xl bg-blue-50 font-black text-blue-700"
-                    aria-hidden="true"
-                  >
-                    {pet?.name?.slice(0, 2).toUpperCase()}
-                  </span>
-                  <div>
-                    <p className="font-black">
-                      {pet?.name} · {service?.customer_name}
-                    </p>
-                    <p className="text-sm text-[var(--text-secondary)]">
-                      {booking.booking_number} · {booking.customers?.first_name}{' '}
-                      {booking.customers?.last_name} · {booking.locations?.name}
-                    </p>
-                    <p className="mt-1 text-sm">
-                      {new Intl.DateTimeFormat('en-US', {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                      }).format(new Date(item.starts_at))}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
+                  leading={
+                    <span
+                      aria-hidden="true"
+                      className="grid size-12 place-items-center rounded-2xl bg-blue-50 font-black text-blue-700"
+                    >
+                      {pet?.name?.slice(0, 2).toUpperCase()}
+                    </span>
+                  }
+                  status={
                     <Badge
                       tone={
                         pendingHandoff
@@ -110,18 +116,22 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
                     >
                       {displayStatus}
                     </Badge>
-                    <ButtonLink href={`/app/arrivals/${item.booking_id}`} variant="secondary">
-                      Open check-in
-                    </ButtonLink>
-                  </div>
-                </div>
+                  }
+                  title={
+                    <>
+                      {pet?.name} · {service?.customer_name}
+                    </>
+                  }
+                />
               );
             })}
-          </div>
+          </RecordList>
         ) : (
-          <p className="text-sm text-[var(--text-secondary)]">
-            No confirmed arrivals are currently scheduled.
-          </p>
+          <StatePanel
+            description="Confirmed reservations will appear here when they are ready for physical arrival."
+            size="compact"
+            title="No confirmed arrivals scheduled"
+          />
         )}
       </Card>
     </div>
