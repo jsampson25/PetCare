@@ -4,13 +4,12 @@ import { Button } from '@petcare/ui/button';
 import { Card } from '@petcare/ui/card';
 import { PageHeader } from '@petcare/ui/page-header';
 import { Field } from '@petcare/ui/field';
+import { SelectField } from '@petcare/ui/select-field';
 import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
 import { completePetCheckout, recordCheckoutOverride } from './actions';
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
-const selectClass =
-  'mt-2 min-h-12 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface-default)] px-3';
 export default async function DeparturesPage({ searchParams }: { searchParams: SearchParameters }) {
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('operations.check_out')) redirect('/denied');
@@ -168,18 +167,15 @@ export default async function DeparturesPage({ searchParams }: { searchParams: S
                     className="mb-5 grid gap-3 border-b pb-5 md:grid-cols-[1fr_2fr_auto]"
                   >
                     <input name="petVisitId" type="hidden" value={visit.id} />
-                    <label className="text-sm font-bold">
-                      Blocker
-                      <select className={selectClass} name="blockerType">
-                        {blockers
-                          .filter((blocker) => !approved.has(blocker))
-                          .map((blocker) => (
-                            <option key={blocker} value={blocker}>
-                              {blocker.replaceAll('_', ' ')}
-                            </option>
-                          ))}
-                      </select>
-                    </label>
+                    <SelectField label="Blocker" name="blockerType">
+                      {blockers
+                        .filter((blocker) => !approved.has(blocker))
+                        .map((blocker) => (
+                          <option key={blocker} value={blocker}>
+                            {blocker.replaceAll('_', ' ')}
+                          </option>
+                        ))}
+                    </SelectField>
                     <Field label="Manager override reason" name="reason" required />
                     <Button type="submit" variant="secondary">
                       Approve exception
@@ -189,24 +185,18 @@ export default async function DeparturesPage({ searchParams }: { searchParams: S
                 <form action={completePetCheckout} className="grid gap-4 md:grid-cols-2">
                   <input name="petVisitId" type="hidden" value={visit.id} />
                   <Field label="Pickup person" name="pickupName" required />
-                  <label className="text-sm font-bold">
-                    Relationship
-                    <select className={selectClass} name="pickupRelationship">
-                      <option value="owner">Owner</option>
-                      <option value="household_member">Household member</option>
-                      <option value="authorized_pickup">Authorized pickup</option>
-                      <option value="other">Other / exception</option>
-                    </select>
-                  </label>
-                  <label className="text-sm font-bold">
-                    Verification method
-                    <select className={selectClass} name="verificationMethod">
-                      <option value="photo_id">Photo ID</option>
-                      <option value="account_questions">Account questions</option>
-                      <option value="known_customer">Known customer</option>
-                      <option value="other">Other controlled method</option>
-                    </select>
-                  </label>
+                  <SelectField label="Relationship" name="pickupRelationship">
+                    <option value="owner">Owner</option>
+                    <option value="household_member">Household member</option>
+                    <option value="authorized_pickup">Authorized pickup</option>
+                    <option value="other">Other / exception</option>
+                  </SelectField>
+                  <SelectField label="Verification method" name="verificationMethod">
+                    <option value="photo_id">Photo ID</option>
+                    <option value="account_questions">Account questions</option>
+                    <option value="known_customer">Known customer</option>
+                    <option value="other">Other controlled method</option>
+                  </SelectField>
                   <Field label="Identity evidence 1" name="identityOne" required />
                   <Field label="Identity evidence 2" name="identityTwo" required />
                   <Field label="Customer handoff notes" name="handoffNotes" />
@@ -222,13 +212,13 @@ export default async function DeparturesPage({ searchParams }: { searchParams: S
                           <p className="text-sm font-bold">
                             {item.item_name} · {item.quantity} {item.unit}
                           </p>
-                          <select className={selectClass} name={`returnStatus_${item.id}`}>
+                          <SelectField label="Return outcome" name={`returnStatus_${item.id}`}>
                             <option value="returned">Returned</option>
                             <option value="consumed">Consumed</option>
                             <option value="disposed">Disposed as authorized</option>
                             <option value="missing">Missing</option>
                             <option value="damaged">Damaged</option>
-                          </select>
+                          </SelectField>
                           <Field label="Item notes" name={`returnNotes_${item.id}`} />
                         </div>
                       ))}

@@ -17,6 +17,7 @@
     "./navigation": "./src/navigation.ts",
     "./page-header": "./src/page-header.tsx",
     "./record-list": "./src/record-list.tsx",
+    "./select-field": "./src/select-field.tsx",
     "./shell-navigation": "./src/shell-navigation.tsx",
     "./state-panel": "./src/state-panel.tsx",
     "./tabs": "./src/tabs.tsx",

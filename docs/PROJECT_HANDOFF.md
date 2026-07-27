@@ -226,6 +226,7 @@ Capture defects with screenshots and exact URLs.
 - [x] Standardize core list and operations page headers with a shared responsive component
 - [x] Standardize core workspace command bars and empty-result presentation
 - [x] Standardize mobile-first workspace record lists, statuses, and row actions
+- [x] Standardize core text and select controls with accessible shared field contracts
 - Standardize page headers, command bars, filters, tables, cards, forms, and empty states
 - Use SVG icons consistently
 - Add representative beta sample data so screens can be evaluated visually

@@ -6,6 +6,7 @@ import { Card } from '@petcare/ui/card';
 import { Field } from '@petcare/ui/field';
 import { PageHeader } from '@petcare/ui/page-header';
 import { RecordList, RecordListItem } from '@petcare/ui/record-list';
+import { SelectField } from '@petcare/ui/select-field';
 import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
@@ -79,15 +80,11 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
                 name="birthDate"
                 type="date"
               />
-              <SelectField
-                label="Sex"
-                name="petSex"
-                options={[
-                  ['female', 'Female'],
-                  ['male', 'Male'],
-                  ['unknown', 'Unknown'],
-                ]}
-              />
+              <SelectField label="Sex" name="petSex">
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="unknown">Unknown</option>
+              </SelectField>
               <label className="flex min-h-12 items-center gap-3 text-sm font-bold sm:col-span-2">
                 <input className="size-5" name="birthDateEstimated" type="checkbox" />
                 Birth date is estimated
@@ -143,35 +140,6 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
           />
         )}
       </Card>
-    </div>
-  );
-}
-
-function SelectField({
-  label,
-  name,
-  options,
-}: {
-  label: string;
-  name: string;
-  options: [string, string][];
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-bold" htmlFor={name}>
-        {label}
-      </label>
-      <select
-        className="mt-2 min-h-12 w-full rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-[var(--surface-default)] px-3"
-        id={name}
-        name={name}
-      >
-        {options.map(([value, text]) => (
-          <option key={value} value={value}>
-            {text}
-          </option>
-        ))}
-      </select>
     </div>
   );
 }

@@ -3,7 +3,9 @@ import { Button } from '@petcare/ui/button';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { CommandBar } from '@petcare/ui/command-bar';
+import { Field } from '@petcare/ui/field';
 import { PageHeader } from '@petcare/ui/page-header';
+import { SelectField } from '@petcare/ui/select-field';
 import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
@@ -64,45 +66,39 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
         title="Choose week"
       >
         <form className="flex flex-wrap items-end gap-3" method="get">
-          <label className="text-sm font-bold">
-            Starting date
-            <input
-              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
-              defaultValue={requestedDate}
-              name="date"
-              type="date"
-            />
-          </label>
-          <label className="text-sm font-bold">
-            Location
-            <select
-              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
-              defaultValue={requestedLocation}
-              name="location"
-            >
-              <option value="all">All locations</option>
-              {locations?.map((location) => (
-                <option key={location.id} value={location.id}>
-                  {location.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="text-sm font-bold">
-            Item status
-            <select
-              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
-              defaultValue={requestedStatus}
-              name="status"
-            >
-              <option value="active">Active</option>
-              <option value="all">All</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="held">Held</option>
-              <option value="completed">Completed</option>
-              <option value="no_show">No-show</option>
-            </select>
-          </label>
+          <Field
+            defaultValue={requestedDate}
+            density="compact"
+            label="Starting date"
+            name="date"
+            type="date"
+          />
+          <SelectField
+            defaultValue={requestedLocation}
+            density="compact"
+            label="Location"
+            name="location"
+          >
+            <option value="all">All locations</option>
+            {locations?.map((location) => (
+              <option key={location.id} value={location.id}>
+                {location.name}
+              </option>
+            ))}
+          </SelectField>
+          <SelectField
+            defaultValue={requestedStatus}
+            density="compact"
+            label="Item status"
+            name="status"
+          >
+            <option value="active">Active</option>
+            <option value="all">All</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="held">Held</option>
+            <option value="completed">Completed</option>
+            <option value="no_show">No-show</option>
+          </SelectField>
           <Button type="submit" variant="secondary">
             Show week
           </Button>

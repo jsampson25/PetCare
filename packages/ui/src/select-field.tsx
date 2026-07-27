@@ -1,13 +1,15 @@
-import type { InputHTMLAttributes } from 'react';
+import type { ReactNode, SelectHTMLAttributes } from 'react';
 
-type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
+type SelectFieldProps = SelectHTMLAttributes<HTMLSelectElement> & {
+  children: ReactNode;
   density?: 'compact' | 'default';
   error?: string;
   hint?: string;
   label: string;
 };
 
-export function Field({
+export function SelectField({
+  children,
   className = '',
   density = 'default',
   error,
@@ -15,9 +17,9 @@ export function Field({
   id,
   label,
   ...props
-}: FieldProps) {
+}: SelectFieldProps) {
   const fieldId = id ?? props.name;
-  if (!fieldId) throw new Error('Field requires an id or name.');
+  if (!fieldId) throw new Error('SelectField requires an id or name.');
   const descriptionId = `${fieldId}-description`;
 
   return (
@@ -26,13 +28,15 @@ export function Field({
         {label}
       </label>
       {hint ? <p className="mt-1 text-sm leading-5 text-[var(--text-secondary)]">{hint}</p> : null}
-      <input
+      <select
         aria-describedby={hint || error ? descriptionId : undefined}
         aria-invalid={error ? true : undefined}
         className={`mt-2 w-full rounded-[var(--radius-md)] border bg-[var(--surface-default)] px-3 outline-none transition focus:border-[var(--focus-ring)] focus:ring-3 focus:ring-[color-mix(in_srgb,var(--focus-ring)_25%,transparent)] ${density === 'compact' ? 'min-h-11 text-sm' : 'min-h-12 text-base'} ${error ? 'border-[var(--danger-border)]' : 'border-[var(--border-strong)]'} ${className}`}
         id={fieldId}
         {...props}
-      />
+      >
+        {children}
+      </select>
       {error ? (
         <p
           className="mt-2 text-sm font-semibold text-[var(--danger-foreground)]"

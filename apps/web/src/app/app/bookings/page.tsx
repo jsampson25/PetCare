@@ -4,8 +4,10 @@ import { Button } from '@petcare/ui/button';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { CommandBar } from '@petcare/ui/command-bar';
+import { Field } from '@petcare/ui/field';
 import { PageHeader } from '@petcare/ui/page-header';
 import { RecordList, RecordListItem } from '@petcare/ui/record-list';
+import { SelectField } from '@petcare/ui/select-field';
 import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
@@ -97,33 +99,24 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
         description="Search the authoritative booking number and narrow the lifecycle state."
       >
         <form className="flex flex-wrap items-end gap-3" method="get">
-          <label className="text-sm font-bold">
-            Booking number
-            <input
-              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
-              defaultValue={query}
-              name="q"
-              placeholder="PC-000123"
-            />
-          </label>
-          <label className="text-sm font-bold">
-            Status
-            <select
-              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
-              defaultValue={status}
-              name="status"
-            >
-              <option value="active">Active</option>
-              <option value="all">All</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="action_required">Action required</option>
-              <option value="pending_approval">Pending approval</option>
-              <option value="pending_deposit">Pending deposit</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="no_show">No-show</option>
-              <option value="expired">Expired</option>
-            </select>
-          </label>
+          <Field
+            defaultValue={query}
+            density="compact"
+            label="Booking number"
+            name="q"
+            placeholder="PC-000123"
+          />
+          <SelectField defaultValue={status} density="compact" label="Status" name="status">
+            <option value="active">Active</option>
+            <option value="all">All</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="action_required">Action required</option>
+            <option value="pending_approval">Pending approval</option>
+            <option value="pending_deposit">Pending deposit</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="no_show">No-show</option>
+            <option value="expired">Expired</option>
+          </SelectField>
           <Button type="submit" variant="secondary">
             Apply filters
           </Button>

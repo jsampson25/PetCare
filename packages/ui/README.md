@@ -12,11 +12,15 @@ Shared interface primitives for every PetCare surface. Components use the semant
 | `button`             | Primary, secondary, quiet, destructive, disabled, and loading actions     |
 | `button-link`        | Navigation styled as an action                                            |
 | `card`               | Grouped content surface with optional title and description               |
+| `command-bar`        | Responsive grouping for filters and secondary view actions                |
 | `data-table`         | Semantic tabular data with caption and contained overflow                 |
 | `dialog`             | Managed native modal with focus containment and Escape behavior           |
 | `field`              | Visible-label text input with linked guidance and error output            |
 | `form-error-summary` | Focusable error index linking to invalid fields                           |
 | `navigation`         | Permission-aware presentation filtering; never an authorization boundary  |
+| `page-header`        | Consistent responsive page title, context, description, and actions       |
+| `record-list`        | Mobile-first record identity, status, and explicit action presentation    |
+| `select-field`       | Visible-label native select with linked guidance and error output         |
 | `state-panel`        | Empty, unavailable, denied, or informational page state                   |
 | `tabs`               | Arrow-key-operable tab list and associated panels                         |
 | `upload-field`       | Labeled file selection with type and size validation helpers              |

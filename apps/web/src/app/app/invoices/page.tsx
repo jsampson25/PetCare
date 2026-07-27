@@ -6,6 +6,7 @@ import { Card } from '@petcare/ui/card';
 import { CommandBar } from '@petcare/ui/command-bar';
 import { PageHeader } from '@petcare/ui/page-header';
 import { RecordList, RecordListItem } from '@petcare/ui/record-list';
+import { SelectField } from '@petcare/ui/select-field';
 import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
@@ -61,21 +62,14 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
         title="Filter invoices"
       >
         <form className="flex flex-wrap items-end gap-3" method="get">
-          <label className="text-sm font-bold">
-            Status
-            <select
-              className="mt-2 block min-h-11 rounded-lg border bg-white px-3"
-              defaultValue={status}
-              name="status"
-            >
-              <option value="outstanding">Outstanding</option>
-              <option value="all">All</option>
-              <option value="open">Open</option>
-              <option value="partially_paid">Partially paid</option>
-              <option value="paid">Paid</option>
-              <option value="void">Void</option>
-            </select>
-          </label>
+          <SelectField defaultValue={status} density="compact" label="Status" name="status">
+            <option value="outstanding">Outstanding</option>
+            <option value="all">All</option>
+            <option value="open">Open</option>
+            <option value="partially_paid">Partially paid</option>
+            <option value="paid">Paid</option>
+            <option value="void">Void</option>
+          </SelectField>
           <Button type="submit" variant="secondary">
             Apply filters
           </Button>
