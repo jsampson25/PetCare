@@ -20,6 +20,7 @@ import {
   expireBookingRequests,
   offerWaitlistEntry,
 } from './actions';
+import { type BookingListItem, summarizeBookingItems } from './booking-list';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 const tone = (status: string) =>
@@ -41,7 +42,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
   let bookingQuery = supabase
     .from('bookings')
     .select(
-      'id,booking_number,status,source_channel,created_at,customers(first_name,last_name),locations(name)',
+      'id,booking_number,status,source_channel,created_at,customers(first_name,last_name),locations(name),booking_items(starts_at,ends_at,pets(name),service_versions(customer_name))',
     )
     .eq('business_id', context.businessId)
     .order('created_at', { ascending: false })
@@ -135,6 +136,28 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
           {parameters.error}
         </Alert>
       ) : null}
+      <Card eyebrow="Booking summary" title="Current view" tone="subtle">
+        <dl className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <dt className="text-sm font-semibold text-[var(--text-secondary)]">Visible records</dt>
+            <dd className="mt-1 text-3xl font-black tracking-tight">{bookings?.length ?? 0}</dd>
+          </div>
+          <div>
+            <dt className="text-sm font-semibold text-[var(--text-secondary)]">Confirmed</dt>
+            <dd className="mt-1 text-3xl font-black tracking-tight">
+              {bookings?.filter((booking) => booking.status === 'confirmed').length ?? 0}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm font-semibold text-[var(--text-secondary)]">Needs attention</dt>
+            <dd className="mt-1 text-3xl font-black tracking-tight">
+              {bookings?.filter((booking) =>
+                ['action_required', 'pending_approval', 'pending_deposit'].includes(booking.status),
+              ).length ?? 0}
+            </dd>
+          </div>
+        </dl>
+      </Card>
       <Card
         description="A pending request is never presented as a confirmed reservation."
         eyebrow="Reservation records"
@@ -148,6 +171,9 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
                 last_name: string;
               } | null;
               const location = booking.locations as unknown as { name: string } | null;
+              const schedule = summarizeBookingItems(
+                (booking.booking_items as unknown as BookingListItem[]) ?? [],
+              );
               return (
                 <RecordListItem
                   action={
@@ -160,12 +186,42 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
                     </ButtonLink>
                   }
                   description={
-                    <>
-                      {customer?.first_name} {customer?.last_name} · {location?.name} ·{' '}
-                      {booking.source_channel.replaceAll('_', ' ')}
-                    </>
+                    <div className="space-y-1">
+                      <p>
+                        {customer?.first_name} {customer?.last_name} · {location?.name} ·{' '}
+                        {booking.source_channel.replaceAll('_', ' ')}
+                      </p>
+                      {schedule ? (
+                        <p className="font-semibold text-[var(--text-primary)]">
+                          {schedule.petName} · {schedule.serviceName} ·{' '}
+                          <time dateTime={schedule.startsAt}>
+                            {new Intl.DateTimeFormat('en-US', {
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            }).format(new Date(schedule.startsAt))}
+                          </time>{' '}
+                          –{' '}
+                          <time dateTime={schedule.endsAt}>
+                            {new Intl.DateTimeFormat('en-US', {
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            }).format(new Date(schedule.endsAt))}
+                          </time>
+                          {schedule.additionalItemCount
+                            ? ` · +${schedule.additionalItemCount} more service${schedule.additionalItemCount === 1 ? '' : 's'}`
+                            : ''}
+                        </p>
+                      ) : (
+                        <p>Schedule pending</p>
+                      )}
+                    </div>
                   }
                   key={booking.id}
+                  leading={
+                    <span className="flex size-11 items-center justify-center rounded-[var(--radius-md)] bg-[var(--surface-subtle)] text-[var(--action-primary)]">
+                      <Icon name="booking" />
+                    </span>
+                  }
                   status={
                     <Badge tone={tone(booking.status) as 'danger' | 'info' | 'success' | 'warning'}>
                       {booking.status.replaceAll('_', ' ')}
