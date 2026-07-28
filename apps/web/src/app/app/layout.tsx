@@ -101,6 +101,13 @@ const businessNavigation = [
   },
   {
     group: 'Business',
+    href: '/app/pets',
+    icon: 'pets',
+    label: 'Pets',
+    requiredPermissions: ['pets.view'],
+  },
+  {
+    group: 'Business',
     href: '/app/customer-requests',
     icon: 'users',
     label: 'Customer requests',
