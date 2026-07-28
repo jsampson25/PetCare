@@ -1,8 +1,14 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
+import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { CommandBar } from '@petcare/ui/command-bar';
 import { Field } from '@petcare/ui/field';
+import { Icon } from '@petcare/ui/icon';
+import { PageHeader } from '@petcare/ui/page-header';
+import { SelectField } from '@petcare/ui/select-field';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -14,6 +20,7 @@ import {
   recordDaycareEvaluation,
   transitionPlaygroupParticipant,
 } from './actions';
+import { filterPlaygroupSessions, summarizePlaygroupBoard } from './playgroup-board-view';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 const selectClass =
@@ -23,6 +30,16 @@ export default async function PlaygroupsPage({ searchParams }: { searchParams: S
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('operations.manage_playgroup')) redirect('/denied');
   const parameters = await searchParams;
+  const sizeParameter = typeof parameters.size === 'string' ? parameters.size : 'all';
+  const requestedSize = ['all', 'small', 'medium', 'large', 'mixed', 'special_needs'].includes(
+    sizeParameter,
+  )
+    ? sizeParameter
+    : 'all';
+  const viewParameter = typeof parameters.view === 'string' ? parameters.view : 'all';
+  const requestedView = ['all', 'available', 'full', 'attention'].includes(viewParameter)
+    ? viewParameter
+    : 'all';
   const supabase = await createSupabaseServerClient();
   const [
     { data: executions },
@@ -78,16 +95,39 @@ export default async function PlaygroupsPage({ searchParams }: { searchParams: S
       !placedIds.has(execution.id) &&
       ['approved', 'restricted'].includes(latestEvaluation.get(execution.id)?.outcome ?? ''),
   );
+  const sessionRows = (sessions ?? []).map((session) => {
+    const members = (participants ?? []).filter(
+      (participant) => participant.playgroup_session_id === session.id,
+    );
+    return {
+      session,
+      members,
+      size_band: session.size_band,
+      effective_capacity: Math.min(session.max_pets, session.pets_per_staff * session.staff_count),
+      active_count: members.filter((member) => member.status === 'active').length,
+      resting_count: members.filter((member) => member.status === 'resting').length,
+      removed_count: members.filter((member) => member.status === 'removed').length,
+    };
+  });
+  const visibleSessions = filterPlaygroupSessions(sessionRows, requestedSize, requestedView);
+  const summary = summarizePlaygroupBoard(sessionRows, eligible.length);
   const canClear = context.roles.includes('owner') || context.roles.includes('manager');
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--action-primary)]">Daycare operations</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Playgroups</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Evaluation, staffed capacity, rest, and safety removals remain explicit.
-        </p>
-      </header>
+      <PageHeader
+        actions={
+          <ButtonLink
+            href="/app/service-board?category=daycare"
+            leadingIcon={<Icon name="clipboard" />}
+            variant="secondary"
+          >
+            Daycare board
+          </ButtonLink>
+        }
+        description="Evaluation, staffed capacity, rest, and safety removals remain explicit."
+        eyebrow="Daycare operations"
+        title="Playgroups"
+      />
       {typeof parameters.notice === 'string' ? (
         <Alert title="Playgroup updated" tone="success">
           {parameters.notice}
@@ -98,6 +138,49 @@ export default async function PlaygroupsPage({ searchParams }: { searchParams: S
           {parameters.error}
         </Alert>
       ) : null}
+      <CommandBar
+        description="Focus staffed sessions by care band, remaining capacity, or safety attention."
+        title="Filter playgroup sessions"
+      >
+        <form className="flex flex-wrap items-end gap-3" method="get">
+          <SelectField
+            defaultValue={requestedSize}
+            density="compact"
+            label="Size / care band"
+            name="size"
+          >
+            <option value="all">All care bands</option>
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+            <option value="mixed">Mixed</option>
+            <option value="special_needs">Special needs</option>
+          </SelectField>
+          <SelectField
+            defaultValue={requestedView}
+            density="compact"
+            label="Session view"
+            name="view"
+          >
+            <option value="all">All active sessions</option>
+            <option value="available">Capacity available</option>
+            <option value="full">At staffed capacity</option>
+            <option value="attention">Safety attention</option>
+          </SelectField>
+          <Button leadingIcon={<Icon name="filter" />} type="submit" variant="secondary">
+            Apply filters
+          </Button>
+        </form>
+      </CommandBar>
+      <Card eyebrow="Live summary" title="Playgroup workload" tone="subtle">
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <SummaryMetric label="Active sessions" value={summary.sessions} />
+          <SummaryMetric label="Playing" value={summary.active} />
+          <SummaryMetric label="Resting" value={summary.resting} />
+          <SummaryMetric label="Removed" value={summary.removed} />
+          <SummaryMetric label="Eligible to place" value={summary.eligible} />
+        </dl>
+      </Card>
       <section className="grid gap-5 xl:grid-cols-2">
         <Card
           title="Record daycare evaluation"
@@ -170,12 +253,8 @@ export default async function PlaygroupsPage({ searchParams }: { searchParams: S
           </form>
         </Card>
       </section>
-      {sessions?.map((session) => {
+      {visibleSessions.map(({ session, members, effective_capacity: effective }) => {
         const location = session.locations as unknown as { name: string } | null;
-        const members = (participants ?? []).filter(
-          (participant) => participant.playgroup_session_id === session.id,
-        );
-        const effective = Math.min(session.max_pets, session.pets_per_staff * session.staff_count);
         return (
           <Card
             key={session.id}
@@ -299,6 +378,27 @@ export default async function PlaygroupsPage({ searchParams }: { searchParams: S
           </Card>
         );
       })}
+      {!visibleSessions.length ? (
+        <StatePanel
+          description={
+            sessions?.length
+              ? 'No active playgroups match the selected care band and session view.'
+              : 'Open a staffed session to begin placing evaluated daycare pets.'
+          }
+          title={sessions?.length ? 'No matching playgroups' : 'No active playgroups'}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function SummaryMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <dt className="text-sm font-bold text-[var(--text-secondary)]">{label}</dt>
+      <dd className="mt-1 text-3xl font-black tracking-tight text-[var(--text-primary)]">
+        {value}
+      </dd>
     </div>
   );
 }
