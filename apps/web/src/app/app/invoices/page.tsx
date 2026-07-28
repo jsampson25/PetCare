@@ -4,6 +4,7 @@ import { Button } from '@petcare/ui/button';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { CommandBar } from '@petcare/ui/command-bar';
+import { Icon } from '@petcare/ui/icon';
 import { PageHeader } from '@petcare/ui/page-header';
 import { RecordList, RecordListItem } from '@petcare/ui/record-list';
 import { SelectField } from '@petcare/ui/select-field';
@@ -70,7 +71,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
             <option value="paid">Paid</option>
             <option value="void">Void</option>
           </SelectField>
-          <Button type="submit" variant="secondary">
+          <Button leadingIcon={<Icon name="filter" />} type="submit" variant="secondary">
             Apply filters
           </Button>
         </form>
@@ -92,7 +93,11 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
               return (
                 <RecordListItem
                   action={
-                    <ButtonLink href={`/app/invoices/${invoice.id}`} variant="secondary">
+                    <ButtonLink
+                      href={`/app/invoices/${invoice.id}`}
+                      leadingIcon={<Icon name="arrow-right" />}
+                      variant="secondary"
+                    >
                       View invoice
                     </ButtonLink>
                   }
@@ -134,7 +139,11 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
         ) : (
           <StatePanel
             action={
-              <ButtonLink href="/app/bookings" variant="secondary">
+              <ButtonLink
+                href="/app/bookings"
+                leadingIcon={<Icon name="arrow-right" />}
+                variant="secondary"
+              >
                 View bookings
               </ButtonLink>
             }

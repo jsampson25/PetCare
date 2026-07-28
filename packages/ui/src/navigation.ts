@@ -1,7 +1,9 @@
+import type { IconName } from './icon';
+
 export type NavigationItem = {
   group?: string;
   href: string;
-  icon?: string;
+  icon?: IconName;
   label: string;
   requiredPermissions?: readonly string[];
 };

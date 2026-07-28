@@ -17,6 +17,7 @@ Shared interface primitives for every PetCare surface. Components use the semant
 | `dialog`             | Managed native modal with focus containment and Escape behavior           |
 | `field`              | Visible-label text input with linked guidance and error output            |
 | `form-error-summary` | Focusable error index linking to invalid fields                           |
+| `icon`               | Typed, decorative-by-default SVG icons for navigation and labeled actions |
 | `navigation`         | Permission-aware presentation filtering; never an authorization boundary  |
 | `page-header`        | Consistent responsive page title, context, description, and actions       |
 | `record-list`        | Mobile-first record identity, status, and explicit action presentation    |

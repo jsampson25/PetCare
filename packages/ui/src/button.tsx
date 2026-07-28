@@ -4,6 +4,7 @@ type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'quiet';
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
+  leadingIcon?: ReactNode;
   loading?: boolean;
   loadingLabel?: string;
   variant?: ButtonVariant;
@@ -22,6 +23,7 @@ export function Button({
   children,
   className = '',
   disabled,
+  leadingIcon,
   loading = false,
   loadingLabel = 'Working…',
   type = 'button',
@@ -41,7 +43,9 @@ export function Button({
           aria-hidden="true"
           className="size-4 animate-spin rounded-full border-2 border-current border-r-transparent"
         />
-      ) : null}
+      ) : (
+        leadingIcon
+      )}
       <span>{loading ? loadingLabel : children}</span>
     </button>
   );

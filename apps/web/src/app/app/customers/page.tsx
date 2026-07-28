@@ -4,6 +4,7 @@ import { Button } from '@petcare/ui/button';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { Field } from '@petcare/ui/field';
+import { Icon } from '@petcare/ui/icon';
 import { PageHeader } from '@petcare/ui/page-header';
 import { RecordList, RecordListItem } from '@petcare/ui/record-list';
 import { SelectField } from '@petcare/ui/select-field';
@@ -87,7 +88,9 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
               </label>
             </fieldset>
             <div className="lg:col-span-2">
-              <Button type="submit">Create customer and pet</Button>
+              <Button leadingIcon={<Icon name="add" />} type="submit">
+                Create customer and pet
+              </Button>
             </div>
           </form>
         </Card>
@@ -103,7 +106,11 @@ export default async function CustomersPage({ searchParams }: { searchParams: Se
             {customers.map((customer) => (
               <RecordListItem
                 action={
-                  <ButtonLink href={`/app/customers/${customer.id}`} variant="secondary">
+                  <ButtonLink
+                    href={`/app/customers/${customer.id}`}
+                    leadingIcon={<Icon name="arrow-right" />}
+                    variant="secondary"
+                  >
                     View household
                   </ButtonLink>
                 }

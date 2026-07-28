@@ -229,7 +229,7 @@ Capture defects with screenshots and exact URLs.
 - [x] Standardize core text and select controls with accessible shared field contracts
 - [x] Standardize core card headers, section context, actions, and surface tones
 - Standardize page headers, command bars, filters, tables, cards, forms, and empty states
-- Use SVG icons consistently
+- [x] Standardize typed SVG icons across workspace navigation and core actions
 - Add representative beta sample data so screens can be evaluated visually
 - Improve calendar, bookings, customer records, pet records, care boards, invoices, and reports
 - Verify desktop, tablet, and mobile layouts

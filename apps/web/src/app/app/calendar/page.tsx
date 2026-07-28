@@ -4,6 +4,7 @@ import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { CommandBar } from '@petcare/ui/command-bar';
 import { Field } from '@petcare/ui/field';
+import { Icon } from '@petcare/ui/icon';
 import { PageHeader } from '@petcare/ui/page-header';
 import { SelectField } from '@petcare/ui/select-field';
 import { StatePanel } from '@petcare/ui/state-panel';
@@ -56,7 +57,11 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
   return (
     <div className="space-y-6">
       <PageHeader
-        actions={<ButtonLink href="/app/bookings/new">New booking</ButtonLink>}
+        actions={
+          <ButtonLink href="/app/bookings/new" leadingIcon={<Icon name="add" />}>
+            New booking
+          </ButtonLink>
+        }
         description="Seven-day authoritative schedule with an accessible list presentation."
         eyebrow="Reservations"
         title="Calendar agenda"
@@ -99,7 +104,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
             <option value="completed">Completed</option>
             <option value="no_show">No-show</option>
           </SelectField>
-          <Button type="submit" variant="secondary">
+          <Button leadingIcon={<Icon name="filter" />} type="submit" variant="secondary">
             Show week
           </Button>
         </form>

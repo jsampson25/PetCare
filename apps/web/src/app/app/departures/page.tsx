@@ -2,6 +2,7 @@ import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
 import { Card } from '@petcare/ui/card';
+import { Icon } from '@petcare/ui/icon';
 import { PageHeader } from '@petcare/ui/page-header';
 import { Field } from '@petcare/ui/field';
 import { SelectField } from '@petcare/ui/select-field';
@@ -186,7 +187,7 @@ export default async function DeparturesPage({ searchParams }: { searchParams: S
                         ))}
                     </SelectField>
                     <Field label="Manager override reason" name="reason" required />
-                    <Button type="submit" variant="secondary">
+                    <Button leadingIcon={<Icon name="check" />} type="submit" variant="secondary">
                       Approve exception
                     </Button>
                   </form>
@@ -239,7 +240,9 @@ export default async function DeparturesPage({ searchParams }: { searchParams: S
                     status were reviewed.
                   </label>
                   <div className="md:col-span-2">
-                    <Button type="submit">Complete pet checkout</Button>
+                    <Button leadingIcon={<Icon name="check" />} type="submit">
+                      Complete pet checkout
+                    </Button>
                   </div>
                 </form>
               </Card>

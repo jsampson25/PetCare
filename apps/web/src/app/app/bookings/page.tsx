@@ -5,6 +5,7 @@ import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
 import { CommandBar } from '@petcare/ui/command-bar';
 import { Field } from '@petcare/ui/field';
+import { Icon } from '@petcare/ui/icon';
 import { PageHeader } from '@petcare/ui/page-header';
 import { RecordList, RecordListItem } from '@petcare/ui/record-list';
 import { SelectField } from '@petcare/ui/select-field';
@@ -78,7 +79,9 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
       <PageHeader
         actions={
           context.permissions.has('bookings.create') ? (
-            <ButtonLink href="/app/bookings/new">New booking</ButtonLink>
+            <ButtonLink href="/app/bookings/new" leadingIcon={<Icon name="add" />}>
+              New booking
+            </ButtonLink>
           ) : null
         }
         description="Authoritative requests, confirmations, and exceptions across every service."
@@ -89,7 +92,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
         secondaryAction={
           context.permissions.has('bookings.modify') ? (
             <form action={expireBookingRequests}>
-              <Button type="submit" variant="quiet">
+              <Button leadingIcon={<Icon name="refresh" />} type="submit" variant="quiet">
                 Process expired requests
               </Button>
             </form>
@@ -117,7 +120,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
             <option value="no_show">No-show</option>
             <option value="expired">Expired</option>
           </SelectField>
-          <Button type="submit" variant="secondary">
+          <Button leadingIcon={<Icon name="filter" />} type="submit" variant="secondary">
             Apply filters
           </Button>
         </form>
@@ -148,7 +151,11 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
               return (
                 <RecordListItem
                   action={
-                    <ButtonLink href={`/app/bookings/${booking.id}`} variant="secondary">
+                    <ButtonLink
+                      href={`/app/bookings/${booking.id}`}
+                      leadingIcon={<Icon name="arrow-right" />}
+                      variant="secondary"
+                    >
                       View booking
                     </ButtonLink>
                   }
@@ -173,7 +180,9 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
           <StatePanel
             action={
               context.permissions.has('bookings.create') ? (
-                <ButtonLink href="/app/bookings/new">Create booking</ButtonLink>
+                <ButtonLink href="/app/bookings/new" leadingIcon={<Icon name="add" />}>
+                  Create booking
+                </ButtonLink>
               ) : null
             }
             description="Adjust the filters or create the first booking request."
@@ -202,7 +211,11 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
                     entry.status === 'active' && context.permissions.has('bookings.modify') ? (
                       <form action={offerWaitlistEntry}>
                         <input name="entryId" type="hidden" value={entry.id} />
-                        <Button type="submit" variant="secondary">
+                        <Button
+                          leadingIcon={<Icon name="arrow-right" />}
+                          type="submit"
+                          variant="secondary"
+                        >
                           Offer slot
                         </Button>
                       </form>
@@ -265,7 +278,9 @@ export default async function BookingsPage({ searchParams }: { searchParams: Sea
                       <form action={acceptWaitlistOffer}>
                         <input name="offerId" type="hidden" value={offer.id} />
                         <input name="units" type="hidden" value={units} />
-                        <Button type="submit">Convert</Button>
+                        <Button leadingIcon={<Icon name="check" />} type="submit">
+                          Convert
+                        </Button>
                       </form>
                       {context.permissions.has('bookings.modify') ? (
                         <form action={declineWaitlistOffer}>

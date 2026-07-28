@@ -2,6 +2,7 @@ import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { Icon } from '@petcare/ui/icon';
 import { PageHeader } from '@petcare/ui/page-header';
 import { RecordList, RecordListItem } from '@petcare/ui/record-list';
 import { StatePanel } from '@petcare/ui/state-panel';
@@ -76,7 +77,11 @@ export default async function ArrivalsPage({ searchParams }: { searchParams: Sea
               return (
                 <RecordListItem
                   action={
-                    <ButtonLink href={`/app/arrivals/${item.booking_id}`} variant="secondary">
+                    <ButtonLink
+                      href={`/app/arrivals/${item.booking_id}`}
+                      leadingIcon={<Icon name="arrow-right" />}
+                      variant="secondary"
+                    >
                       Open check-in
                     </ButtonLink>
                   }
