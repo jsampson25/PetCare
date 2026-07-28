@@ -230,7 +230,7 @@ Capture defects with screenshots and exact URLs.
 - [x] Standardize core card headers, section context, actions, and surface tones
 - Standardize page headers, command bars, filters, tables, cards, forms, and empty states
 - [x] Standardize typed SVG icons across workspace navigation and core actions
-- Add representative beta sample data so screens can be evaluated visually
+- [x] Add guarded representative beta sample data so screens can be evaluated visually
 - Improve calendar, bookings, customer records, pet records, care boards, invoices, and reports
 - Verify desktop, tablet, and mobile layouts
 - Maintain WCAG 2.2 AA contrast and keyboard behavior

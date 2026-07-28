@@ -12,6 +12,10 @@ supabase test db
 
 `supabase db reset` must be able to rebuild the local database from an empty state. Never repair a shared environment with an unversioned schema change.
 
+Hosted beta visual-review data is intentionally opt-in. See [`seeds/README.md`](./seeds/README.md)
+for the guarded synthetic dataset and execution instructions. It is not part of the default local
+database reset because database tests require an empty tenant catalog.
+
 ## Current migration inventory
 
 | Migration                                       | Ownership class                                                                      | RLS                                       | Purpose                                                                                                                                                        |
