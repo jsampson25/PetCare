@@ -1,13 +1,20 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
+import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { CommandBar } from '@petcare/ui/command-bar';
 import { Field } from '@petcare/ui/field';
+import { Icon } from '@petcare/ui/icon';
+import { PageHeader } from '@petcare/ui/page-header';
+import { SelectField } from '@petcare/ui/select-field';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
 import { initializeServiceExecution, transitionServiceExecution } from './actions';
+import { filterServiceExecutions, summarizeServiceBoard } from './service-board-view';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 const selectClass =
@@ -49,6 +56,14 @@ export default async function ServiceBoardPage({
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('operations.execute_service')) redirect('/denied');
   const parameters = await searchParams;
+  const categoryParameter = typeof parameters.category === 'string' ? parameters.category : 'all';
+  const requestedCategory = ['all', 'boarding', 'daycare', 'grooming'].includes(categoryParameter)
+    ? categoryParameter
+    : 'all';
+  const stageParameter = typeof parameters.stage === 'string' ? parameters.stage : 'all';
+  const requestedStage = ['all', 'in_progress', 'hold', 'ready'].includes(stageParameter)
+    ? stageParameter
+    : 'all';
   const supabase = await createSupabaseServerClient();
   const [{ data: executions }, { data: petVisits }] = await Promise.all([
     supabase
@@ -73,23 +88,36 @@ export default async function ServiceBoardPage({
     const item = visit.booking_items as unknown as {
       service_versions: { services: { category: string } | null } | null;
     } | null;
+    const category = item?.service_versions?.services?.category ?? '';
     return (
       !activePetIds.has(visit.id) &&
-      ['boarding', 'daycare', 'grooming'].includes(item?.service_versions?.services?.category ?? '')
+      ['boarding', 'daycare', 'grooming'].includes(category) &&
+      (requestedCategory === 'all' || requestedCategory === category)
     );
   });
+  const visibleExecutions = filterServiceExecutions(
+    executions ?? [],
+    requestedCategory,
+    requestedStage,
+  );
+  const categoryExecutions = filterServiceExecutions(executions ?? [], requestedCategory, 'all');
+  const summary = summarizeServiceBoard(categoryExecutions, unstarted.length);
+  const visibleCategories =
+    requestedCategory === 'all'
+      ? (['boarding', 'daycare', 'grooming'] as const)
+      : ([requestedCategory] as const);
   return (
     <div className="space-y-6">
-      <header className="rounded-[2rem] bg-[linear-gradient(125deg,#0b1f3a_0%,#12376a_58%,#2864ed_145%)] p-7 text-white shadow-[var(--elevation-2)] sm:p-9">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-200">
-          Daily operations
-        </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Service boards</h1>
-        <p className="mt-2 text-blue-50/80">
-          Boarding, daycare, and grooming keep distinct operational stages and one shared visit
-          timeline.
-        </p>
-      </header>
+      <PageHeader
+        actions={
+          <ButtonLink href="/app/tasks" leadingIcon={<Icon name="clipboard" />}>
+            Open care work
+          </ButtonLink>
+        }
+        description="Boarding, daycare, and grooming retain distinct stages on one operational command surface."
+        eyebrow="Daily operations"
+        title="Service boards"
+      />
       {typeof parameters.notice === 'string' ? (
         <Alert title="Board updated" tone="success">
           {parameters.notice}
@@ -100,6 +128,46 @@ export default async function ServiceBoardPage({
           {parameters.error}
         </Alert>
       ) : null}
+      <CommandBar
+        description="Focus the board by service line or the work state that needs attention."
+        title="Filter service work"
+      >
+        <form className="flex flex-wrap items-end gap-3" method="get">
+          <SelectField
+            defaultValue={requestedCategory}
+            density="compact"
+            label="Service category"
+            name="category"
+          >
+            <option value="all">All services</option>
+            <option value="boarding">Boarding</option>
+            <option value="daycare">Daycare</option>
+            <option value="grooming">Grooming</option>
+          </SelectField>
+          <SelectField
+            defaultValue={requestedStage}
+            density="compact"
+            label="Work state"
+            name="stage"
+          >
+            <option value="all">All active work</option>
+            <option value="in_progress">In progress</option>
+            <option value="hold">On hold</option>
+            <option value="ready">Ready</option>
+          </SelectField>
+          <Button leadingIcon={<Icon name="filter" />} type="submit" variant="secondary">
+            Apply filters
+          </Button>
+        </form>
+      </CommandBar>
+      <Card eyebrow="Board summary" title="Operational workload" tone="subtle">
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <SummaryMetric label="Active services" value={summary.active} />
+          <SummaryMetric label="Ready to start" value={summary.unstarted} />
+          <SummaryMetric label="On hold" value={summary.onHold} />
+          <SummaryMetric label="Ready" value={summary.ready} />
+        </dl>
+      </Card>
       {unstarted.length ? (
         <Card
           className="border-blue-100 bg-[linear-gradient(135deg,#f2f7ff,#fff)]"
@@ -139,8 +207,8 @@ export default async function ServiceBoardPage({
           </div>
         </Card>
       ) : null}
-      {(['boarding', 'daycare', 'grooming'] as const).map((category) => {
-        const rows = (executions ?? []).filter(
+      {visibleCategories.map((category) => {
+        const rows = visibleExecutions.filter(
           (execution) => execution.service_category === category,
         );
         return (
@@ -211,11 +279,24 @@ export default async function ServiceBoardPage({
                 })}
               </div>
             ) : (
-              <p className="text-sm text-[var(--text-secondary)]">No active {category} services.</p>
+              <StatePanel
+                description="Adjust the filters or initialize an eligible visit when custody handoff is complete."
+                size="compact"
+                title={`No ${category} services in this view`}
+              />
             )}
           </Card>
         );
       })}
+    </div>
+  );
+}
+
+function SummaryMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <dt className="text-sm font-semibold text-[var(--text-secondary)]">{label}</dt>
+      <dd className="mt-1 text-3xl font-black tracking-tight">{value}</dd>
     </div>
   );
 }
