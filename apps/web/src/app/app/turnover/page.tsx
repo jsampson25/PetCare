@@ -1,13 +1,20 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
+import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { CommandBar } from '@petcare/ui/command-bar';
 import { Field } from '@petcare/ui/field';
+import { Icon } from '@petcare/ui/icon';
+import { PageHeader } from '@petcare/ui/page-header';
+import { SelectField } from '@petcare/ui/select-field';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
 import { completeCleaning, inspectTurnover, startTurnover } from './actions';
+import { filterTurnoverTasks, summarizeTurnoverTasks } from './turnover-view';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 const checklistClass = 'flex min-h-11 items-center gap-3 rounded-lg border px-3 text-sm font-bold';
@@ -27,6 +34,12 @@ export default async function TurnoverPage({ searchParams }: { searchParams: Sea
   const canInspect = context?.permissions.has('operations.inspect_resources');
   if (!context || (!canClean && !canInspect)) redirect('/denied');
   const parameters = await searchParams;
+  const statusParameter = typeof parameters.status === 'string' ? parameters.status : 'all';
+  const requestedStatus = ['all', 'cleaning_required', 'cleaning', 'inspection_required'].includes(
+    statusParameter,
+  )
+    ? statusParameter
+    : 'all';
   const supabase = await createSupabaseServerClient();
   const { data: tasks } = await supabase
     .from('resource_turnover_tasks')
@@ -36,15 +49,24 @@ export default async function TurnoverPage({ searchParams }: { searchParams: Sea
     .eq('business_id', context.businessId)
     .neq('status', 'ready')
     .order('created_at');
+  const visibleTasks = filterTurnoverTasks(tasks ?? [], requestedStatus);
+  const summary = summarizeTurnoverTasks(tasks ?? []);
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--action-primary)]">Facility readiness</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Cleaning & turnover</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Released resources stay unavailable until cleaning is documented and inspection passes.
-        </p>
-      </header>
+      <PageHeader
+        actions={
+          <ButtonLink
+            href="/app/availability"
+            leadingIcon={<Icon name="calendar" />}
+            variant="secondary"
+          >
+            View availability
+          </ButtonLink>
+        }
+        description="Released resources stay unavailable until cleaning is documented and inspection passes."
+        eyebrow="Facility readiness"
+        title="Cleaning & turnover"
+      />
       {typeof parameters.notice === 'string' ? (
         <Alert title="Turnover updated" tone="success">
           {parameters.notice}
@@ -55,9 +77,38 @@ export default async function TurnoverPage({ searchParams }: { searchParams: Sea
           {parameters.error}
         </Alert>
       ) : null}
-      {tasks?.length ? (
+      <CommandBar
+        description="Focus cleaners and inspectors on the workflow stage that needs attention."
+        title="Filter turnover work"
+      >
+        <form className="flex flex-wrap items-end gap-3" method="get">
+          <SelectField
+            defaultValue={requestedStatus}
+            density="compact"
+            label="Workflow stage"
+            name="status"
+          >
+            <option value="all">All turnover work</option>
+            <option value="cleaning_required">Waiting for cleaning</option>
+            <option value="cleaning">Cleaning in progress</option>
+            <option value="inspection_required">Waiting for inspection</option>
+          </SelectField>
+          <Button leadingIcon={<Icon name="filter" />} type="submit" variant="secondary">
+            Apply filter
+          </Button>
+        </form>
+      </CommandBar>
+      <Card eyebrow="Readiness summary" title="Facility workload" tone="subtle">
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <SummaryMetric label="Waiting for cleaning" value={summary.waiting} />
+          <SummaryMetric label="Cleaning now" value={summary.cleaning} />
+          <SummaryMetric label="Awaiting inspection" value={summary.inspection} />
+          <SummaryMetric label="Failed inspection" value={summary.failed} />
+        </dl>
+      </Card>
+      {visibleTasks.length ? (
         <div className="grid gap-6">
-          {tasks.map((task) => {
+          {visibleTasks.map((task) => {
             const location = task.locations as unknown as { name: string } | null;
             const resource = task.capacity_resources as unknown as {
               resource_code: string;
@@ -134,10 +185,26 @@ export default async function TurnoverPage({ searchParams }: { searchParams: Sea
           })}
         </div>
       ) : (
-        <Card>
-          <p className="text-sm text-[var(--text-secondary)]">No resources need turnover.</p>
-        </Card>
+        <StatePanel
+          description={
+            tasks?.length
+              ? 'No turnover tasks match the selected workflow stage.'
+              : 'Released resources will appear here until cleaning and inspection are complete.'
+          }
+          title={tasks?.length ? 'No matching turnover work' : 'All resources are ready'}
+        />
       )}
+    </div>
+  );
+}
+
+function SummaryMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <dt className="text-sm font-bold text-[var(--text-secondary)]">{label}</dt>
+      <dd className="mt-1 text-3xl font-black tracking-tight text-[var(--text-primary)]">
+        {value}
+      </dd>
     </div>
   );
 }
