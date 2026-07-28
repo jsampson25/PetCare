@@ -1,8 +1,14 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
+import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { CommandBar } from '@petcare/ui/command-bar';
 import { Field } from '@petcare/ui/field';
+import { Icon } from '@petcare/ui/icon';
+import { PageHeader } from '@petcare/ui/page-header';
+import { SelectField } from '@petcare/ui/select-field';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -12,6 +18,11 @@ import {
   recordGroomingIntake,
   recordGroomingQualityReview,
 } from './actions';
+import {
+  filterGroomingQueue,
+  summarizeGroomingQueue,
+  type GroomingWorkState,
+} from './grooming-queue-view';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 const selectClass =
@@ -20,6 +31,17 @@ export default async function GroomingPage({ searchParams }: { searchParams: Sea
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('operations.manage_grooming')) redirect('/denied');
   const parameters = await searchParams;
+  const workParameter = typeof parameters.work === 'string' ? parameters.work : 'all';
+  const requestedWork = [
+    'all',
+    'intake_required',
+    'authorization_required',
+    'in_progress',
+    'quality_review',
+    'hold',
+  ].includes(workParameter)
+    ? workParameter
+    : 'all';
   const supabase = await createSupabaseServerClient();
   const [{ data: executions }, { data: intakes }, { data: authorizations }, { data: reviews }] =
     await Promise.all([
@@ -60,15 +82,36 @@ export default async function GroomingPage({ searchParams }: { searchParams: Sea
   for (const review of reviews ?? [])
     if (!latestReview.has(review.service_execution_id))
       latestReview.set(review.service_execution_id, review.outcome);
+  const queueRows = (executions ?? []).map((execution) => {
+    const intake = latestIntake.get(execution.id);
+    const decision = intake ? latestAuthorization.get(intake.id) : undefined;
+    const review = latestReview.get(execution.id);
+    let workState: GroomingWorkState = 'in_progress';
+    if (execution.stage === 'hold') workState = 'hold';
+    else if (!intake && execution.stage === 'intake') workState = 'intake_required';
+    else if (intake?.approval_status === 'pending' && !decision)
+      workState = 'authorization_required';
+    else if (execution.stage === 'quality_review') workState = 'quality_review';
+    return { execution, intake, decision, review, work_state: workState };
+  });
+  const visibleRows = filterGroomingQueue(queueRows, requestedWork);
+  const summary = summarizeGroomingQueue(queueRows);
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--action-primary)]">Grooming operations</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Grooming intake & quality</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Changed scope requires authority; ready status requires a passed quality review.
-        </p>
-      </header>
+      <PageHeader
+        actions={
+          <ButtonLink
+            href="/app/service-board?category=grooming"
+            leadingIcon={<Icon name="clipboard" />}
+            variant="secondary"
+          >
+            Grooming board
+          </ButtonLink>
+        }
+        description="Changed scope requires authority; ready status requires a passed quality review."
+        eyebrow="Grooming operations"
+        title="Grooming intake & quality"
+      />
       {typeof parameters.notice === 'string' ? (
         <Alert title="Grooming updated" tone="success">
           {parameters.notice}
@@ -79,17 +122,46 @@ export default async function GroomingPage({ searchParams }: { searchParams: Sea
           {parameters.error}
         </Alert>
       ) : null}
-      {executions?.length ? (
+      <CommandBar
+        description="Focus the production queue on the next intake, authorization, quality, or hold action."
+        title="Filter grooming work"
+      >
+        <form className="flex flex-wrap items-end gap-3" method="get">
+          <SelectField
+            defaultValue={requestedWork}
+            density="compact"
+            label="Next action"
+            name="work"
+          >
+            <option value="all">All active grooming</option>
+            <option value="intake_required">Intake required</option>
+            <option value="authorization_required">Authorization required</option>
+            <option value="in_progress">In production</option>
+            <option value="quality_review">Quality review</option>
+            <option value="hold">On hold</option>
+          </SelectField>
+          <Button leadingIcon={<Icon name="filter" />} type="submit" variant="secondary">
+            Apply filter
+          </Button>
+        </form>
+      </CommandBar>
+      <Card eyebrow="Production summary" title="Grooming workload" tone="subtle">
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <SummaryMetric label="Active" value={summary.active} />
+          <SummaryMetric label="Needs intake" value={summary.intake} />
+          <SummaryMetric label="Needs authorization" value={summary.authorization} />
+          <SummaryMetric label="Quality review" value={summary.quality} />
+          <SummaryMetric label="On hold" value={summary.hold} />
+        </dl>
+      </Card>
+      {visibleRows.length ? (
         <div className="grid gap-5">
-          {executions.map((execution) => {
+          {visibleRows.map(({ execution, intake, decision, review, work_state: workState }) => {
             const pet = execution.pets as unknown as { name: string; breed: string } | null;
             const service = execution.service_versions as unknown as {
               customer_name: string;
             } | null;
             const location = execution.locations as unknown as { name: string } | null;
-            const intake = latestIntake.get(execution.id);
-            const decision = intake ? latestAuthorization.get(intake.id) : undefined;
-            const review = latestReview.get(execution.id);
             return (
               <Card
                 key={execution.id}
@@ -97,6 +169,9 @@ export default async function GroomingPage({ searchParams }: { searchParams: Sea
                 description={`${pet?.breed} · ${location?.name}`}
               >
                 <div className="mb-5 flex flex-wrap gap-2">
+                  <Badge tone={workState === 'hold' ? 'danger' : 'neutral'}>
+                    {workState.replaceAll('_', ' ')}
+                  </Badge>
                   <Badge
                     tone={
                       execution.stage === 'hold'
@@ -231,10 +306,26 @@ export default async function GroomingPage({ searchParams }: { searchParams: Sea
           })}
         </div>
       ) : (
-        <Card>
-          <p className="text-sm text-[var(--text-secondary)]">No active grooming services.</p>
-        </Card>
+        <StatePanel
+          description={
+            executions?.length
+              ? 'No active grooming services match the selected next action.'
+              : 'Accepted grooming visits will appear here until production and quality review are complete.'
+          }
+          title={executions?.length ? 'No matching grooming work' : 'No active grooming services'}
+        />
       )}
+    </div>
+  );
+}
+
+function SummaryMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <dt className="text-sm font-bold text-[var(--text-secondary)]">{label}</dt>
+      <dd className="mt-1 text-3xl font-black tracking-tight text-[var(--text-primary)]">
+        {value}
+      </dd>
     </div>
   );
 }
