@@ -1,12 +1,19 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
+import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { CommandBar } from '@petcare/ui/command-bar';
 import { Field } from '@petcare/ui/field';
+import { Icon } from '@petcare/ui/icon';
+import { PageHeader } from '@petcare/ui/page-header';
+import { SelectField } from '@petcare/ui/select-field';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
 import { createReportCardDraft, startReportCardCorrection, transitionReportCard } from './actions';
+import { filterReportCardQueue, summarizeReportCardQueue } from './report-card-queue-view';
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 export default async function ReportCardsPage({
   searchParams,
@@ -16,6 +23,16 @@ export default async function ReportCardsPage({
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('operations.manage_report_cards')) redirect('/denied');
   const parameters = await searchParams;
+  const categoryParameter = typeof parameters.category === 'string' ? parameters.category : 'all';
+  const requestedCategory = ['all', 'boarding', 'daycare', 'grooming'].includes(categoryParameter)
+    ? categoryParameter
+    : 'all';
+  const statusParameter = typeof parameters.status === 'string' ? parameters.status : 'all';
+  const requestedStatus = ['all', 'draft', 'review', 'approved', 'published'].includes(
+    statusParameter,
+  )
+    ? statusParameter
+    : 'all';
   const supabase = await createSupabaseServerClient();
   const [{ data: executions }, { data: cards }, { data: versions }] = await Promise.all([
     supabase
@@ -26,7 +43,7 @@ export default async function ReportCardsPage({
     supabase
       .from('report_cards')
       .select(
-        'id,service_execution_id,status,current_version_number,pets(name),service_executions(service_versions(customer_name))',
+        'id,service_execution_id,status,current_version_number,pets(name),service_executions(service_category,service_versions(customer_name))',
       )
       .eq('business_id', context.businessId)
       .neq('status', 'archived')
@@ -45,17 +62,31 @@ export default async function ReportCardsPage({
   for (const version of versions ?? [])
     if (!currentVersions.has(version.report_card_id))
       currentVersions.set(version.report_card_id, version);
+  const queueCards = (cards ?? []).map((card) => {
+    const execution = card.service_executions as unknown as {
+      service_category: string;
+    } | null;
+    return { ...card, service_category: execution?.service_category ?? '' };
+  });
+  const visibleCards = filterReportCardQueue(queueCards, requestedCategory, requestedStatus);
+  const summary = summarizeReportCardQueue(queueCards, available.length);
   const canApprove = context.roles.includes('owner') || context.roles.includes('manager');
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--action-primary)]">Customer updates</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Report cards</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Draft from authorized facts, review before delivery, and correct by publishing a new
-          version.
-        </p>
-      </header>
+      <PageHeader
+        actions={
+          <ButtonLink
+            href="/app/departures"
+            leadingIcon={<Icon name="departures" />}
+            variant="secondary"
+          >
+            Checkout queue
+          </ButtonLink>
+        }
+        description="Draft from authorized facts, review before delivery, and correct by publishing a new version."
+        eyebrow="Customer updates"
+        title="Report cards"
+      />
       {typeof parameters.notice === 'string' ? (
         <Alert title="Report card updated" tone="success">
           {parameters.notice}
@@ -66,32 +97,67 @@ export default async function ReportCardsPage({
           {parameters.error}
         </Alert>
       ) : null}
+      <CommandBar
+        description="Focus authoring and approval work by service line and publishing stage."
+        title="Filter report-card work"
+      >
+        <form className="flex flex-wrap items-end gap-3" method="get">
+          <SelectField
+            defaultValue={requestedCategory}
+            density="compact"
+            label="Service category"
+            name="category"
+          >
+            <option value="all">All services</option>
+            <option value="boarding">Boarding</option>
+            <option value="daycare">Daycare</option>
+            <option value="grooming">Grooming</option>
+          </SelectField>
+          <SelectField
+            defaultValue={requestedStatus}
+            density="compact"
+            label="Publishing stage"
+            name="status"
+          >
+            <option value="all">All report cards</option>
+            <option value="draft">Draft</option>
+            <option value="review">In review</option>
+            <option value="approved">Approved</option>
+            <option value="published">Published</option>
+          </SelectField>
+          <Button leadingIcon={<Icon name="filter" />} type="submit" variant="secondary">
+            Apply filters
+          </Button>
+        </form>
+      </CommandBar>
+      <Card eyebrow="Delivery summary" title="Report-card workload" tone="subtle">
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <SummaryMetric label="Ready to draft" value={summary.available} />
+          <SummaryMetric label="Drafting" value={summary.authoring} />
+          <SummaryMetric label="In review" value={summary.review} />
+          <SummaryMetric label="Approved" value={summary.approved} />
+          <SummaryMetric label="Published" value={summary.published} />
+        </dl>
+      </Card>
       {available.length ? (
         <Card
           title="Create report card"
           description="Internal notes and unnotified incidents are excluded from the source snapshot."
         >
           <form action={createReportCardDraft} className="grid gap-4 md:grid-cols-2">
-            <label className="text-sm font-bold">
-              Ready service
-              <select
-                className="mt-2 min-h-12 w-full rounded-lg border bg-[var(--surface-default)] px-3"
-                name="executionId"
-              >
-                {available.map((execution) => {
-                  const pet = execution.pets as unknown as { name: string } | null;
-                  const service = execution.service_versions as unknown as {
-                    customer_name: string;
-                  } | null;
-                  return (
-                    <option key={execution.id} value={execution.id}>
-                      {pet?.name} · {service?.customer_name} ·{' '}
-                      {execution.stage.replaceAll('_', ' ')}
-                    </option>
-                  );
-                })}
-              </select>
-            </label>
+            <SelectField label="Ready service" name="executionId">
+              {available.map((execution) => {
+                const pet = execution.pets as unknown as { name: string } | null;
+                const service = execution.service_versions as unknown as {
+                  customer_name: string;
+                } | null;
+                return (
+                  <option key={execution.id} value={execution.id}>
+                    {pet?.name} · {service?.customer_name} · {execution.stage.replaceAll('_', ' ')}
+                  </option>
+                );
+              })}
+            </SelectField>
             <Field label="Mood" name="mood" required />
             <Field label="Customer narrative" name="narrative" required />
             <Field label="Favorite activity" name="favoriteActivity" />
@@ -106,11 +172,12 @@ export default async function ReportCardsPage({
         title="Report-card queue"
         description="Published content is immutable and delivery is idempotent."
       >
-        {cards?.length ? (
+        {visibleCards.length ? (
           <div className="grid gap-5">
-            {cards.map((card) => {
+            {visibleCards.map((card) => {
               const pet = card.pets as unknown as { name: string } | null;
               const execution = card.service_executions as unknown as {
+                service_category: string;
                 service_versions: { customer_name: string } | null;
               } | null;
               const service = execution?.service_versions;
@@ -144,7 +211,7 @@ export default async function ReportCardsPage({
                   </div>
                   <p className="mt-3 text-sm">{version?.narrative}</p>
                   <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                    Mood: {highlights?.mood}
+                    {execution?.service_category} Â· Mood: {highlights?.mood}
                   </p>
                   {version?.correction_reason ? (
                     <p className="mt-2 text-sm">
@@ -189,9 +256,28 @@ export default async function ReportCardsPage({
             })}
           </div>
         ) : (
-          <p className="text-sm text-[var(--text-secondary)]">No report cards yet.</p>
+          <StatePanel
+            description={
+              cards?.length
+                ? 'No report cards match the selected service and publishing stage.'
+                : 'Eligible services will appear here when their customer update is ready to draft.'
+            }
+            size="compact"
+            title={cards?.length ? 'No matching report cards' : 'No report cards yet'}
+          />
         )}
       </Card>
+    </div>
+  );
+}
+
+function SummaryMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <dt className="text-sm font-bold text-[var(--text-secondary)]">{label}</dt>
+      <dd className="mt-1 text-3xl font-black tracking-tight text-[var(--text-primary)]">
+        {value}
+      </dd>
     </div>
   );
 }
