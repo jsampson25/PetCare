@@ -1,12 +1,19 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
+import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { CommandBar } from '@petcare/ui/command-bar';
 import { Field } from '@petcare/ui/field';
+import { Icon } from '@petcare/ui/icon';
+import { PageHeader } from '@petcare/ui/page-header';
+import { SelectField } from '@petcare/ui/select-field';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
 import { createOperationalIncident, transitionOperationalIncident } from './actions';
+import { filterIncidentQueue, summarizeIncidentQueue } from './incident-queue-view';
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 const selectClass =
   'mt-2 min-h-12 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface-default)] px-3';
@@ -23,6 +30,16 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Se
   const context = await resolveBusinessContext();
   if (!context?.permissions.has('operations.record_incident')) redirect('/denied');
   const parameters = await searchParams;
+  const severityParameter = typeof parameters.severity === 'string' ? parameters.severity : 'all';
+  const requestedSeverity = ['all', 'critical', 'serious', 'minor', 'information'].includes(
+    severityParameter,
+  )
+    ? severityParameter
+    : 'all';
+  const stageParameter = typeof parameters.stage === 'string' ? parameters.stage : 'all';
+  const requestedStage = ['all', 'response', 'review', 'resolved'].includes(stageParameter)
+    ? (stageParameter as 'all' | 'response' | 'review' | 'resolved')
+    : 'all';
   const supabase = await createSupabaseServerClient();
   const [{ data: visits }, { data: executions }, { data: incidents }] = await Promise.all([
     supabase
@@ -44,16 +61,20 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Se
       .neq('status', 'closed')
       .order('occurred_at', { ascending: false }),
   ]);
+  const visibleIncidents = filterIncidentQueue(incidents ?? [], requestedSeverity, requestedStage);
+  const summary = summarizeIncidentQueue(incidents ?? []);
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--action-primary)]">Safety operations</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Incidents</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Record verified facts first, keep internal investigation separate, and resolve serious
-          events under manager control.
-        </p>
-      </header>
+      <PageHeader
+        actions={
+          <ButtonLink href="/app/tasks" leadingIcon={<Icon name="care" />} variant="secondary">
+            Open care work
+          </ButtonLink>
+        }
+        description="Record verified facts first, keep internal investigation separate, and resolve serious events under manager control."
+        eyebrow="Safety operations"
+        title="Incidents"
+      />
       {typeof parameters.notice === 'string' ? (
         <Alert title="Incident updated" tone="success">
           {parameters.notice}
@@ -64,6 +85,47 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Se
           {parameters.error}
         </Alert>
       ) : null}
+      <CommandBar
+        description="Prioritize the events that need immediate response, manager review, or closure."
+        title="Triage incident queue"
+      >
+        <form className="flex flex-wrap items-end gap-3" method="get">
+          <SelectField
+            defaultValue={requestedSeverity}
+            density="compact"
+            label="Severity"
+            name="severity"
+          >
+            <option value="all">All severities</option>
+            <option value="critical">Critical</option>
+            <option value="serious">Serious</option>
+            <option value="minor">Minor</option>
+            <option value="information">Information</option>
+          </SelectField>
+          <SelectField
+            defaultValue={requestedStage}
+            density="compact"
+            label="Response stage"
+            name="stage"
+          >
+            <option value="all">All open incidents</option>
+            <option value="response">Active response</option>
+            <option value="review">Review and action</option>
+            <option value="resolved">Resolved, awaiting closure</option>
+          </SelectField>
+          <Button leadingIcon={<Icon name="filter" />} type="submit" variant="secondary">
+            Apply filters
+          </Button>
+        </form>
+      </CommandBar>
+      <Card eyebrow="Safety summary" title="Incident workload" tone="subtle">
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <SummaryMetric label="Open incidents" value={summary.open} />
+          <SummaryMetric label="Serious or critical" value={summary.highSeverity} />
+          <SummaryMetric label="Manager review" value={summary.managerReview} />
+          <SummaryMetric label="Customer update pending" value={summary.customerPending} />
+        </dl>
+      </Card>
       <Card
         title="Report incident"
         description="Immediate pet safety takes priority; enter the minimum verified facts promptly."
@@ -146,9 +208,9 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Se
         title="Open incident queue"
         description="Serious and critical incidents remain escalated until manager-reviewed resolution."
       >
-        {incidents?.length ? (
+        {visibleIncidents.length ? (
           <div className="grid gap-5">
-            {incidents.map((incident) => {
+            {visibleIncidents.map((incident) => {
               const pet = incident.pets as unknown as { name: string } | null;
               const location = incident.locations as unknown as { name: string } | null;
               const allowed = nextStates[incident.status] ?? [];
@@ -225,9 +287,28 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Se
             })}
           </div>
         ) : (
-          <p className="text-sm text-[var(--text-secondary)]">No open incidents.</p>
+          <StatePanel
+            description={
+              incidents?.length
+                ? 'No open incidents match the selected severity and response stage.'
+                : 'New safety events will remain visible here until the response and closure workflow is complete.'
+            }
+            size="compact"
+            title={incidents?.length ? 'No matching incidents' : 'No open incidents'}
+          />
         )}
       </Card>
+    </div>
+  );
+}
+
+function SummaryMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <dt className="text-sm font-bold text-[var(--text-secondary)]">{label}</dt>
+      <dd className="mt-1 text-3xl font-black tracking-tight text-[var(--text-primary)]">
+        {value}
+      </dd>
     </div>
   );
 }
