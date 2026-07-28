@@ -1,8 +1,14 @@
 import { Alert } from '@petcare/ui/alert';
 import { Badge } from '@petcare/ui/badge';
 import { Button } from '@petcare/ui/button';
+import { ButtonLink } from '@petcare/ui/button-link';
 import { Card } from '@petcare/ui/card';
+import { CommandBar } from '@petcare/ui/command-bar';
 import { Field } from '@petcare/ui/field';
+import { Icon } from '@petcare/ui/icon';
+import { PageHeader } from '@petcare/ui/page-header';
+import { SelectField } from '@petcare/ui/select-field';
+import { StatePanel } from '@petcare/ui/state-panel';
 import { redirect } from 'next/navigation';
 
 import { resolveBusinessContext } from '../../../lib/auth/tenant-context';
@@ -13,6 +19,7 @@ import {
   scheduleCareTask,
   transitionOperationalAlert,
 } from './actions';
+import { filterCareTasks, getCareTaskTiming, summarizeCareTasks } from './care-work-view';
 
 type SearchParameters = Promise<Record<string, string | string[] | undefined>>;
 const selectClass =
@@ -36,6 +43,14 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
   )
     redirect('/denied');
   const parameters = await searchParams;
+  const typeParameter = typeof parameters.type === 'string' ? parameters.type : 'all';
+  const requestedType = ['all', 'feeding', 'medication'].includes(typeParameter)
+    ? typeParameter
+    : 'all';
+  const timingParameter = typeof parameters.timing === 'string' ? parameters.timing : 'all';
+  const requestedTiming = ['all', 'overdue', 'due', 'upcoming'].includes(timingParameter)
+    ? (timingParameter as 'all' | 'overdue' | 'due' | 'upcoming')
+    : 'all';
   const supabase = await createSupabaseServerClient();
   const now = new Date();
   const [{ data: tasks }, { data: petVisits }, { data: alerts }] = await Promise.all([
@@ -65,8 +80,8 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
       .order('created_at', { ascending: false }),
   ]);
   const openTasks = (tasks ?? []).filter((task) => !terminal.includes(task.status));
-  const dueTasks = openTasks.filter((task) => new Date(task.due_starts_at) <= now);
-  const overdueTasks = openTasks.filter((task) => new Date(task.due_ends_at) < now);
+  const visibleTasks = filterCareTasks(openTasks, requestedType, requestedTiming, now);
+  const summary = summarizeCareTasks(openTasks, now);
   const terminalTasks = (tasks ?? [])
     .filter((task) => terminal.includes(task.status))
     .slice(-20)
@@ -74,13 +89,20 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
   const canCorrect = context.roles.includes('owner') || context.roles.includes('manager');
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold text-[var(--action-primary)]">Daily operations</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Care work</h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Medication and feeding remain pet-specific, snapshot-bound, and auditable.
-        </p>
-      </header>
+      <PageHeader
+        actions={
+          <ButtonLink
+            href="/app/service-board"
+            leadingIcon={<Icon name="arrow-right" />}
+            variant="secondary"
+          >
+            Service boards
+          </ButtonLink>
+        }
+        description="Medication and feeding remain pet-specific, snapshot-bound, and auditable."
+        eyebrow="Daily operations"
+        title="Care work"
+      />
       {typeof parameters.notice === 'string' ? (
         <Alert title="Work updated" tone="success">
           {parameters.notice}
@@ -148,20 +170,40 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
           </div>
         </Card>
       ) : null}
-      <section className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <p className="text-3xl font-black">{openTasks.length}</p>
-          <p className="text-sm text-[var(--text-secondary)]">Open tasks</p>
-        </Card>
-        <Card>
-          <p className="text-3xl font-black">{dueTasks.length}</p>
-          <p className="text-sm text-[var(--text-secondary)]">Due now</p>
-        </Card>
-        <Card>
-          <p className="text-3xl font-black">{overdueTasks.length}</p>
-          <p className="text-sm text-[var(--text-secondary)]">Overdue</p>
-        </Card>
-      </section>
+      <CommandBar
+        description="Narrow the queue without hiding safety alerts or changing the underlying care schedule."
+        title="Filter care work"
+      >
+        <form className="flex flex-wrap items-end gap-3" method="get">
+          <SelectField defaultValue={requestedType} density="compact" label="Task type" name="type">
+            <option value="all">All task types</option>
+            <option value="feeding">Feeding</option>
+            <option value="medication">Medication</option>
+          </SelectField>
+          <SelectField
+            defaultValue={requestedTiming}
+            density="compact"
+            label="Due state"
+            name="timing"
+          >
+            <option value="all">All open work</option>
+            <option value="overdue">Overdue</option>
+            <option value="due">Due now</option>
+            <option value="upcoming">Upcoming</option>
+          </SelectField>
+          <Button leadingIcon={<Icon name="filter" />} type="submit" variant="secondary">
+            Apply filters
+          </Button>
+        </form>
+      </CommandBar>
+      <Card eyebrow="Queue summary" title="Care workload" tone="subtle">
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <SummaryMetric label="Open tasks" value={summary.open} />
+          <SummaryMetric label="Overdue" value={summary.overdue} />
+          <SummaryMetric label="Due now" value={summary.due} />
+          <SummaryMetric label="Upcoming" value={summary.upcoming} />
+        </dl>
+      </Card>
       <Card
         title="Schedule snapshot-backed work"
         description="Use an explicit due window. Never infer medication timing from free-text instructions."
@@ -213,12 +255,12 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
         title="Work queue"
         description="Overdue work stays visible; medication cannot be bulk-completed."
       >
-        {openTasks.length ? (
+        {visibleTasks.length ? (
           <div className="grid gap-5">
-            {openTasks.map((task) => {
+            {visibleTasks.map((task) => {
               const pet = task.pets as unknown as { name: string; breed: string } | null;
               const location = task.locations as unknown as { name: string } | null;
-              const overdue = new Date(task.due_ends_at) < now;
+              const timing = getCareTaskTiming(task, now);
               const instructions = task.instructions as { instructions?: string };
               return (
                 <article className="rounded-lg border p-4" key={task.id}>
@@ -236,9 +278,21 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
                       </p>
                     </div>
                     <Badge
-                      tone={overdue ? 'danger' : task.priority === 'critical' ? 'warning' : 'info'}
+                      tone={
+                        timing === 'overdue'
+                          ? 'danger'
+                          : task.priority === 'critical'
+                            ? 'warning'
+                            : timing === 'due'
+                              ? 'warning'
+                              : 'info'
+                      }
                     >
-                      {overdue ? 'overdue' : task.status.replaceAll('_', ' ')}
+                      {timing === 'overdue'
+                        ? 'overdue'
+                        : timing === 'due'
+                          ? 'due now'
+                          : task.status.replaceAll('_', ' ')}
                     </Badge>
                   </div>
                   <p className="mt-3 text-sm">{instructions.instructions}</p>
@@ -293,7 +347,15 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
             })}
           </div>
         ) : (
-          <p className="text-sm text-[var(--text-secondary)]">No open care tasks.</p>
+          <StatePanel
+            description={
+              openTasks.length
+                ? 'No open care tasks match the selected task type and due state.'
+                : 'New feeding and medication work will appear here when it is scheduled.'
+            }
+            size="compact"
+            title={openTasks.length ? 'No matching care work' : 'No open care tasks'}
+          />
         )}
       </Card>
       {canCorrect && terminalTasks.length ? (
@@ -351,6 +413,17 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
           </div>
         </Card>
       ) : null}
+    </div>
+  );
+}
+
+function SummaryMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <dt className="text-sm font-bold text-[var(--text-secondary)]">{label}</dt>
+      <dd className="mt-1 text-3xl font-black tracking-tight text-[var(--text-primary)]">
+        {value}
+      </dd>
     </div>
   );
 }
